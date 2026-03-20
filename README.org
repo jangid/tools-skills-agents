@@ -1,0 +1,17 @@
+#+TITLE: Tools, Skills & Agents
+#+AUTHOR: Pankaj Jangid
+#+DESCRIPTION: A curated collection of reusable tools, skills, and agents for AI-assisted workflows.
+
+* Overview
+
+A repository of reusable tools, skills, and agents designed to integrate into AI-assisted development workflows.
+
+* Structure
+
+- =tools/= — Standalone utilities and helper scripts
+- =skills/= — Composable skill definitions (e.g., for Claude Code)
+- =agents/= — Agent configurations and prompt templates
+
+* License
+
+TBD

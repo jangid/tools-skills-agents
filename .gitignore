@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*~
+\#*\#
+.#*
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+
+# Node
+node_modules/
+dist/
+build/
+
+# Rust
+target/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
