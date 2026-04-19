@@ -1,0 +1,127 @@
+---
+name: sdd-requirements
+description: >
+  Guides requirements gathering for a new project or feature using Spec-Driven
+  Development (SDD). Produces a structured docs/requirements.md through iterative
+  Q&A with the user. Use at the start of any new project or when adding significant
+  new functionality.
+---
+
+# SDD: Requirements Gathering
+
+You are guiding the user through requirements gathering for a Spec-Driven Development workflow. Your output is a structured `docs/requirements.md` in the project directory.
+
+## Your Role
+
+- Ask questions to clarify scope, constraints, and expected behavior
+- Identify gaps and ambiguities in what the user describes
+- Organize requirements into a structured document with unique IDs
+- Do NOT design solutions — requirements describe WHAT, not HOW
+
+## Process
+
+### Step 1: Understand Context
+
+Before asking questions, understand what exists:
+
+1. Read any existing `docs/requirements.md` — you may be adding to it, not starting fresh
+2. Read `CLAUDE.md` or `README` for project context
+3. Ask the user: "What are we building and why?" if not already clear
+
+### Step 2: Elicit Requirements
+
+Ask questions in these categories (skip what's already clear):
+
+- **Functional**: What must the system do? What are the inputs/outputs?
+- **Non-functional**: Performance, security, reliability, scalability constraints?
+- **Integration**: What does this connect to? What protocols/APIs?
+- **Configuration**: What must be configurable? What are sensible defaults?
+- **Scope boundaries**: What is explicitly out of scope?
+
+Don't ask all questions at once. Go category by category. Listen for implicit requirements in the user's answers — things they assume but don't state.
+
+### Step 3: Capture External Input
+
+The user may bring in requirements from other parties (stakeholders, docs, tickets). When they paste or describe external requirements:
+
+1. Restate them in your own words to confirm understanding
+2. Assign requirement IDs
+3. Flag any conflicts with existing requirements
+4. Ask clarifying questions about ambiguities
+
+### Step 4: Write Requirements Document
+
+When the user is satisfied with the Q&A, produce `docs/requirements.md`:
+
+```markdown
+# Requirements: [Project Name]
+
+## Overview
+One paragraph: what the project is and why it exists.
+
+## Stakeholders
+Who provided requirements and their role/perspective.
+
+## Functional Requirements
+
+### [Category Name]
+
+#### REQ-F-001: [Short title]
+[Clear, testable statement of what the system must do.]
+
+#### REQ-F-002: [Short title]
+...
+
+## Non-Functional Requirements
+
+#### REQ-NF-001: [Short title]
+[Clear, measurable constraint.]
+
+## Integration Requirements
+
+#### REQ-I-001: [Short title]
+[What the system connects to and how.]
+
+## Configuration Requirements
+
+#### REQ-C-001: [Short title]
+[What must be configurable.]
+
+## Out of Scope
+- Explicit list of what this project does NOT do
+
+## Open Questions
+- Unresolved items that need answers before specs can be written
+
+## Glossary
+Domain-specific terms used in this document.
+```
+
+### Requirement Rules
+
+- Every requirement gets a unique ID: `REQ-{type}-{number}` where type is F (functional), NF (non-functional), I (integration), C (configuration)
+- Requirements must be **testable** — if you can't write a verification for it, rewrite it
+- Requirements describe behavior, not implementation ("the system must support multiple exchanges" not "use a factory pattern for exchanges")
+- One requirement per ID — don't bundle multiple behaviors
+- Use "must" for mandatory, "should" for preferred, "may" for optional
+
+### Step 5: Review
+
+Present the document to the user. Ask:
+- "Are any requirements missing?"
+- "Are any requirements wrong or unclear?"
+- "Are the priorities right?" (must vs should vs may)
+- "Are there open questions we need to resolve before proceeding to design?"
+
+Iterate until the user approves.
+
+## Updating Existing Requirements
+
+When `docs/requirements.md` already exists:
+
+1. Read the current document fully
+2. Identify where new requirements fit in the existing structure
+3. Use the next available ID number in each category (don't reuse deleted IDs)
+4. If a requirement changes, update in place and add a `[Updated: YYYY-MM-DD]` tag
+5. If a requirement is removed, mark it `[Removed: YYYY-MM-DD — reason]` — don't delete the ID
+6. Present a diff summary to the user for approval
