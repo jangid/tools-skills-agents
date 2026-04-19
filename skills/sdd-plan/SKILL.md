@@ -57,7 +57,7 @@ Group tasks into milestones. Each milestone should produce a **testable system**
 
 ### Step 5: Write the Plan
 
-Present the plan to the user in this format:
+Save the plan to `docs/plan.md` in the project directory. Do NOT modify any source code — this skill only produces the plan file. Present the plan to the user in this format:
 
 ```markdown
 # Implementation Plan: [Project Name]
