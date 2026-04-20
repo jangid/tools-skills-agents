@@ -11,12 +11,25 @@ description: >
 
 You are writing design specs for a Spec-Driven Development workflow. Your input is an approved `docs/requirements.md`. Your output is feature specs in `docs/spec/`.
 
+## Phase Detection
+
+Before starting, check project state to confirm you're in the right phase:
+
+1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements` first
+2. If `docs/spec/*.md` all have `status: Approved` → use `sdd-plan`
+3. If `docs/plan.md` exists with incomplete tasks → use `sdd-implement`
+4. If `docs/verification.md` exists with failures → use `sdd-replan`
+5. If `docs/requirements.md` has `status: Approved` and specs are missing or `Draft` → you're in the right place
+
+Tell the user which phase you detected and confirm before proceeding.
+
 ## Your Role
 
 - Translate requirements into concrete design decisions
 - Define contracts, interfaces, data shapes, and behavior
 - Document rationale for design choices (why X not Y)
 - Include verification criteria so reviewers can assess testability
+- Mark sections with high uncertainty that may need spikes during implementation
 - Do NOT write implementation code — specs define WHAT the system looks like, not the code
 
 ## Process
@@ -24,9 +37,10 @@ You are writing design specs for a Spec-Driven Development workflow. Your input 
 ### Step 1: Read Requirements
 
 1. Read `docs/requirements.md` — this is your source of truth
-2. Read `CLAUDE.md` or `README` for project context and technical constraints
-3. Read any existing specs in `docs/spec/` — you may be adding or updating
-4. Flag any requirements that are ambiguous or conflicting — ask the user before proceeding
+2. Read `docs/research/*.md` — prior research informs design decisions
+3. Read `CLAUDE.md` or `README` for project context and technical constraints
+4. Read any existing specs in `docs/spec/` — you may be adding or updating
+5. Flag any requirements that are ambiguous or conflicting — ask the user before proceeding
 
 ### Step 2: Plan Spec Structure
 
@@ -67,6 +81,10 @@ Reference the requirements it fulfills.
 Contracts, interfaces, data shapes, behavior.
 Decisions with rationale (why X not Y).
 
+### [Sub-section] [high-uncertainty]
+Mark sections where the design depends on unverified assumptions.
+Note what spike would resolve it and what the fallback is.
+
 Keep this section focused on:
 - Public interfaces and their contracts
 - Data models and their invariants
@@ -101,6 +119,7 @@ Do NOT include:
 - **Keep specs short**: ~500 lines max. If a spec is growing beyond that, split it.
 - **Decisions need rationale**: every non-obvious design choice should have a "why" — a sentence or two explaining the tradeoff. Future readers need to know if the context has changed enough to revisit the decision.
 - **Verification is design**: the verification section is reviewed alongside the design, not added as an afterthought. If you can't write verification criteria, the design isn't concrete enough.
+- **Mark uncertainty**: sections marked `[high-uncertainty]` become spike tasks in the plan. They must include: what assumption is unverified, what spike would resolve it, and what the fallback design is if the assumption is wrong.
 
 ### Step 4: Review Cycle
 
@@ -126,6 +145,7 @@ After all specs are written, verify:
 1. **Every requirement is covered** — each REQ-* ID appears in at least one spec's `requires` list
 2. **No orphan specs** — every spec traces to at least one requirement
 3. **No contradictions** — specs don't make conflicting design decisions
+4. **Uncertainty inventory** — list all `[high-uncertainty]` sections and confirm the user is aware
 
 Present a traceability summary:
 
@@ -135,6 +155,7 @@ REQ-F-002 → exchanges.md
 REQ-NF-001 → testing.md
 ...
 [Uncovered]: REQ-F-015 (no spec addresses this yet)
+[High-uncertainty]: exchanges.md §OAuth2 flow, testing.md §TA-Lib fallback
 ```
 
 ## Updating Existing Specs
@@ -147,3 +168,7 @@ When updating specs after code exists:
 4. In the design section, note what changed and why: `[Changed YYYY-MM-DD: switched from X to Y because Z]`
 5. Update verification/acceptance criteria to cover the change
 6. Present the diff to the user for approval
+
+## Transition
+
+When all specs are approved, recommend `sdd-plan` as the next step.

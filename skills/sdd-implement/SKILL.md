@@ -2,39 +2,75 @@
 name: sdd-implement
 description: >
   Executes implementation from an approved plan and design specs. Works through
-  tasks in order, verifies against acceptance criteria, and flags when specs need
-  updating. Use after the implementation plan is approved.
+  tasks in order, uses TDD inner loop, detects stuck states, and executes spike
+  tasks. Triggers replan when assumptions break. Use after the implementation
+  plan is approved.
 ---
 
 # SDD: Implementation
 
-You are implementing from an approved plan and design specs. Follow the plan, verify against specs, and flag gaps.
+You are implementing from an approved plan and design specs. Follow the plan, use TDD, detect when you're stuck, and trigger replanning when needed.
+
+## Phase Detection
+
+Before starting, check project state to confirm you're in the right phase:
+
+1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements`
+2. If `docs/spec/*.md` are missing or have `status: Draft` → use `sdd-specs`
+3. If no `docs/plan.md` → use `sdd-plan`
+4. If `docs/verification.md` exists with failures → use `sdd-replan`
+5. If `docs/plan.md` exists with incomplete tasks → you're in the right place, resume
+
+Tell the user which phase you detected. If resuming, identify the next incomplete task and confirm before proceeding.
 
 ## Your Role
 
 - Implement tasks from the plan in order
+- Use TDD: write test → see it fail → implement → see it pass → refactor
+- Execute spike tasks as time-boxed research
+- Detect when you're stuck and trigger replanning
 - Verify each task against the spec's acceptance criteria
-- Flag when implementation reveals a spec gap — don't silently deviate
 - Keep the user informed of progress at milestone boundaries
 
 ## Process
 
 ### Step 1: Load Context
 
-1. Read the implementation plan (ask the user where it is if not obvious)
-2. Read all approved specs in `docs/spec/`
+1. Read `docs/plan.md` — identify the current milestone and next task
+2. Read the relevant spec sections for the current task
 3. Read `CLAUDE.md` for project conventions
 4. Identify which milestone you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
-For each task in the current milestone:
+For each task, follow the process based on its type:
+
+#### [implement] tasks — TDD Inner Loop
 
 1. **Read the relevant spec section** before writing any code
-2. **Implement** the task following project conventions
-3. **Verify locally**: does it build? Does it type-check? Does it lint?
-4. **Write tests** if the task includes them (or the spec's acceptance criteria demand them)
-5. **Mark the task done** and move to the next
+2. **Write a failing test** that captures what the spec requires
+3. **Run the test** — confirm it fails (red)
+4. **Write minimal code** to make the test pass
+5. **Run the test** — confirm it passes (green)
+6. **Refactor** if needed — tests must still pass
+7. **Run full verification**: build + lint + type-check + tests
+8. **Mark the task done**
+
+#### [spike] tasks — Time-Boxed Research
+
+1. **Note the budget** from the plan (e.g., "30 min max")
+2. **Explore** the unknown: read docs, try APIs, prototype in a scratch branch
+3. **Document findings** — update `docs/research/{topic}.md`
+4. **Check replan triggers** — did findings invalidate any plan assumptions?
+5. If replan triggered → stop implementation, invoke `sdd-replan`
+6. If no replan needed → mark done, proceed to next task
+
+#### [verify] tasks — Beyond Unit Tests
+
+1. **Read the acceptance criteria** from the spec
+2. **Run the specified verification** (integration test, manual check, benchmark)
+3. **Document results** — what passed, what failed
+4. If failures → assess severity. Minor: fix inline. Major: trigger replan
 
 ### Task Completion Checklist
 
@@ -43,10 +79,26 @@ Before marking any task done:
 - [ ] Code builds without errors
 - [ ] Type checker passes (mypy strict or equivalent)
 - [ ] Linter passes (ruff, eslint, clippy, or equivalent)
-- [ ] Tests pass (if tests exist for this task)
+- [ ] Tests pass (including the new test written for this task)
 - [ ] The task's spec acceptance criteria are met
 
-### Step 3: Milestone Checkpoints
+### Step 3: Stuck Detection
+
+You are **stuck** if any of these are true:
+
+- Same test has failed 3+ times with different attempted fixes
+- You've spent more than 2x the expected effort on a single task
+- You've discovered something that contradicts the spec or plan
+- A dependency you expected to exist doesn't work as documented
+
+When stuck:
+
+1. **Stop** — don't keep trying the same approach
+2. **Document** what you tried and why it failed
+3. **Assess**: is this a spec gap, a plan ordering issue, or a research question?
+4. **Recommend**: invoke `sdd-replan` with the stuck context
+
+### Step 4: Milestone Checkpoints
 
 At each milestone boundary:
 
@@ -57,16 +109,17 @@ At each milestone boundary:
 
 ```
 Milestone M2 complete.
-- Tasks done: 4/4
+- Tasks done: 4/4 (3 implement, 1 spike)
 - Build: pass
 - Types: pass
 - Lint: pass
 - Tests: 12 pass, 0 fail
+- Spike findings: OAuth2 works as expected, no replan needed
 - Acceptance criteria: all met for exchanges.md, providers.md
 Proceed to M3?
 ```
 
-### Step 4: Handle Spec Gaps
+### Step 5: Handle Spec Gaps
 
 When implementation reveals something the spec didn't cover:
 
@@ -80,19 +133,26 @@ Do NOT:
 - Assume the spec "probably meant" something
 - Skip verification because "it's obvious"
 
-### Step 5: Completion
+### Step 6: Completion
 
 When all milestones are done:
 
 1. Run the full verification suite one final time
 2. Walk through every spec's acceptance criteria — confirm each one passes
 3. List any spec gaps that were discovered and how they were resolved
-4. Report a summary to the user
+4. Recommend invoking `sdd-verify` for holistic validation
 
 ## Rules
 
 - **Specs are law**: if the spec says X, implement X. If X is wrong, flag it — don't fix it silently
 - **Plan is the order**: follow the task order unless you have a concrete reason to deviate (dependency issue, blocker). If you reorder, tell the user why
+- **TDD is not optional**: write the test first. If you catch yourself writing implementation before a test, stop and write the test
 - **Tests are not optional**: if the spec has acceptance criteria, there must be tests that verify them
 - **Small commits**: commit at logical boundaries (per-task or per-subtask), not per-milestone
-- **No gold-plating**: implement what the spec says. Don't add features, abstractions, or "nice to haves" that aren't in the spec. If you think something should be added, flag it as a potential spec update
+- **No gold-plating**: implement what the spec says. Don't add features, abstractions, or "nice to haves" that aren't in the spec
+- **Stuck means stop**: if you're stuck, replan. Don't burn cycles on a broken approach
+- **Spike budget is real**: when a spike task exceeds its budget, stop and report findings so far
+
+## Transition
+
+When all tasks complete, recommend `sdd-verify` as the next step.

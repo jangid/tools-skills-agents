@@ -78,11 +78,48 @@ Standalone scripts or utilities. Use the appropriate language for the task. Each
 
 ## Spec-Driven Development (SDD)
 
-This repo includes a four-phase SDD workflow as skills:
+A cyclic, phase-based workflow for building software with AI assistance. Each phase produces artifacts on disk that serve as state markers — any new session can detect the current phase and resume.
 
-1. `sdd-requirements` — elicit and document requirements (`docs/requirements.md`)
-2. `sdd-specs` — translate requirements into design specs (`docs/spec/`)
-3. `sdd-plan` — break specs into ordered implementation tasks
-4. `sdd-implement` — execute the plan, verify against specs
+### Phases (7 skills)
 
-Use these skills in order when building non-trivial features for any project.
+```
+┌─ RESEARCH ──→ REQUIREMENTS ──→ SPECS ──→ PLAN ──→ IMPLEMENT ──→ VERIFY ─┐
+│      ↑              ↑                                  │           │      │
+│      └──────────────┴──────────── REPLAN ←─────────────┴───────────┘      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+1. `sdd-research` — time-boxed exploration to reduce uncertainty (`docs/research/`)
+2. `sdd-requirements` — elicit and document requirements (`docs/requirements.md`)
+3. `sdd-specs` — translate requirements into design specs (`docs/spec/`)
+4. `sdd-plan` — break specs into ordered, typed tasks (implement/spike/verify)
+5. `sdd-implement` — execute the plan with TDD inner loop and stuck detection
+6. `sdd-verify` — holistic validation: quality gates + acceptance criteria + UX
+7. `sdd-replan` — structured replanning when assumptions break
+
+### Phase Detection
+
+Every skill detects the current phase on entry by checking which artifacts exist:
+
+| Artifact | Phase complete |
+|----------|---------------|
+| `docs/research/{topic}.md` (status: Complete) | Research done |
+| `docs/requirements.md` (status: Approved) | Requirements done |
+| `docs/spec/*.md` (all status: Approved) | Specs done |
+| `docs/plan.md` (exists, tasks incomplete) | Planning done, implementing |
+| `docs/plan.md` (all tasks done) | Implementation done |
+| `docs/verification.md` (status: pass) | Verified, ready to ship |
+| `docs/verification.md` (status: fail) | Needs replan |
+
+### Key Differences from Linear Waterfall
+
+- **Research phase**: explore before committing (time-boxed spikes)
+- **Typed tasks**: implement (code), spike (research), verify (validation)
+- **Stuck detection**: if implementation hits a wall, trigger replan instead of spinning
+- **Replan triggers**: defined upfront in the plan — conditions that invalidate the approach
+- **Holistic verification**: goes beyond "tests pass" to user-perspective validation
+- **Cyclic**: replan can route back to any earlier phase based on severity
+
+### When to Use
+
+Use SDD for non-trivial features (multi-file, multi-day, architectural impact). Skip for bug fixes, small tweaks, and well-understood changes.
