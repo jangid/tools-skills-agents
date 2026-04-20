@@ -99,7 +99,7 @@ A cyclic, phase-based workflow for building software with AI assistance. Each ph
 
 ### Phase Detection
 
-Every skill detects the current phase on entry by checking which artifacts exist:
+Every skill detects the current phase on entry by checking which artifacts exist **and whether they are stale**:
 
 | Artifact | Phase complete |
 |----------|---------------|
@@ -110,6 +110,16 @@ Every skill detects the current phase on entry by checking which artifacts exist
 | `docs/plan.md` (all tasks done) | Implementation done |
 | `docs/verification.md` (status: pass) | Verified, ready to ship |
 | `docs/verification.md` (status: fail) | Needs replan |
+
+#### Staleness Detection
+
+Downstream artifacts become stale when their upstream inputs are updated. Each skill compares `last_updated` dates across the dependency chain:
+
+```
+research → requirements → specs → plan → implementation → verification
+```
+
+If a downstream artifact's `last_updated` is older than its upstream input, it is **stale** and needs updating — not skipping to. For example, if `requirements.md` was rewritten today but `docs/spec/*.md` and `docs/plan.md` are from last week, `sdd-specs` will update the specs rather than redirecting to `sdd-implement`. Early-phase skills (research, requirements) are always valid entry points — they note existing downstream artifacts but don't block on them.
 
 ### Key Differences from Linear Waterfall
 

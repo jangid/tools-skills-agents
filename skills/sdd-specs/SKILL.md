@@ -13,15 +13,16 @@ You are writing design specs for a Spec-Driven Development workflow. Your input 
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Before starting, check project state. **Compare `last_updated` dates** to detect stale downstream artifacts:
 
 1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements` first
-2. If `docs/spec/*.md` all have `status: Approved` → use `sdd-plan`
-3. If `docs/plan.md` exists with incomplete tasks → use `sdd-implement`
-4. If `docs/verification.md` exists with failures → use `sdd-replan`
-5. If `docs/requirements.md` has `status: Approved` and specs are missing or `Draft` → you're in the right place
+2. **Staleness check**: compare `last_updated` in `docs/requirements.md` against `last_updated` in each `docs/spec/*.md` and `docs/plan.md` (if they exist). If requirements are newer than existing specs or plan, those downstream artifacts are **stale** — they were written against older requirements and need updating. Proceed to write/update specs regardless of their current status
+3. If `docs/spec/*.md` all have `status: Approved` **and are not stale** (per check 2) → use `sdd-plan`
+4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 2) → use `sdd-implement`
+5. If `docs/verification.md` exists with failures → use `sdd-replan`
+6. If `docs/requirements.md` has `status: Approved` and specs are missing, `Draft`, or stale → you're in the right place
 
-Tell the user which phase you detected and confirm before proceeding.
+Tell the user which phase you detected, including any stale artifacts found, and confirm before proceeding.
 
 ## Your Role
 

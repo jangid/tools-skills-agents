@@ -13,15 +13,14 @@ You are conducting a time-boxed research spike to reduce uncertainty. Your outpu
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Research is always a valid entry point — new exploration doesn't require a clean slate. Before starting, check what exists so you can inform the user:
 
-1. If `docs/requirements.md` exists with `status: Approved` → you're past research, use `sdd-specs`
-2. If `docs/spec/*.md` all have `status: Approved` → use `sdd-plan`
-3. If `docs/plan.md` exists with incomplete tasks → use `sdd-implement`
-4. If `docs/verification.md` exists with failures → use `sdd-replan`
-5. Otherwise → you're in the right place, proceed with research
+1. If `docs/verification.md` exists with failures → mention it; user may want `sdd-replan` instead, but research is valid if they're exploring a new direction
+2. If downstream artifacts exist (`docs/requirements.md`, `docs/spec/`, `docs/plan.md`) → note them. These may become stale after new research — that's expected. Downstream phases will detect staleness and update them
+3. If `docs/research/*.md` already cover this topic → you may be extending prior research. Read existing findings first to avoid duplicating work
+4. Proceed with research
 
-Tell the user which phase you detected and confirm before proceeding.
+Tell the user what artifacts exist and confirm the research direction before proceeding.
 
 ## Your Role
 

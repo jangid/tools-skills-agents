@@ -13,12 +13,13 @@ You are performing holistic verification of a completed implementation. Your job
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Before starting, check project state. **Compare dates** to detect stale artifacts:
 
 1. If no `docs/plan.md` → use `sdd-plan`
-2. If `docs/plan.md` has incomplete tasks → use `sdd-implement`
-3. If all plan tasks are done (or user explicitly requests verification) → you're in the right place
-4. If `docs/verification.md` already exists → you're re-verifying (after fixes or replan)
+2. **Staleness check**: compare `last_updated` in specs against `docs/plan.md` modification date. If specs are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
+3. If `docs/plan.md` has incomplete tasks → use `sdd-implement`
+4. If all plan tasks are done (or user explicitly requests verification) → you're in the right place
+5. If `docs/verification.md` already exists → you're re-verifying (after fixes or replan)
 
 Tell the user which phase you detected and confirm before proceeding.
 

@@ -13,16 +13,16 @@ You are guiding the user through requirements gathering for a Spec-Driven Develo
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Requirements gathering is always valid — the user may be starting a new cycle or updating existing requirements. Before starting, check project state:
 
-1. If `docs/requirements.md` exists with `status: Approved` and no specs → use `sdd-specs`
-2. If `docs/spec/*.md` all have `status: Approved` → use `sdd-plan`
-3. If `docs/plan.md` exists with incomplete tasks → use `sdd-implement`
-4. If `docs/verification.md` exists with failures → use `sdd-replan`
-5. If `docs/requirements.md` exists with `status: Draft` → resume requirements gathering
-6. Otherwise → you're in the right place, start fresh
+1. If `docs/requirements.md` exists with `status: Draft` → resume requirements gathering
+2. If `docs/requirements.md` exists with `status: Approved` → inform the user. They can either:
+   - Update the existing requirements (proceed here, downstream artifacts will become stale)
+   - Move to the next phase (`sdd-specs` if specs are missing/stale, `sdd-plan` if specs are done)
+3. If downstream artifacts exist (`docs/spec/`, `docs/plan.md`, `docs/verification.md`) → note them. If requirements are being rewritten or significantly updated, these will become stale and need updating in subsequent phases — that's the intended workflow
+4. Otherwise → start fresh
 
-Tell the user which phase you detected and confirm before proceeding.
+Tell the user what artifacts exist and confirm how to proceed.
 
 ## Your Role
 

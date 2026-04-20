@@ -13,13 +13,14 @@ You are implementing from an approved plan and design specs. Follow the plan, us
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Before starting, check project state. **Compare `last_updated` dates** to detect stale upstream artifacts:
 
 1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or have `status: Draft` → use `sdd-specs`
 3. If no `docs/plan.md` → use `sdd-plan`
-4. If `docs/verification.md` exists with failures → use `sdd-replan`
-5. If `docs/plan.md` exists with incomplete tasks → you're in the right place, resume
+4. **Staleness check**: compare `last_updated` in `docs/requirements.md` against `last_updated` in specs, and specs against `docs/plan.md` modification date. If the plan is older than its specs, or specs are older than requirements, upstream artifacts have changed since the plan was written → use `sdd-plan` to update the plan before implementing
+5. If `docs/verification.md` exists with failures → use `sdd-replan`
+6. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 4) → you're in the right place, resume
 
 Tell the user which phase you detected. If resuming, identify the next incomplete task and confirm before proceeding.
 

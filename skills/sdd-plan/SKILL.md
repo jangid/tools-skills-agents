@@ -13,15 +13,16 @@ You are creating an implementation plan from approved design specs. Your input i
 
 ## Phase Detection
 
-Before starting, check project state to confirm you're in the right phase:
+Before starting, check project state. **Compare `last_updated` dates** to detect stale downstream artifacts:
 
 1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or any has `status: Draft` → use `sdd-specs`
-3. If `docs/plan.md` exists with incomplete tasks → use `sdd-implement`
-4. If `docs/verification.md` exists with failures → use `sdd-replan`
-5. If all specs are `Approved` and no plan exists → you're in the right place
+3. **Staleness check**: if `docs/plan.md` exists, compare its modification date against `last_updated` in each `docs/spec/*.md`. If any spec is newer than the plan, the plan is **stale** — it was written against older specs and needs updating. Proceed to rewrite/update the plan regardless of task completion status
+4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 3) → use `sdd-implement`
+5. If `docs/verification.md` exists with failures → use `sdd-replan`
+6. If all specs are `Approved` and plan is missing or stale → you're in the right place
 
-Tell the user which phase you detected and confirm before proceeding.
+Tell the user which phase you detected, including any stale artifacts found, and confirm before proceeding.
 
 ## Your Role
 

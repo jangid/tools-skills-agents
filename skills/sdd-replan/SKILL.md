@@ -20,6 +20,7 @@ Before starting, check what triggered the replan:
 2. If a spike task produced findings that contradict the plan → replan from new knowledge
 3. If the user explicitly requested changes → replan from scope change
 4. If implementation is stuck (documented in conversation) → replan from blocked state
+5. **Staleness check**: if upstream artifacts (requirements, specs) have `last_updated` dates newer than `docs/plan.md`, the plan is stale due to upstream changes → replan to align the plan with updated upstream artifacts
 
 Tell the user what triggered the replan and confirm before proceeding.
 
