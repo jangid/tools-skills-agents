@@ -15,8 +15,9 @@ You are performing holistic verification of a completed implementation. Your job
 
 Before starting, check project state. **Compare dates** to detect stale artifacts:
 
+0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/plan.md` → use `sdd-plan`
-2. **Staleness check**: compare `last_updated` in specs against `docs/plan.md` modification date. If specs are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
+2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` and specs against `docs/plan.md` modification date. If upstream artifacts are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
 3. If `docs/plan.md` has incomplete tasks → use `sdd-implement`
 4. If all plan tasks are done (or user explicitly requests verification) → you're in the right place
 5. If `docs/verification.md` already exists → you're re-verifying (after fixes or replan)
@@ -39,7 +40,8 @@ Tell the user which phase you detected and confirm before proceeding.
 1. Read `docs/plan.md` — confirm all tasks marked done
 2. Read all `docs/spec/*.md` — collect every acceptance criterion
 3. Read `CLAUDE.md` — identify the project's quality gates
-4. Read `docs/requirements.md` — understand the original intent
+4. Read `docs/requirements/index.md` and `docs/requirements/{category}/*.md` — understand the original intent
+5. Read `docs/requirements/traceability.md` — understand current coverage state
 
 ### Step 2: Quality Gates
 
@@ -82,6 +84,16 @@ For each spec in `docs/spec/`:
    - Execute the verification
    - Record: pass, fail, or unable-to-verify
 3. If a criterion fails: note what's wrong and severity (critical/minor)
+
+### Step 3b: Traceability Verification
+
+Read `docs/requirements/traceability.md` and verify:
+
+1. **Every requirement has a spec** — Spec column is non-empty for all rows
+2. **Every implemented requirement has tests** — Test column is non-empty for requirements with Implementation filled
+3. **Flag gaps** — list any requirements missing spec, test, or implementation coverage
+
+After verification, update the **Verified** column in `traceability.md` with pass/fail for each requirement.
 
 ### Step 4: User-Perspective Validation
 
@@ -167,7 +179,7 @@ plan_ref: docs/plan.md
 
 Based on the report:
 
-- **All pass, no issues** → tell the user "verification complete, ready to ship"
+- **All pass, no issues** → tell the user "verification complete, ready to ship". Note that the active plan can now be archived to `docs/plan-history/` if desired
 - **Minor issues only** → ask user: "fix now or ship and track as follow-up?"
 - **Critical issues** → recommend `sdd-replan` with the failure context
 

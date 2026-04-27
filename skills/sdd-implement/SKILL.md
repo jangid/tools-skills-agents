@@ -15,10 +15,11 @@ You are implementing from an approved plan and design specs. Follow the plan, us
 
 Before starting, check project state. **Compare `last_updated` dates** to detect stale upstream artifacts:
 
-1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements`
+0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
+1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or have `status: Draft` → use `sdd-specs`
 3. If no `docs/plan.md` → use `sdd-plan`
-4. **Staleness check**: compare `last_updated` in `docs/requirements.md` against `last_updated` in specs, and specs against `docs/plan.md` modification date. If the plan is older than its specs, or specs are older than requirements, upstream artifacts have changed since the plan was written → use `sdd-plan` to update the plan before implementing
+4. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` against `last_updated` in specs, and specs against `docs/plan.md` modification date. If the plan is older than its specs, or specs are older than requirements, upstream artifacts have changed since the plan was written → use `sdd-plan` to update the plan before implementing
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 4) → you're in the right place, resume
 
@@ -39,8 +40,9 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 
 1. Read `docs/plan.md` — identify the current milestone and next task
 2. Read the relevant spec sections for the current task
-3. Read `CLAUDE.md` for project conventions
-4. Identify which milestone you're starting from (ask if unclear)
+3. Read `docs/requirements/{category}/*.md` for requirement context when needed
+4. Read `CLAUDE.md` for project conventions
+5. Identify which milestone you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
@@ -61,10 +63,11 @@ For each task, follow the process based on its type:
 
 1. **Note the budget** from the plan (e.g., "30 min max")
 2. **Explore** the unknown: read docs, try APIs, prototype in a scratch branch
-3. **Document findings** — update `docs/research/{topic}.md`
-4. **Check replan triggers** — did findings invalidate any plan assumptions?
-5. If replan triggered → stop implementation, invoke `sdd-replan`
-6. If no replan needed → mark done, proceed to next task
+3. **Read prior research** from `docs/research/RS-*/findings.md` to avoid duplicating work
+4. **Document findings** — write to `docs/research/RS-NNN-{topic}/findings.md` and update `docs/research/index.md`
+5. **Check replan triggers** — did findings invalidate any plan assumptions?
+6. If replan triggered → stop implementation, invoke `sdd-replan`
+7. If no replan needed → mark done, proceed to next task
 
 #### [verify] tasks — Beyond Unit Tests
 
@@ -82,6 +85,7 @@ Before marking any task done:
 - [ ] Linter passes (ruff, eslint, clippy, or equivalent)
 - [ ] Tests pass (including the new test written for this task)
 - [ ] The task's spec acceptance criteria are met
+- [ ] Update `docs/requirements/traceability.md`: fill **Test** column after writing tests, fill **Implementation** column after writing code
 
 ### Step 3: Stuck Detection
 

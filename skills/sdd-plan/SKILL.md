@@ -15,9 +15,10 @@ You are creating an implementation plan from approved design specs. Your input i
 
 Before starting, check project state. **Compare `last_updated` dates** to detect stale downstream artifacts:
 
-1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements`
+0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
+1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or any has `status: Draft` → use `sdd-specs`
-3. **Staleness check**: if `docs/plan.md` exists, compare its modification date against `last_updated` in each `docs/spec/*.md`. If any spec is newer than the plan, the plan is **stale** — it was written against older specs and needs updating. Proceed to rewrite/update the plan regardless of task completion status
+3. **Staleness check**: if `docs/plan.md` exists, compare its modification date against `last_updated` in each `docs/spec/*.md` and `docs/requirements/index.md`. If any upstream artifact is newer than the plan, the plan is **stale** — it was written against older inputs and needs updating. Proceed to rewrite/update the plan regardless of task completion status
 4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 3) → use `sdd-implement`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If all specs are `Approved` and plan is missing or stale → you're in the right place
@@ -40,8 +41,8 @@ Tell the user which phase you detected, including any stale artifacts found, and
 
 1. Read all files in `docs/spec/` — only plan from specs with `status: Approved`
 2. If any spec is still `Draft` or `Under Review`, tell the user and ask whether to proceed without it or wait
-3. Read `docs/requirements.md` for context on priorities
-4. Read `docs/research/*.md` for context on what's been explored
+3. Read `docs/requirements/index.md` for overview and priorities, then read `docs/requirements/{category}/*.md` for detail (use `index.md` to discover files)
+4. Read `docs/research/RS-*/findings.md` for context on what's been explored
 5. Read `CLAUDE.md` for project conventions and technical constraints
 
 ### Step 2: Identify Implementation Units
@@ -93,7 +94,13 @@ For each spike task and any high-risk implement task, define the condition that 
 - If TA-Lib C library is unavailable on target → switch to pure-Python fallback approach
 ```
 
-### Step 7: Write the Plan
+### Step 7: Archive and Write the Plan
+
+**Archival**: If `docs/plan.md` already exists, archive it before writing the new plan:
+
+1. Create `docs/plan-history/` directory if it doesn't exist
+2. Copy current `docs/plan.md` to `docs/plan-history/{date}-{reason}.md` (e.g., `2026-04-27-rewrite-after-spec-update.md`)
+3. Then write the new plan
 
 Save the plan to `docs/plan.md`. Present to the user in this format:
 
@@ -127,12 +134,20 @@ One paragraph: what we're implementing and the approach.
 ## Replan Triggers
 - [Condition] → [what changes in the plan]
 
+## Completed
+- [milestone-name]: [description] (YYYY-MM-DD, N tasks)
+
 ## Risks
 - [Risk]: [Impact and mitigation]
 
 ## Open Questions
 - Questions that surfaced during planning
 ```
+
+**Active plan format rules**:
+- Only include current and future milestones in the `## Milestones` section
+- Completed milestones are summarized as one line each in the `## Completed` section. Format: `- {name}: {description} ({date}, {task count})`
+- Do NOT include a `## Plan Changelog` section in the active plan — changelog entries belong in archive files
 
 ### Planning Rules
 

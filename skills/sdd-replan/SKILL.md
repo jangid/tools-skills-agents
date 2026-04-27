@@ -16,11 +16,12 @@ You are adjusting an existing implementation plan because something changed. The
 
 Before starting, check what triggered the replan:
 
+0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If `docs/verification.md` exists with `status: fail` → replan from verification failures
 2. If a spike task produced findings that contradict the plan → replan from new knowledge
 3. If the user explicitly requested changes → replan from scope change
 4. If implementation is stuck (documented in conversation) → replan from blocked state
-5. **Staleness check**: if upstream artifacts (requirements, specs) have `last_updated` dates newer than `docs/plan.md`, the plan is stale due to upstream changes → replan to align the plan with updated upstream artifacts
+5. **Staleness check**: if `docs/requirements/index.md` or specs have `last_updated` dates newer than `docs/plan.md`, the plan is stale due to upstream changes → replan to align the plan with updated upstream artifacts
 
 Tell the user what triggered the replan and confirm before proceeding.
 
@@ -39,9 +40,10 @@ Read the current state:
 
 1. `docs/plan.md` — which tasks are done, in-progress, blocked?
 2. `docs/verification.md` (if exists) — what failed?
-3. `docs/research/*.md` — any new findings that changed assumptions?
+3. `docs/research/RS-*/findings.md` — any new findings that changed assumptions?
 4. `docs/spec/*.md` — are specs still valid given new information?
-5. Recent conversation context — what was the stuck state or trigger?
+5. `docs/requirements/{category}/*.md` — current requirements for context
+6. Recent conversation context — what was the stuck state or trigger?
 
 ### Step 2: Classify the Issue
 
@@ -75,25 +77,43 @@ Determine the depth of the problem:
 
 ### Step 4: Revise the Plan (Level 1 and 2)
 
+First, determine if this is a **significant** or **minor** replan:
+
+- **Significant** = adds/removes milestones or changes the overall approach
+- **Minor** = task reordering within a milestone, small task edits
+
+**For significant replans**: archive the current plan before modifying it:
+
+1. Create `docs/plan-history/` directory if it doesn't exist
+2. Copy `docs/plan.md` to `docs/plan-history/{date}-replan-{reason}.md`
+3. Write the changelog and removed tasks to the **archive file**, not the active plan
+
+**For minor replans**: edit `docs/plan.md` in place. No archive needed.
+
 When revising `docs/plan.md`:
 
 1. **Preserve done tasks** — never undo completed work unless explicitly reverting
 2. **Mark blocked tasks** — note why they're blocked and what unblocks them
 3. **Add new tasks** if the replan introduces new work
-4. **Remove invalidated tasks** — mark with `[removed: reason]`, don't delete
+4. **Remove invalidated tasks** — move them to the archive file (for significant replans). Do NOT write `[removed: reason]` in the active plan
 5. **Reorder** remaining tasks based on new dependencies
 6. **Update replan triggers** — the old ones may no longer apply
-7. **Add a changelog entry** at the bottom of the plan:
+
+**Archive file format** (for significant replans — written to `docs/plan-history/{date}-replan-{reason}.md`):
 
 ```markdown
-## Plan Changelog
+# Plan Archive: Replan — [reason]
 
-### [YYYY-MM-DD] Replan: [reason]
+## Changelog
+- **Date**: YYYY-MM-DD
 - **Trigger**: [what caused the replan]
 - **Impact**: [what changed]
 - **Added**: [new tasks]
-- **Removed**: [invalidated tasks]
+- **Removed**: [invalidated tasks and why]
 - **Reordered**: [what moved and why]
+
+## Previous Plan Snapshot
+[Full content of plan.md at time of archive]
 ```
 
 ### Step 5: Present and Confirm
@@ -117,7 +137,7 @@ After the revised plan is approved:
 
 - **Don't panic**: a replan is normal, not a failure. The goal is to adjust efficiently, not to blame or justify
 - **Minimize disruption**: change only what's necessary. If 3 tasks out of 20 need adjustment, don't rewrite the whole plan
-- **Preserve history**: never silently delete tasks or change what's already done. Use the changelog
+- **Preserve history**: never silently delete tasks or change what's already done. Use the archive file for significant changes
 - **Cascade awareness**: a spec change may invalidate multiple tasks. Check downstream effects
 - **User decides scope**: if the replan could go multiple directions (cut scope vs extend timeline vs change approach), present options and let the user choose
 - **Don't implement during replan**: produce the revised plan, not code. Implementation happens in `sdd-implement`

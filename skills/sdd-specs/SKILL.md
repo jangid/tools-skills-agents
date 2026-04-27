@@ -1,26 +1,28 @@
 ---
 name: sdd-specs
 description: >
-  Reads approved requirements from docs/requirements.md and produces feature
-  design specs in docs/spec/. Each spec defines contracts, interfaces, and
+  Reads approved requirements from docs/requirements/index.md and category
+  files in docs/requirements/{category}/*.md, then produces feature design
+  specs in docs/spec/. Each spec defines contracts, interfaces, and
   verification criteria — not implementation code. Use after requirements are
   approved and before implementation begins.
 ---
 
 # SDD: Design Specs
 
-You are writing design specs for a Spec-Driven Development workflow. Your input is an approved `docs/requirements.md`. Your output is feature specs in `docs/spec/`.
+You are writing design specs for a Spec-Driven Development workflow. Your input is approved requirements from `docs/requirements/index.md` (overview) and `docs/requirements/{category}/*.md` (detail). Your output is feature specs in `docs/spec/`.
 
 ## Phase Detection
 
-Before starting, check project state. **Compare `last_updated` dates** to detect stale downstream artifacts:
+Before starting, check project state:
 
-1. If no `docs/requirements.md` or status is `Draft` → use `sdd-requirements` first
-2. **Staleness check**: compare `last_updated` in `docs/requirements.md` against `last_updated` in each `docs/spec/*.md` and `docs/plan.md` (if they exist). If requirements are newer than existing specs or plan, those downstream artifacts are **stale** — they were written against older requirements and need updating. Proceed to write/update specs regardless of their current status
+0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
+1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements` first
+2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` against `last_updated` in each `docs/spec/*.md` and `docs/plan.md` (if they exist). If requirements are newer than existing specs or plan, those downstream artifacts are **stale** — they were written against older requirements and need updating. Proceed to write/update specs regardless of their current status
 3. If `docs/spec/*.md` all have `status: Approved` **and are not stale** (per check 2) → use `sdd-plan`
 4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 2) → use `sdd-implement`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
-6. If `docs/requirements.md` has `status: Approved` and specs are missing, `Draft`, or stale → you're in the right place
+6. If `docs/requirements/index.md` has `status: Approved` and specs are missing, `Draft`, or stale → you're in the right place
 
 Tell the user which phase you detected, including any stale artifacts found, and confirm before proceeding.
 
@@ -37,11 +39,12 @@ Tell the user which phase you detected, including any stale artifacts found, and
 
 ### Step 1: Read Requirements
 
-1. Read `docs/requirements.md` — this is your source of truth
-2. Read `docs/research/*.md` — prior research informs design decisions
-3. Read `CLAUDE.md` or `README` for project context and technical constraints
-4. Read any existing specs in `docs/spec/` — you may be adding or updating
-5. Flag any requirements that are ambiguous or conflicting — ask the user before proceeding
+1. Read `docs/requirements/index.md` — this is your overview and entry point
+2. Read `docs/requirements/{category}/*.md` — detailed requirements organized by category. Use `index.md` to discover which category directories and files exist
+3. Read `docs/research/RS-*/findings.md` — prior research informs design decisions
+4. Read `CLAUDE.md` or `README` for project context and technical constraints
+5. Read any existing specs in `docs/spec/` — you may be adding or updating
+6. Flag any requirements that are ambiguous or conflicting — ask the user before proceeding
 
 ### Step 2: Plan Spec Structure
 
@@ -67,7 +70,7 @@ Each spec follows this format:
 ---
 status: Draft
 last_updated: YYYY-MM-DD
-requires: [REQ-F-001, REQ-F-002, REQ-NF-003]
+requires: [REQ-{DOMAIN}-{NNN}, ...]  # e.g. REQ-AUTH-001, REQ-PERF-002
 ---
 
 # Feature Name
@@ -113,6 +116,13 @@ Do NOT include:
 - [ ] Must trace to at least one requirement
 ```
 
+### Step 3b: Update Traceability
+
+After writing or updating each spec, update `docs/requirements/traceability.md`:
+
+1. For each requirement ID listed in the spec's `requires` frontmatter, fill in the **Spec** column with the spec filename
+2. This keeps a single source of truth for requirement-to-artifact mapping
+
 ### Spec Rules
 
 - **Trace everything**: every spec must list which requirements it addresses in the `requires` frontmatter. If you're writing something no requirement covers, flag it to the user — don't invent requirements.
@@ -141,22 +151,22 @@ When the user requests changes:
 
 ### Step 5: Coverage Check
 
-After all specs are written, verify:
+After all specs are written, read `docs/requirements/traceability.md` and verify:
 
-1. **Every requirement is covered** — each REQ-* ID appears in at least one spec's `requires` list
+1. **Every requirement is covered** — each REQ-* ID has a non-empty Spec column in traceability.md
 2. **No orphan specs** — every spec traces to at least one requirement
 3. **No contradictions** — specs don't make conflicting design decisions
 4. **Uncertainty inventory** — list all `[high-uncertainty]` sections and confirm the user is aware
 
-Present a traceability summary:
+Present a summary based on `traceability.md`:
 
 ```
-REQ-F-001 → overview.md, exchanges.md
-REQ-F-002 → exchanges.md
-REQ-NF-001 → testing.md
+REQ-AUTH-001 → auth.md (covered)
+REQ-AUTH-002 → auth.md (covered)
+REQ-PERF-001 → testing.md (covered)
 ...
-[Uncovered]: REQ-F-015 (no spec addresses this yet)
-[High-uncertainty]: exchanges.md §OAuth2 flow, testing.md §TA-Lib fallback
+[Uncovered]: REQ-DATA-015 (Spec column empty in traceability.md)
+[High-uncertainty]: auth.md §OAuth2 flow, testing.md §TA-Lib fallback
 ```
 
 ## Updating Existing Specs
