@@ -80,7 +80,7 @@ Standalone scripts or utilities. Use the appropriate language for the task. Each
 
 A cyclic, phase-based workflow for building software with AI assistance. Each phase produces artifacts on disk that serve as state markers — any new session can detect the current phase and resume.
 
-### Phases (7 skills)
+### Phases (8 skills)
 
 ```
 ┌─ RESEARCH ──→ REQUIREMENTS ──→ SPECS ──→ PLAN ──→ IMPLEMENT ──→ VERIFY ─┐
@@ -89,22 +89,23 @@ A cyclic, phase-based workflow for building software with AI assistance. Each ph
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. `sdd-research` — time-boxed exploration to reduce uncertainty (`docs/research/`)
-2. `sdd-requirements` — elicit and document requirements (`docs/requirements.md`)
+1. `sdd-research` — time-boxed exploration to reduce uncertainty (`docs/research/RS-NNN-{topic}/`)
+2. `sdd-requirements` — elicit and document requirements (`docs/requirements/`)
 3. `sdd-specs` — translate requirements into design specs (`docs/spec/`)
 4. `sdd-plan` — break specs into ordered, typed tasks (implement/spike/verify)
 5. `sdd-implement` — execute the plan with TDD inner loop and stuck detection
 6. `sdd-verify` — holistic validation: quality gates + acceptance criteria + UX
 7. `sdd-replan` — structured replanning when assumptions break
+8. `sdd-migrate` — one-time migration between artifact structure versions
 
 ### Phase Detection
 
-Every skill detects the current phase on entry by checking which artifacts exist **and whether they are stale**:
+Every skill checks `docs/.sdd-version` on entry. If missing, it suggests running `sdd-migrate`. Skills then detect the current phase by checking which artifacts exist **and whether they are stale**:
 
 | Artifact | Phase complete |
 |----------|---------------|
-| `docs/research/{topic}.md` (status: Complete) | Research done |
-| `docs/requirements.md` (status: Approved) | Requirements done |
+| `docs/research/RS-*/findings.md` (status: Complete) | Research done |
+| `docs/requirements/index.md` (status: Approved) | Requirements done |
 | `docs/spec/*.md` (all status: Approved) | Specs done |
 | `docs/plan.md` (exists, tasks incomplete) | Planning done, implementing |
 | `docs/plan.md` (all tasks done) | Implementation done |
@@ -113,13 +114,17 @@ Every skill detects the current phase on entry by checking which artifacts exist
 
 #### Staleness Detection
 
-Downstream artifacts become stale when their upstream inputs are updated. Each skill compares `last_updated` dates across the dependency chain:
+Downstream artifacts become stale when their upstream inputs are updated. Each skill compares `last_updated` dates across the dependency chain, using `docs/requirements/index.md` as the single staleness reference for requirements:
 
 ```
-research → requirements → specs → plan → implementation → verification
+research/index.md → requirements/index.md → specs → plan → implementation → verification
 ```
 
-If a downstream artifact's `last_updated` is older than its upstream input, it is **stale** and needs updating — not skipping to. For example, if `requirements.md` was rewritten today but `docs/spec/*.md` and `docs/plan.md` are from last week, `sdd-specs` will update the specs rather than redirecting to `sdd-implement`. Early-phase skills (research, requirements) are always valid entry points — they note existing downstream artifacts but don't block on them.
+If a downstream artifact's `last_updated` is older than its upstream input, it is **stale** and needs updating — not skipping to. For example, if `requirements/index.md` was updated today but `docs/spec/*.md` and `docs/plan.md` are from last week, `sdd-specs` will update the specs rather than redirecting to `sdd-implement`. Early-phase skills (research, requirements) are always valid entry points — they note existing downstream artifacts but don't block on them.
+
+#### Plan Archival
+
+When `sdd-plan` rewrites a plan or `sdd-replan` makes significant changes, the previous plan is archived to `docs/plan-history/{date}-{reason}.md`. The active plan stays lean — completed milestones are summarized to one line each. Changelogs and removed tasks live only in archive files.
 
 ### Key Differences from Linear Waterfall
 
