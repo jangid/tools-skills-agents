@@ -67,13 +67,13 @@ last_updated: 2026-05-25
 | REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md | pass |
 | REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | sdd-replan/SKILL.md | pass |
 | REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md, sdd-implement/SKILL.md | pass |
-| REQ-SKILL-017 | skill-updates.md, migration.md | | sdd-migrate/SKILL.md | |
+| REQ-SKILL-017 | skill-updates.md, migration.md | | sdd-migrate/SKILL.md | pass |
 | REQ-CFG-001 | overview.md, migration.md | | sdd-migrate/SKILL.md | pass |
-| REQ-COMPAT-002 | overview.md, migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-009 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-010 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-011 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-012 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-013 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-014 | migration.md | | sdd-migrate/SKILL.md | |
-| REQ-MIG-015 | overview.md | | overview.md (spec) | |
+| REQ-COMPAT-002 | overview.md, migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-009 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-010 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-011 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-012 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-013 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-014 | migration.md | | sdd-migrate/SKILL.md | pass |
+| REQ-MIG-015 | overview.md | | overview.md (spec) | pass |
