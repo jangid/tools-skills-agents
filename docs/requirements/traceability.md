@@ -67,4 +67,13 @@ last_updated: 2026-05-25
 | REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md | pass |
 | REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | sdd-replan/SKILL.md | pass |
 | REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md, sdd-implement/SKILL.md | pass |
+| REQ-SKILL-017 | skill-updates.md | | | |
 | REQ-CFG-001 | overview.md, migration.md | | | pass |
+| REQ-COMPAT-002 | | | | |
+| REQ-MIG-009 | | | | |
+| REQ-MIG-010 | | | | |
+| REQ-MIG-011 | | | | |
+| REQ-MIG-012 | | | | |
+| REQ-MIG-013 | | | | |
+| REQ-MIG-014 | | | | |
+| REQ-MIG-015 | | | | |

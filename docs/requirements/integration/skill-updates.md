@@ -2,6 +2,7 @@
 domain: SKILL
 last_updated: 2026-05-25
 status: Approved
+research_refs: [RS-003]
 ---
 
 # Requirements: Skill Updates
@@ -111,4 +112,12 @@ affected.
 `sdd-plan` and `sdd-implement` must implement milestone-scoped staleness
 detection (REQ-STALE-003) when reading per-milestone plan files, comparing
 only against requirements and specs traced by that milestone's tasks.
+[Priority: must]
+
+### REQ-SKILL-017: sdd-migrate v2→v3 support
+`sdd-migrate` must implement v2→v3 migration steps (REQ-MIG-009 through
+REQ-MIG-014): version detection for v3, plan vocabulary rename, optional
+multi-milestone split, capability report, v1→v3 sequential composition, and
+finalization. The existing v1→v2 logic must remain unchanged.
+(see RS-003)
 [Priority: must]

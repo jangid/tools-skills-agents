@@ -1,5 +1,5 @@
 ---
-version: "3.0"
+version: "4.0"
 last_updated: 2026-05-25
 traceability: traceability.md
 ---
@@ -9,7 +9,7 @@ traceability: traceability.md
 ## Summary
 
 Requirements for SDD (Spec-Driven Development) skill improvements in the
-tools-skills-agents repository. Covers two scopes:
+tools-skills-agents repository. Covers three scopes:
 
 1. **v2 artifact structure** (RS-001): Research structure, requirements
    splitting, plan management, staleness detection, migration, and per-skill
@@ -17,6 +17,9 @@ tools-skills-agents repository. Covers two scopes:
 2. **Workflow improvements** (RS-002): Chunk-close review, Q-IMPL deviation
    protocol, multi-milestone plan iteration, cross-spec consistency, and
    per-skill updates for workflow changes.
+3. **v3 migration** (RS-003): Migration path from v2 to v3 — plan vocabulary
+   rename, version marker update, backward compatibility, documentation
+   consistency.
 
 ## Stakeholders
 
@@ -31,14 +34,14 @@ tools-skills-agents repository. Covers two scopes:
 | functional | [requirements-structure.md](functional/requirements-structure.md) | REQ | REQ-REQ-001..007 | Approved | 2026-04-28 |
 | functional | [plan-management.md](functional/plan-management.md) | PLAN | REQ-PLAN-001..004 | Approved | 2026-04-28 |
 | functional | [staleness-detection.md](functional/staleness-detection.md) | STALE | REQ-STALE-001..003 | Approved | 2026-05-25 |
-| functional | [migration.md](functional/migration.md) | MIG | REQ-MIG-001..008 | Approved | 2026-04-28 |
+| functional | [migration.md](functional/migration.md) | MIG | REQ-MIG-001..015 | Approved | 2026-05-25 |
 | functional | [chunk-close.md](functional/chunk-close.md) | CHKC | REQ-CHKC-001..008 | Approved | 2026-05-25 |
 | functional | [deviation-protocol.md](functional/deviation-protocol.md) | QIMPL | REQ-QIMPL-001..003 | Approved | 2026-05-25 |
 | functional | [milestone-plans.md](functional/milestone-plans.md) | MPLAN | REQ-MPLAN-001..004 | Approved | 2026-05-25 |
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
-| non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001 | Approved | 2026-04-28 |
-| integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..016 | Approved | 2026-05-25 |
-| configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-04-28 |
+| non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
+| integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..017 | Approved | 2026-05-25 |
+| configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
 
 ## Domain Prefixes
 
@@ -60,6 +63,17 @@ tools-skills-agents repository. Covers two scopes:
 
 ## Q-REQ Resolutions
 
+Resolved during requirements gathering for RS-003:
+
+- **Q-REQ-A** (renumbering policy): Preserve original numbering during
+  vocabulary rename (M1 → Chunk 1, not Chunk 0). Chunk-close doesn't care
+  about N's value; renumbering breaks external references for no functional
+  benefit.
+- **Q-REQ-B** (version marker semantics): Marker tracks SDD process version,
+  not just artifact layout. "3" means v3 conventions available.
+- **Q-REQ-C** (overview.md update scope): Promoted into scope. Documentation
+  and version marker must be consistent at the moment of version bump.
+
 Resolved during requirements gathering for RS-002:
 
 - **Q-REQ-A** (milestone scoping): Requirements are milestone-agnostic.
@@ -79,9 +93,9 @@ Resolved during requirements gathering for RS-002:
 
 - Code changes to skills (implementation phase)
 - Redesigning the broader SDD methodology
-- New skills not derived from RS-002
-- v2→v3 artifact migration (changes are backward compatible with v2)
+- New skills not derived from RS-002 or RS-003
 - External review as a formal skill (`sdd-review`)
+- Forward planning to v4
 
 ## Open Questions
 
@@ -91,6 +105,7 @@ None — all Q-REQ items resolved.
 
 - [RS-001: SDD Artifact Structure](../research/RS-001-sdd-artifact-structure/findings.md)
 - [RS-002: SDD Skill Improvements](../research/RS-002-skill-improvements/findings.md)
+- [RS-003: v3 Migration Path](../research/RS-003-v3-migration/findings.md)
 
 ## See Also
 
