@@ -1,15 +1,17 @@
 ---
-status: Approved
+status: Draft
 last_updated: 2026-05-25
 requires:
   - REQ-CTX-001
   - REQ-CTX-002
   - REQ-COMPAT-001
+  - REQ-COMPAT-002
   - REQ-CFG-001
+  - REQ-MIG-015
   - REQ-STALE-001
 ---
 
-# Overview: SDD Artifact Structure v2
+# Overview: SDD Artifact Structure
 
 ## Context
 
@@ -17,10 +19,12 @@ The SDD workflow produces artifacts across seven phases. In v1, these artifacts
 live in flat structures that grow unboundedly: a single `requirements.md`, flat
 research files, and plan files that accumulate changelogs and removed-task
 markers. v2 restructures all artifacts for bounded file sizes, traceable
-cross-references, and AI-context-friendly document sizes.
+cross-references, and AI-context-friendly document sizes. v3 adds behavioral
+conventions — chunk-close review, Q-IMPL deviation protocol, per-milestone plan
+support, and cross-spec consistency — without changing the artifact layout.
 
-This spec establishes the shared principles and directory layout that all other
-specs build on.
+This spec establishes the shared principles, directory layout, and version
+conventions that all other specs build on.
 
 ## Design
 
@@ -58,13 +62,27 @@ docs/
 
 ### Version Marker
 
-`docs/.sdd-version` is a plain text file containing a single integer (e.g.,
-`2`). All SDD skills read this file on phase detection to determine which
-artifact layout to expect.
+`docs/.sdd-version` is a plain text file containing a single integer
+indicating the SDD process version. Current valid values:
 
-- If the file is missing, assume v1 (backward compatible).
-- If the file contains `2`, use v2 paths and conventions.
-- Future versions increment this number and add migration logic to `sdd-migrate`.
+- `2` — v2 artifact layout (split requirements, RS-NNN research, archive
+  pattern, traceability matrix)
+- `3` — v2 layout plus v3 process conventions (chunk-close review, Q-IMPL
+  deviation protocol, per-milestone plan support, cross-spec consistency
+  pass, plan vocabulary using `### Chunk N:` headers for work units)
+
+If the file is missing, assume v1 (backward compatible). All SDD skills read
+this file on phase detection to determine which conventions apply.
+
+The marker tracks SDD process version — not just artifact layout — because v3
+introduces behavioral conventions (not layout changes) that operators need to
+know about. Skills read this file to determine which mechanisms are active.
+
+v3 is backward compatible with v2: projects on v2 continue to work without
+migration. v3 mechanisms gracefully degrade when v3 conventions aren't present
+(chunk-close is inactive without `### Chunk N:` headers; per-milestone logic
+activates only when per-milestone files exist; Q-IMPL entries accumulate on
+demand).
 
 **Why a separate file instead of frontmatter in an existing artifact**: The
 version marker must be detectable before reading any specific artifact. A
@@ -128,6 +146,35 @@ than scanning all category files.
 split requirements, comparing against N files adds complexity. The index acts as
 a single source of truth for "when did requirements last change?"
 
+### Plan Vocabulary
+
+v3 distinguishes **chunks** (implementation work units, ~5-15 hours) from
+**delivery milestones** (M1, M2, etc., delivery groupings). Single-milestone
+plans use `### Chunk N:` headers under a `## Chunks` section. Multi-milestone
+projects use per-milestone plan files (see milestone-plans.md) where each
+per-milestone file contains chunks.
+
+v2 plans using `### M N:` as work-unit headers are still readable but won't
+activate chunk-close review (which triggers on `### Chunk N:` boundaries). The
+v2→v3 migration renames these to chunk format, preserving original numbering
+(M1 → Chunk 1, M2 → Chunk 2).
+
+### v3 Behavioral Additions
+
+Beyond the v2 artifact layout, v3 adds:
+
+- **Chunk-close review** — structured 4-check checklist at chunk boundaries
+  during implementation (see chunk-close-review.md)
+- **Q-IMPL deviation protocol** — three-tier classification for implementation
+  decisions diverging from spec (see deviation-protocol.md)
+- **Per-milestone plan support** — optional structure for multi-milestone
+  projects (see milestone-plans.md)
+- **Cross-spec consistency pass** — type reference validation between specs
+  (see cross-spec-consistency.md)
+
+These are documented in their own specs. The overview lists them as the answer
+to "what does v3 add" without restating their designs.
+
 ### ID Namespaces
 
 v2 uses three ID namespaces:
@@ -146,12 +193,18 @@ you both what it's about and where to find it (`functional/auth.md` or similar).
 
 ### Manual
 - Inspect the directory layout after migration or fresh project setup
-- Confirm `docs/.sdd-version` contains `2`
+- Confirm `docs/.sdd-version` contains the current version (`2` or `3`)
 - Confirm each artifact file has the required frontmatter fields
+- Confirm v3 projects use `### Chunk N:` plan vocabulary
 
 ### Acceptance Criteria
 - [ ] All artifact files use plain Markdown with YAML frontmatter (REQ-COMPAT-001)
 - [ ] No artifact file exceeds 300 lines except index/traceability (REQ-CTX-001)
 - [ ] Each file is self-contained with ID-based cross-references (REQ-CTX-002)
 - [ ] `docs/.sdd-version` exists and contains the version number (REQ-CFG-001)
+- [ ] Version marker valid values are `2` and `3` (REQ-CFG-001)
 - [ ] Staleness detection uses `index.md` dates, not individual file scans (REQ-STALE-001)
+- [ ] v2 projects work without migration; v3 mechanisms degrade gracefully (REQ-COMPAT-002)
+- [ ] Overview documents plan vocabulary convention (REQ-MIG-015)
+- [ ] Overview documents version marker semantics as process version (REQ-MIG-015)
+- [ ] Overview lists v3 behavioral additions (REQ-MIG-015)
