@@ -82,7 +82,7 @@ Determine the depth of the problem:
 First, determine if this is a **significant** or **minor** replan:
 
 - **Significant** = adds/removes milestones or changes the overall approach
-- **Minor** = task reordering within a milestone, small task edits
+- **Minor** = task reordering within a chunk, small task edits
 
 **For significant replans**: archive the current plan before modifying it:
 

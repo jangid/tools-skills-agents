@@ -20,7 +20,7 @@ last_updated: 2026-05-25
 | REQ-PLAN-002 | plan-management.md | | | |
 | REQ-PLAN-003 | plan-management.md | | | |
 | REQ-PLAN-004 | plan-management.md | | | |
-| REQ-STALE-001 | requirements-artifacts.md, skill-updates.md, overview.md | | | |
+| REQ-STALE-001 | requirements-artifacts.md, skill-updates.md, overview.md | | sdd-specs/SKILL.md, sdd-plan/SKILL.md, sdd-implement/SKILL.md, sdd-replan/SKILL.md | |
 | REQ-STALE-002 | requirements-artifacts.md, skill-updates.md | | sdd-requirements/SKILL.md | |
 | REQ-STALE-003 | milestone-plans.md | | sdd-plan/SKILL.md, sdd-implement/SKILL.md | |
 | REQ-MIG-001 | migration.md | | | |
