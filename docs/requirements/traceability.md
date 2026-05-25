@@ -20,9 +20,9 @@ last_updated: 2026-05-25
 | REQ-PLAN-002 | plan-management.md | | | |
 | REQ-PLAN-003 | plan-management.md | | | |
 | REQ-PLAN-004 | plan-management.md | | | |
-| REQ-STALE-001 | requirements-artifacts.md, skill-updates.md | | | |
-| REQ-STALE-002 | requirements-artifacts.md | | | |
-| REQ-STALE-003 | | | | |
+| REQ-STALE-001 | requirements-artifacts.md, skill-updates.md, overview.md | | | |
+| REQ-STALE-002 | requirements-artifacts.md, skill-updates.md | | | |
+| REQ-STALE-003 | milestone-plans.md | | | |
 | REQ-MIG-001 | migration.md | | | |
 | REQ-MIG-002 | migration.md | | | |
 | REQ-MIG-003 | migration.md | | | |
@@ -31,23 +31,23 @@ last_updated: 2026-05-25
 | REQ-MIG-006 | migration.md | | | |
 | REQ-MIG-007 | migration.md | | | |
 | REQ-MIG-008 | migration.md | | | |
-| REQ-CHKC-001 | | | | |
-| REQ-CHKC-002 | | | | |
-| REQ-CHKC-003 | | | | |
-| REQ-CHKC-004 | | | | |
-| REQ-CHKC-005 | | | | |
-| REQ-CHKC-006 | | | | |
-| REQ-CHKC-007 | | | | |
-| REQ-CHKC-008 | | | | |
-| REQ-QIMPL-001 | | | | |
-| REQ-QIMPL-002 | | | | |
-| REQ-QIMPL-003 | | | | |
-| REQ-MPLAN-001 | | | | |
-| REQ-MPLAN-002 | | | | |
-| REQ-MPLAN-003 | | | | |
-| REQ-MPLAN-004 | | | | |
-| REQ-XSPEC-001 | | | | |
-| REQ-XSPEC-002 | | | | |
+| REQ-CHKC-001 | chunk-close-review.md | | | |
+| REQ-CHKC-002 | chunk-close-review.md | | | |
+| REQ-CHKC-003 | chunk-close-review.md | | | |
+| REQ-CHKC-004 | chunk-close-review.md | | | |
+| REQ-CHKC-005 | chunk-close-review.md | | | |
+| REQ-CHKC-006 | chunk-close-review.md | | | |
+| REQ-CHKC-007 | chunk-close-review.md | | | |
+| REQ-CHKC-008 | chunk-close-review.md | | | |
+| REQ-QIMPL-001 | deviation-protocol.md | | | |
+| REQ-QIMPL-002 | deviation-protocol.md | | | |
+| REQ-QIMPL-003 | deviation-protocol.md | | | |
+| REQ-MPLAN-001 | milestone-plans.md | | | |
+| REQ-MPLAN-002 | milestone-plans.md | | | |
+| REQ-MPLAN-003 | milestone-plans.md | | | |
+| REQ-MPLAN-004 | milestone-plans.md | | | |
+| REQ-XSPEC-001 | cross-spec-consistency.md | | | |
+| REQ-XSPEC-002 | cross-spec-consistency.md | | | |
 | REQ-CTX-001 | overview.md | | | |
 | REQ-CTX-002 | overview.md | | | |
 | REQ-COMPAT-001 | overview.md | | | |
@@ -59,12 +59,12 @@ last_updated: 2026-05-25
 | REQ-SKILL-006 | skill-updates.md | | | |
 | REQ-SKILL-007 | skill-updates.md | | | |
 | REQ-SKILL-008 | plan-management.md, skill-updates.md | | | |
-| REQ-SKILL-009 | | | | |
-| REQ-SKILL-010 | | | | |
-| REQ-SKILL-011 | | | | |
-| REQ-SKILL-012 | | | | |
-| REQ-SKILL-013 | | | | |
-| REQ-SKILL-014 | | | | |
-| REQ-SKILL-015 | | | | |
-| REQ-SKILL-016 | | | | |
+| REQ-SKILL-009 | skill-updates.md, chunk-close-review.md | | | |
+| REQ-SKILL-010 | skill-updates.md, deviation-protocol.md | | | |
+| REQ-SKILL-011 | skill-updates.md | | | |
+| REQ-SKILL-012 | skill-updates.md | | | |
+| REQ-SKILL-013 | skill-updates.md, cross-spec-consistency.md | | | |
+| REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | | |
+| REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | | |
+| REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | | |
 | REQ-CFG-001 | overview.md, migration.md | | | |

@@ -1,6 +1,6 @@
 ---
 status: Approved
-last_updated: 2026-04-28
+last_updated: 2026-05-25
 requires:
   - REQ-MIG-001
   - REQ-MIG-002

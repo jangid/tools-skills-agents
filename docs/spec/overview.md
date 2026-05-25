@@ -1,11 +1,12 @@
 ---
-status: Approved
-last_updated: 2026-04-28
+status: Draft
+last_updated: 2026-05-25
 requires:
   - REQ-CTX-001
   - REQ-CTX-002
   - REQ-COMPAT-001
   - REQ-CFG-001
+  - REQ-STALE-001
 ---
 
 # Overview: SDD Artifact Structure v2
@@ -153,4 +154,4 @@ you both what it's about and where to find it (`functional/auth.md` or similar).
 - [ ] No artifact file exceeds 300 lines except index/traceability (REQ-CTX-001)
 - [ ] Each file is self-contained with ID-based cross-references (REQ-CTX-002)
 - [ ] `docs/.sdd-version` exists and contains the version number (REQ-CFG-001)
-- [ ] Staleness detection uses `index.md` dates, not individual file scans
+- [ ] Staleness detection uses `index.md` dates, not individual file scans (REQ-STALE-001)

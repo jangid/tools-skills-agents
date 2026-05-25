@@ -1,6 +1,6 @@
 ---
-status: Approved
-last_updated: 2026-04-28
+status: Draft
+last_updated: 2026-05-25
 requires:
   - REQ-SKILL-001
   - REQ-SKILL-002
@@ -10,7 +10,16 @@ requires:
   - REQ-SKILL-006
   - REQ-SKILL-007
   - REQ-SKILL-008
+  - REQ-SKILL-009
+  - REQ-SKILL-010
+  - REQ-SKILL-011
+  - REQ-SKILL-012
+  - REQ-SKILL-013
+  - REQ-SKILL-014
+  - REQ-SKILL-015
+  - REQ-SKILL-016
   - REQ-STALE-001
+  - REQ-STALE-002
 ---
 
 # Skill Updates
@@ -154,8 +163,95 @@ milestone structure, dependency ordering, and replan trigger definition.
    - After writing code: update `traceability.md`'s Implementation column.
 5. **Research reading**: Read from `docs/research/RS-*/findings.md`.
 
-**Unchanged**: The TDD inner loop, stuck detection, milestone checkpoints,
-spec gap handling, and task completion checklist.
+**Unchanged**: The TDD inner loop, stuck detection, spec gap handling, and
+task completion checklist.
+
+#### Chunk Close Checklist (REQ-SKILL-009)
+
+`sdd-implement`'s current "Step 4: Milestone Checkpoints" must be renamed
+to distinguish two levels of checkpoint:
+
+- **Chunk close review**: Runs at each `### Chunk N:` boundary within a
+  milestone. Four structured checks (type alignment, traceability, test
+  coverage, Q-IMPL audit) with tiered enforcement. See
+  chunk-close-review.md for the full checklist design.
+- **Milestone checkpoints**: Run at delivery milestone boundaries (M1, M2,
+  etc.). The operator approves proceeding to the next milestone.
+
+The chunk close checklist runs more frequently and catches mechanical
+errors (type-name drift, missing traceability) before they ripple into
+downstream chunks.
+
+#### Q-IMPL Deviation Protocol (REQ-SKILL-010)
+
+`sdd-implement` must document the three-tier deviation protocol inline in
+its implementation process. See deviation-protocol.md for the full protocol
+design. The skill must include:
+
+- Tier classification guidance (when to use each tier)
+- Q-IMPL entry format (ID, tier, decision, rationale)
+- Global sequential numbering instructions
+- Tier 3 escalation procedure (stop, escalate, reference sdd-replan
+  Level 2)
+
+#### Spike Code Separation (REQ-SKILL-011)
+
+For `[spike]` tasks, `sdd-implement` should add a rule:
+
+- Spike findings go to `docs/spikes/{topic}.md`
+- Throwaway spike code goes to `scripts/spike_*`
+- Production code for the same functionality must be written fresh against
+  the spec, not adapted from spike code
+
+**Why fresh code**: Spike code is written for speed of learning, not
+production quality. Adapting it silently imports shortcuts and assumptions
+that the spec's design may have deliberately avoided.
+
+#### CLAUDE.md Convention Reading (REQ-SKILL-012)
+
+`sdd-implement` must instruct the implementer to read `CLAUDE.md` (if
+present) as the first item in its context loading step. Project conventions
+from `CLAUDE.md` take precedence over generic patterns when choosing
+libraries, coding patterns, and project structure.
+
+**Why must, not should**: `CLAUDE.md` carries project-specific conventions
+that override generic skill behavior (e.g., preferred test framework,
+import style, error handling approach). Missing these conventions leads to
+rework when the operator corrects the style.
+
+#### Cross-Spec Consistency in sdd-specs (REQ-SKILL-013)
+
+`sdd-specs` must add the cross-spec consistency reading pass after writing
+all specs and before the final coverage check. See
+cross-spec-consistency.md for the full design.
+
+#### Milestone Plan Support in sdd-plan (REQ-SKILL-014)
+
+`sdd-plan` must support per-milestone plan files when the project defines
+multiple milestones. See milestone-plans.md for the full design. For single-
+milestone projects, the existing single-file behavior is preserved.
+
+#### Milestone Plan Support in sdd-replan (REQ-SKILL-015)
+
+`sdd-replan` must work with per-milestone plan files, archiving and revising
+the correct milestone's plan file based on which milestone's tasks are
+affected.
+
+#### Milestone-Scoped Staleness (REQ-SKILL-016)
+
+`sdd-plan` and `sdd-implement` must implement milestone-scoped staleness
+detection when reading per-milestone plan files, comparing only against
+requirements and specs traced by that milestone's tasks. See
+milestone-plans.md §Milestone-Scoped Staleness.
+
+#### Research-to-Requirements Staleness (REQ-STALE-002)
+
+`sdd-requirements` must detect when new research (a `findings.md` with
+`status: Complete`) is newer than `docs/requirements/index.md`'s
+`last_updated` and inform the user. This is advisory, not blocking — the
+user decides whether the new research affects requirements. This check is
+already specified in requirements-artifacts.md §Staleness Detection but is
+traced here for completeness.
 
 ### sdd-verify
 
@@ -227,4 +323,14 @@ logic, and rules (minimize disruption, preserve history, cascade awareness).
 - [ ] `sdd-implement` updates traceability when writing tests/code (REQ-SKILL-006)
 - [ ] `sdd-verify` verifies traceability matrix, updates Verified column (REQ-SKILL-007)
 - [ ] `sdd-replan` writes changelogs/removed tasks to archive only (REQ-SKILL-008)
+- [ ] `sdd-implement` includes chunk close checklist at chunk boundaries (REQ-SKILL-009)
+- [ ] Step 4 renamed to distinguish chunk vs milestone checkpoints (REQ-SKILL-009)
+- [ ] `sdd-implement` documents three-tier Q-IMPL protocol (REQ-SKILL-010)
+- [ ] `sdd-implement` separates spike code from production code (REQ-SKILL-011)
+- [ ] `sdd-implement` reads CLAUDE.md as first context loading step (REQ-SKILL-012)
+- [ ] `sdd-specs` includes cross-spec consistency pass (REQ-SKILL-013)
+- [ ] `sdd-plan` supports per-milestone plan files (REQ-SKILL-014)
+- [ ] `sdd-replan` handles per-milestone archival and revision (REQ-SKILL-015)
+- [ ] Plan skills implement milestone-scoped staleness (REQ-SKILL-016)
 - [ ] All skills use `index.md` for staleness detection (REQ-STALE-001)
+- [ ] `sdd-requirements` detects research-to-requirements staleness (REQ-STALE-002)

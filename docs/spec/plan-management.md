@@ -1,6 +1,6 @@
 ---
-status: Approved
-last_updated: 2026-04-28
+status: Draft
+last_updated: 2026-05-25
 requires:
   - REQ-PLAN-001
   - REQ-PLAN-002
@@ -90,6 +90,13 @@ including:
 **Naming convention**: `{YYYY-MM-DD}-{reason}.md` where reason is kebab-case,
 describing why the plan was archived (e.g., `replan-api-change`, `cycle-complete`,
 `pre-v2-migration`).
+
+**Per-milestone archival**: When a project uses per-milestone plan files
+(see milestone-plans.md), completed milestone plans are archived with the
+milestone ID as part of the reason: `{date}-{milestone-id}-complete.md`
+(e.g., `2026-04-20-m1-complete.md`). The archive pattern and naming
+convention are the same — only the reason segment changes to include the
+milestone identifier.
 
 ### Archival Triggers
 
