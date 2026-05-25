@@ -226,3 +226,11 @@ directly, as in the current model.
 - [ ] `sdd-plan` creates per-milestone files and index (REQ-SKILL-014)
 - [ ] `sdd-replan` archives/revises correct milestone plan (REQ-SKILL-015)
 - [ ] `sdd-implement` uses milestone-scoped staleness (REQ-SKILL-016)
+
+## Implementation Questions
+
+### Q-IMPL-002: Per-milestone activation threshold heuristics
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Single-Milestone Fallback — "sdd-plan detects that the project scope warrants splitting"
+**Decision**: Added concrete heuristics in the skill instruction: activate per-milestone structure when chunk count exceeds ~10, plan would exceed ~300 lines, or work spans multiple distinct delivery scopes.
+**Rationale**: The spec intentionally leaves the threshold to judgment. Concrete heuristics give the operator a starting point without being rigid (the "~" prefix signals approximation). Without numbers, different sessions would apply inconsistent thresholds.

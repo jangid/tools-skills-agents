@@ -19,7 +19,9 @@ Before starting, check project state. **Compare `last_updated` dates** to detect
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or have `status: Draft` → use `sdd-specs`
 3. If no `docs/plan.md` → use `sdd-plan`
-4. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` against `last_updated` in specs, and specs against `docs/plan.md` modification date. If the plan is older than its specs, or specs are older than requirements, upstream artifacts have changed since the plan was written → use `sdd-plan` to update the plan before implementing
+4. **Staleness check**: compare `last_updated` dates to detect upstream changes:
+   - **Single-milestone plan**: compare `docs/requirements/index.md`'s `last_updated` against specs, and specs against `docs/plan.md`'s `last_updated`. If anything upstream is newer → use `sdd-plan`
+   - **Multi-milestone plan** (index + per-milestone files): apply milestone-scoped staleness — compare the active milestone plan's `last_updated` only against specs and requirement category files traced by that milestone's tasks (task → spec → `requires:` → requirement IDs → category file dates). Unrelated requirement changes don't trigger staleness. The index-level `docs/plan.md` is not subject to this check
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 4) → you're in the right place, resume
 

@@ -18,7 +18,10 @@ Before starting, check project state. **Compare `last_updated` dates** to detect
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or any has `status: Draft` → use `sdd-specs`
-3. **Staleness check**: if `docs/plan.md` exists, compare its modification date against `last_updated` in each `docs/spec/*.md` and `docs/requirements/index.md`. If any upstream artifact is newer than the plan, the plan is **stale** — it was written against older inputs and needs updating. Proceed to rewrite/update the plan regardless of task completion status
+3. **Staleness check**: if `docs/plan.md` exists, check for upstream changes:
+   - **Single-milestone plan**: compare `docs/plan.md`'s modification date against `last_updated` in each `docs/spec/*.md` and `docs/requirements/index.md`. If any upstream artifact is newer, the plan is **stale**
+   - **Multi-milestone plan** (index + per-milestone files): apply milestone-scoped staleness — for each milestone plan file, compare its `last_updated` only against specs and requirement category files traced by that milestone's tasks (task → spec → `requires:` → requirement IDs → category file dates). A change to unrelated requirements does not make the milestone plan stale
+   - Stale plans need updating. Proceed to rewrite/update regardless of task completion status
 4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 3) → use `sdd-implement`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If all specs are `Approved` and plan is missing or stale → you're in the right place
@@ -74,14 +77,38 @@ Build a dependency graph:
 
 Place `spike` tasks early — their findings may invalidate later tasks.
 
-### Step 5: Define Milestones
+### Step 5: Group into Chunks and Milestones
 
-Group tasks into milestones. Each milestone should produce a **testable system** — not just a pile of code. Good milestones:
+Group tasks into **chunks** — contiguous work units of ~5-15 hours each, marked by `### Chunk N: <name>` headers. Each chunk should have clear entry/exit criteria.
+
+Decide whether to use per-milestone plan files:
+
+- **Default: single-milestone.** Write all chunks directly to `docs/plan.md` with `### Chunk N:` headers. No `milestone:` frontmatter needed. Use this for projects with one delivery scope.
+
+- **Per-milestone activation.** Use per-milestone files when:
+  - The plan or specs explicitly define multiple delivery milestones (M1, M2, M3...), OR
+  - The total chunk count exceeds ~10, or the plan would exceed ~300 lines, or work spans multiple distinct delivery scopes
+
+When activating per-milestone structure:
+1. Create `docs/plan.md` as the index (milestone table format — see Step 7)
+2. Create `docs/plan-{milestone-id}.md` for each active milestone
+3. Add `milestone:`, `last_updated:`, and `status: planned` frontmatter to each milestone plan
+
+Each delivery milestone should produce a **testable system** — not just a pile of code. Good milestones:
 
 - M1: Project skeleton — builds, lints, type-checks with zero functionality
 - M2: Core models + first working feature end-to-end
 - M3..N: Feature groups that build on each other
 - Final: Full feature set, all acceptance criteria pass
+
+**Milestone lifecycle** (per-milestone plans only):
+
+Each milestone plan file's `status:` frontmatter transitions through:
+
+1. **planned**: `sdd-plan` creates the file. Tasks defined but not started.
+2. **active**: `sdd-implement` sets when work begins on the milestone's first task.
+3. **complete**: `sdd-implement` (or `sdd-verify`) sets when all tasks are done and verified.
+4. **archived**: The completed plan moves to `docs/plan-history/{date}-{milestone-id}-complete.md` and the index table is updated with the archive link.
 
 ### Step 6: Define Replan Triggers
 
@@ -102,7 +129,9 @@ For each spike task and any high-risk implement task, define the condition that 
 2. Copy current `docs/plan.md` to `docs/plan-history/{date}-{reason}.md` (e.g., `2026-04-27-rewrite-after-spec-update.md`)
 3. Then write the new plan
 
-Save the plan to `docs/plan.md`. Present to the user in this format:
+Save the plan to `docs/plan.md` (single-milestone) or create the index + per-milestone files (multi-milestone).
+
+**Single-milestone plan format (default):**
 
 ```markdown
 # Implementation Plan: [Project Name]
@@ -111,42 +140,57 @@ Save the plan to `docs/plan.md`. Present to the user in this format:
 One paragraph: what we're implementing and the approach.
 
 ## Conventions
-- **Tests alongside implementation**: every milestone includes tests.
 - **Task types**: [implement] produces code, [spike] produces findings, [verify] validates behavior.
-- **Parallelization**: note which milestones/tasks can run in parallel.
+- **Chunk headers**: `### Chunk N: <name>` per work unit.
 
-## Milestones
+## Chunks
 
-### M1: [Name] — [one-line description]
-**Goal**: What's testable after this milestone.
+### Chunk 0: [Name]
+**Goal**: What's testable after this chunk.
 **Tasks**:
 1. [implement] [Task description] — traces to [spec.md]
 2. [spike] [Research question, budget: 30min] — traces to [spec.md §section]
 3. [verify] [What to validate] — traces to [spec.md acceptance criteria]
-**Verify**: How to confirm this milestone is done.
+**Entry criteria**: None (first chunk).
+**Exit criteria**: [conditions].
 
-### M2: [Name] — [one-line description]
-**Depends on**: M1
-**Goal**: ...
+### Chunk 1: [Name]
 **Tasks**: ...
-**Verify**: ...
+**Entry criteria**: Chunk 0 complete.
+**Exit criteria**: ...
 
 ## Replan Triggers
 - [Condition] → [what changes in the plan]
 
 ## Completed
-- [milestone-name]: [description] (YYYY-MM-DD, N tasks)
+- [chunk/milestone name]: [description] (YYYY-MM-DD, N tasks)
 
 ## Risks
 - [Risk]: [Impact and mitigation]
-
-## Open Questions
-- Questions that surfaced during planning
 ```
 
+**Multi-milestone index format** (`docs/plan.md` when per-milestone files exist):
+
+```markdown
+# Implementation Plan: [Project Name]
+
+## Overview
+One paragraph: project scope and approach.
+
+## Milestones
+
+| ID | Name | Plan File | Status |
+|----|------|-----------|--------|
+| M1 | [name] | [archived](plan-history/2026-04-20-m1-complete.md) | Complete |
+| M2 | [name] | plan-m2.md | Active |
+| M3 | [name] | plan-m3.md | Planned |
+```
+
+Each `docs/plan-{id}.md` follows the single-milestone format above (with `### Chunk N:` headers) plus `milestone:`, `last_updated:`, and `status:` frontmatter.
+
 **Active plan format rules**:
-- Only include current and future milestones in the `## Milestones` section
-- Completed milestones are summarized as one line each in the `## Completed` section. Format: `- {name}: {description} ({date}, {task count})`
+- Only include current and future chunks in the active plan
+- Completed chunks/milestones are summarized as one line each in the `## Completed` section
 - Do NOT include a `## Plan Changelog` section in the active plan — changelog entries belong in archive files
 
 ### Planning Rules
@@ -158,15 +202,16 @@ One paragraph: what we're implementing and the approach.
 - **Don't over-plan**: if the order between two independent tasks doesn't matter, say so — let the implementor parallelize
 - **Flag unknowns**: if a task depends on something you're not sure about, mark it as a risk
 - **Verify tasks are explicit**: don't rely on "tests pass" — include specific verification tasks for complex features
+- **Chunks not milestones for work units**: use `### Chunk N: <name>` headers for implementation work units (~5-15 hours each). Reserve "milestone" for delivery groupings (M1, M2, etc.) in multi-milestone projects
 
 ### Step 8: Review
 
 Present the plan to the user. Ask:
 
-- "Does the milestone ordering make sense?"
+- "Does the chunk ordering make sense?"
 - "Are any tasks missing?"
 - "Are the replan triggers right?"
-- "Do you want to adjust scope for any milestone?"
+- "Do you want to adjust scope for any chunk or milestone?"
 
 Iterate until approved.
 
@@ -176,7 +221,7 @@ When invoked for an existing plan (e.g., after `sdd-replan` triggers):
 
 1. Note which tasks are done, in-progress, or blocked
 2. Identify what changed (spike findings, spec update, discovered blocker)
-3. Adjust remaining tasks and milestones
+3. Adjust remaining tasks, chunks, and milestones
 4. Present the updated plan — don't silently change it
 
 ## Transition

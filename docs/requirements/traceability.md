@@ -21,8 +21,8 @@ last_updated: 2026-05-25
 | REQ-PLAN-003 | plan-management.md | | | |
 | REQ-PLAN-004 | plan-management.md | | | |
 | REQ-STALE-001 | requirements-artifacts.md, skill-updates.md, overview.md | | | |
-| REQ-STALE-002 | requirements-artifacts.md, skill-updates.md | | | |
-| REQ-STALE-003 | milestone-plans.md | | | |
+| REQ-STALE-002 | requirements-artifacts.md, skill-updates.md | | sdd-requirements/SKILL.md | |
+| REQ-STALE-003 | milestone-plans.md | | sdd-plan/SKILL.md, sdd-implement/SKILL.md | |
 | REQ-MIG-001 | migration.md | | | |
 | REQ-MIG-002 | migration.md | | | |
 | REQ-MIG-003 | migration.md | | | |
@@ -42,10 +42,10 @@ last_updated: 2026-05-25
 | REQ-QIMPL-001 | deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-QIMPL-002 | deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-QIMPL-003 | deviation-protocol.md | | sdd-implement/SKILL.md | |
-| REQ-MPLAN-001 | milestone-plans.md | | | |
-| REQ-MPLAN-002 | milestone-plans.md | | | |
-| REQ-MPLAN-003 | milestone-plans.md | | | |
-| REQ-MPLAN-004 | milestone-plans.md | | | |
+| REQ-MPLAN-001 | milestone-plans.md | | sdd-plan/SKILL.md | |
+| REQ-MPLAN-002 | milestone-plans.md | | sdd-plan/SKILL.md | |
+| REQ-MPLAN-003 | milestone-plans.md | | sdd-plan/SKILL.md | |
+| REQ-MPLAN-004 | milestone-plans.md | | sdd-plan/SKILL.md | |
 | REQ-XSPEC-001 | cross-spec-consistency.md | | sdd-specs/SKILL.md | |
 | REQ-XSPEC-002 | cross-spec-consistency.md | | sdd-specs/SKILL.md | |
 | REQ-CTX-001 | overview.md | | | |
@@ -64,7 +64,7 @@ last_updated: 2026-05-25
 | REQ-SKILL-011 | skill-updates.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-012 | skill-updates.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-013 | skill-updates.md, cross-spec-consistency.md | | sdd-specs/SKILL.md | |
-| REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | | |
-| REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | | |
-| REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | | |
+| REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md | |
+| REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | sdd-replan/SKILL.md | |
+| REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | sdd-plan/SKILL.md, sdd-implement/SKILL.md | |
 | REQ-CFG-001 | overview.md, migration.md | | | |

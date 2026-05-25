@@ -21,7 +21,9 @@ Before starting, check what triggered the replan:
 2. If a spike task produced findings that contradict the plan → replan from new knowledge
 3. If the user explicitly requested changes → replan from scope change
 4. If implementation is stuck (documented in conversation) → replan from blocked state
-5. **Staleness check**: if `docs/requirements/index.md` or specs have `last_updated` dates newer than `docs/plan.md`, the plan is stale due to upstream changes → replan to align the plan with updated upstream artifacts
+5. **Staleness check**: if upstream artifacts are newer than the plan, the plan is stale → replan to align:
+   - **Single-milestone plan**: compare `docs/requirements/index.md` and specs against `docs/plan.md`
+   - **Multi-milestone plan**: apply milestone-scoped staleness — compare only against requirements and specs traced by the affected milestone's tasks
 
 Tell the user what triggered the replan and confirm before proceeding.
 
@@ -115,6 +117,23 @@ When revising `docs/plan.md`:
 ## Previous Plan Snapshot
 [Full content of plan.md at time of archive]
 ```
+
+#### Per-Milestone Replans
+
+When the project uses per-milestone plan files (`docs/plan-{id}.md`):
+
+**Single-milestone replan** (most common):
+1. Identify which milestone's plan file is affected by the replan trigger
+2. Archive only that milestone's plan file to `docs/plan-history/{date}-m{N}-replan-{reason}.md`
+3. Revise the affected milestone plan
+4. Update `docs/plan.md` index table if milestone status changes
+
+**Cross-milestone replan** (tasks moving between milestones):
+1. Archive both affected milestone plans before changes
+2. Update both milestone plan files with the task movement
+3. Update the index table to reflect current status
+
+Single-file plans continue to use the existing archival pattern above. Per-milestone logic activates only when per-milestone files exist.
 
 ### Step 5: Present and Confirm
 
