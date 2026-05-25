@@ -39,8 +39,8 @@ last_updated: 2026-05-25
 | REQ-CHKC-006 | chunk-close-review.md | | | |
 | REQ-CHKC-007 | chunk-close-review.md | | | |
 | REQ-CHKC-008 | chunk-close-review.md | | | |
-| REQ-QIMPL-001 | deviation-protocol.md | | | |
-| REQ-QIMPL-002 | deviation-protocol.md | | | |
+| REQ-QIMPL-001 | deviation-protocol.md | | sdd-implement/SKILL.md | |
+| REQ-QIMPL-002 | deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-QIMPL-003 | deviation-protocol.md | | | |
 | REQ-MPLAN-001 | milestone-plans.md | | | |
 | REQ-MPLAN-002 | milestone-plans.md | | | |
@@ -60,9 +60,9 @@ last_updated: 2026-05-25
 | REQ-SKILL-007 | skill-updates.md | | | |
 | REQ-SKILL-008 | plan-management.md, skill-updates.md | | | |
 | REQ-SKILL-009 | skill-updates.md, chunk-close-review.md | | | |
-| REQ-SKILL-010 | skill-updates.md, deviation-protocol.md | | | |
-| REQ-SKILL-011 | skill-updates.md | | | |
-| REQ-SKILL-012 | skill-updates.md | | | |
+| REQ-SKILL-010 | skill-updates.md, deviation-protocol.md | | sdd-implement/SKILL.md | |
+| REQ-SKILL-011 | skill-updates.md | | sdd-implement/SKILL.md | |
+| REQ-SKILL-012 | skill-updates.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-013 | skill-updates.md, cross-spec-consistency.md | | | |
 | REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | | |
 | REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | | |

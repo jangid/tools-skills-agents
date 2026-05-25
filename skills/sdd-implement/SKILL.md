@@ -38,11 +38,11 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 
 ### Step 1: Load Context
 
+0. **Read `CLAUDE.md` first (if present).** Project conventions in `CLAUDE.md` take precedence over generic patterns when choosing libraries, coding patterns, or project structure. The file may not exist — that's normal — but when it does, its conventions override defaults you might otherwise apply.
 1. Read `docs/plan.md` — identify the current milestone and next task
 2. Read the relevant spec sections for the current task
 3. Read `docs/requirements/{category}/*.md` for requirement context when needed
-4. Read `CLAUDE.md` for project conventions
-5. Identify which milestone you're starting from (ask if unclear)
+4. Identify which milestone you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
@@ -68,6 +68,12 @@ For each task, follow the process based on its type:
 5. **Check replan triggers** — did findings invalidate any plan assumptions?
 6. If replan triggered → stop implementation, invoke `sdd-replan`
 7. If no replan needed → mark done, proceed to next task
+
+**Spike code separation:**
+
+- Spike findings (decisions, learnings, recommendations) go to `docs/spikes/{topic}.md`.
+- Throwaway spike code (proofs of concept, exploratory scripts) goes to `scripts/spike_*` with a docstring noting it is throwaway.
+- Production code for the same functionality must be written fresh against the spec, not adapted from spike code. Spike code is optimized for speed of learning; adapting it imports shortcuts and assumptions the spec's design may have deliberately avoided.
 
 #### [verify] tasks — Beyond Unit Tests
 
@@ -157,6 +163,53 @@ When all milestones are done:
 - **No gold-plating**: implement what the spec says. Don't add features, abstractions, or "nice to haves" that aren't in the spec
 - **Stuck means stop**: if you're stuck, replan. Don't burn cycles on a broken approach
 - **Spike budget is real**: when a spike task exceeds its budget, stop and report findings so far
+
+## Q-IMPL Deviation Protocol
+
+When implementation deviates from spec, classify the deviation and respond accordingly. See `docs/spec/deviation-protocol.md` for full design rationale.
+
+### Tier 1: Implementation choice
+
+Internal decisions that don't affect the spec's public contract — helper naming, internal data structure selection, import organization, private method decomposition.
+
+**Response:** No documentation required. Commit normally.
+
+### Tier 2: Spec ambiguity
+
+The spec didn't anticipate the situation. The implementation must make a decision, but the decision doesn't change the spec's public interface.
+
+**Response:**
+1. Add a Q-IMPL entry to the relevant spec's `## Implementation Questions` section (format below).
+2. Continue implementing with the chosen approach.
+
+### Tier 3: Contract change
+
+The spec's public interface must change — a type needs renaming, a field needs adding, an API contract needs revision.
+
+**Response:**
+1. Stop the current task.
+2. Escalate to the operator.
+3. The operator decides: edit the spec via `sdd-specs` and get re-approved, or trigger `sdd-replan` at Level 2 (spec gap). Q-IMPL classifies the deviation; replan handles the response.
+
+### Q-IMPL Entry Format
+
+Entries live in an `## Implementation Questions` section at the bottom of the relevant spec file:
+
+```markdown
+### Q-IMPL-NNN: <short topic>
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §<section name or quote>
+**Decision**: <what you chose>
+**Rationale**: <why; or **Impact** for changes affecting other components>
+```
+
+Required fields: question ID, tier, decision, and rationale (or impact for tier 2+ entries).
+
+### Numbering Rules
+
+- Global sequential across all specs in the project: `Q-IMPL-001`, `Q-IMPL-002`, ...
+- To find the next number, scan all spec files' `## Implementation Questions` sections and increment from the highest existing.
+- Append-only: retired entries stay in their spec with a `[superseded by Q-IMPL-NNN]` status note, not deleted or renumbered.
 
 ## Transition
 
