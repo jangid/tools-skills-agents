@@ -1,5 +1,5 @@
 ---
-version: "4.0"
+version: "5.0"
 last_updated: 2026-05-25
 traceability: traceability.md
 ---
@@ -20,6 +20,9 @@ tools-skills-agents repository. Covers three scopes:
 3. **v3 migration** (RS-003): Migration path from v2 to v3 — plan vocabulary
    rename, version marker update, backward compatibility, documentation
    consistency.
+4. **External review** (RS-004): Formal sdd-review skill for structured
+   out-of-session review at phase boundaries — phase detection, report
+   format, session isolation, scope-completeness checking.
 
 ## Stakeholders
 
@@ -39,8 +42,9 @@ tools-skills-agents repository. Covers three scopes:
 | functional | [deviation-protocol.md](functional/deviation-protocol.md) | QIMPL | REQ-QIMPL-001..003 | Approved | 2026-05-25 |
 | functional | [milestone-plans.md](functional/milestone-plans.md) | MPLAN | REQ-MPLAN-001..004 | Approved | 2026-05-25 |
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
+| functional | [review.md](functional/review.md) | REV | REQ-REV-001..008 | Approved | 2026-05-25 |
 | non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
-| integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..017 | Approved | 2026-05-25 |
+| integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..018 | Approved | 2026-05-25 |
 | configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
 
 ## Domain Prefixes
@@ -56,12 +60,28 @@ tools-skills-agents repository. Covers three scopes:
 | QIMPL | Q-IMPL Deviation Protocol | functional/deviation-protocol.md |
 | MPLAN | Milestone Plan Iteration | functional/milestone-plans.md |
 | XSPEC | Cross-Spec Consistency | functional/cross-spec-consistency.md |
+| REV | External Review | functional/review.md |
 | CTX | AI Context Budget | non-functional/context-and-compatibility.md |
 | COMPAT | Git Compatibility | non-functional/context-and-compatibility.md |
 | SKILL | Skill Updates | integration/skill-updates.md |
 | CFG | Configuration | configuration/version-marker.md |
 
 ## Q-REQ Resolutions
+
+Resolved during requirements gathering for RS-004:
+
+- **Q-REQ-A** (scope-completeness placement): Separate requirement
+  (REQ-REV-008). F2's root-cause finding is cross-cutting — folding it
+  into phase checklists risks the lesson being lost. Dedicated requirement
+  makes the concern visible.
+- **Q-REQ-B** (review persistence): Locked down as non-persistent.
+  Reviews are transient working artifacts; decisions land in the artifacts
+  themselves (commits, Q-IMPL entries, replan triggers). No `docs/reviews/`
+  directory.
+- **Q-REQ-C** (session isolation enforcement): Combined approach. Skill
+  includes confirmation prompt as opening step; actual isolation is operator
+  responsibility. Claude cannot reliably detect its own context
+  contamination.
 
 Resolved during requirements gathering for RS-003:
 
@@ -93,9 +113,11 @@ Resolved during requirements gathering for RS-002:
 
 - Code changes to skills (implementation phase)
 - Redesigning the broader SDD methodology
-- New skills not derived from RS-002 or RS-003
-- External review as a formal skill (`sdd-review`)
+- New skills not derived from RS-002, RS-003, or RS-004
 - Forward planning to v4
+- Cross-project review (sdd-review operates on one SDD project at a time)
+- Review automation or auto-triggering
+- Review of sdd-review's own output (recursive case deferred)
 
 ## Open Questions
 
@@ -106,6 +128,7 @@ None — all Q-REQ items resolved.
 - [RS-001: SDD Artifact Structure](../research/RS-001-sdd-artifact-structure/findings.md)
 - [RS-002: SDD Skill Improvements](../research/RS-002-skill-improvements/findings.md)
 - [RS-003: v3 Migration Path](../research/RS-003-v3-migration/findings.md)
+- [RS-004: sdd-review Skill Design](../research/RS-004-sdd-review/findings.md)
 
 ## See Also
 

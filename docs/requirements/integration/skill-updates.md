@@ -2,7 +2,7 @@
 domain: SKILL
 last_updated: 2026-05-25
 status: Approved
-research_refs: [RS-003]
+research_refs: [RS-003, RS-004]
 ---
 
 # Requirements: Skill Updates
@@ -120,4 +120,14 @@ REQ-MIG-014): version detection for v3, plan vocabulary rename, optional
 multi-milestone split, capability report, v1→v3 sequential composition, and
 finalization. The existing v1→v2 logic must remain unchanged.
 (see RS-003)
+[Priority: must]
+
+### REQ-SKILL-018: sdd-review skill
+A new `sdd-review` skill must be created at `skills/sdd-review/SKILL.md`
+implementing the external review requirements (REQ-REV-001 through
+REQ-REV-008): phase detection with phase-specific checklists, structured
+report format, required inputs specification, bias disclosure, trigger
+classification, scope boundaries against chunk-close/XSPEC/sdd-verify,
+session-isolation confirmation, and scope-completeness checking.
+(see RS-004)
 [Priority: must]
