@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-XSPEC-001
@@ -57,7 +57,7 @@ defined in a different spec. The reading pass identifies these by:
    (fenced with `` ``` ``) for type definitions:
    - Class declarations: `class Foo` or `class Foo(Base)`
    - Enum declarations: `class Foo(Enum)` or `class Foo(StrEnum)`
-   - Type alias patterns: `Foo = ...`
+   - Type alias patterns: `Foo: TypeAlias = Bar` or `Foo = NewType("Foo", Bar)`
 
 2. **Build a type-to-spec map**: `{TypeName: spec-file.md}` across all
    specs. Flag duplicates (same type defined in multiple specs) as findings.

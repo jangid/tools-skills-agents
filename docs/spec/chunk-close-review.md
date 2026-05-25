@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-CHKC-001
@@ -247,7 +247,8 @@ is more granular and runs more frequently.
 
 ### Acceptance Criteria
 - [ ] Chunk close checkpoint runs after all tasks in a chunk (REQ-CHKC-001)
-- [ ] Type alignment check extracts classes, fields, and enums from spec code blocks (REQ-CHKC-002)
+- [ ] Type alignment check extracts class names and field names from spec code blocks (REQ-CHKC-002 a, b)
+- [ ] Type alignment check extracts enum value lists from spec code blocks (REQ-CHKC-002 c)
 - [ ] Traceability check verifies Test and Implementation columns (REQ-CHKC-003)
 - [ ] Test coverage check verifies at least one test file per spec (REQ-CHKC-004)
 - [ ] Q-IMPL audit flags undocumented deviations (REQ-CHKC-005)

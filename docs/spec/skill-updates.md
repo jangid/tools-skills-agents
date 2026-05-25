@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-SKILL-001
@@ -214,10 +214,12 @@ present) as the first item in its context loading step. Project conventions
 from `CLAUDE.md` take precedence over generic patterns when choosing
 libraries, coding patterns, and project structure.
 
-**Why must, not should**: `CLAUDE.md` carries project-specific conventions
-that override generic skill behavior (e.g., preferred test framework,
-import style, error handling approach). Missing these conventions leads to
-rework when the operator corrects the style.
+**Why must, not should**: The skill *must* instruct the implementer to read
+`CLAUDE.md` when present. If absent, the skill proceeds normally. The "must"
+is about the skill's behavior, not about requiring `CLAUDE.md` to exist.
+Project-specific conventions override generic skill behavior (e.g., preferred
+test framework, import style, error handling approach). Missing these
+conventions leads to rework when the operator corrects the style.
 
 #### Cross-Spec Consistency in sdd-specs (REQ-SKILL-013)
 

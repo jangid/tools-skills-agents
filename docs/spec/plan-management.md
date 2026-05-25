@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-PLAN-001
@@ -23,6 +23,10 @@ becomes hard to navigate.
 v2 introduces an archive pattern: the active plan stays lean, and history moves
 to `docs/plan-history/`.
 
+This spec covers single-milestone projects. For multi-milestone projects,
+`docs/plan.md` becomes an index of milestone plans per milestone-plans.md,
+which extends this design.
+
 ## Design
 
 ### Active Plan Structure
@@ -38,17 +42,17 @@ One paragraph: what we're implementing and the approach.
 ## Conventions
 ...
 
-## Milestones
+## Chunks
 
-### M3: [Name] — [one-line description]
+### Chunk 3: [Name] — [one-line description]
 **Goal**: ...
 **Tasks**:
 1. [implement] ... — traces to [spec.md]
 2. [verify] ... — traces to [spec.md]
 **Verify**: ...
 
-### M4: [Name] — [one-line description]
-**Depends on**: M3
+### Chunk 4: [Name] — [one-line description]
+**Depends on**: Chunk 3
 ...
 
 ## Replan Triggers
@@ -58,19 +62,23 @@ One paragraph: what we're implementing and the approach.
 - [Risk]: [Impact and mitigation]
 
 ## Completed
-- M1: Project skeleton (2026-04-20, 3 tasks)
-- M2: Core models + first feature (2026-04-25, 5 tasks)
+- Chunk 0: Repo bootstrap (2026-04-20, 3 tasks)
+- Chunk 1: Core models (2026-04-22, 4 tasks)
+- Chunk 2: First feature (2026-04-25, 5 tasks)
 ```
 
 **Key differences from v1**:
-- The `## Completed` section contains one-line summaries, not full milestone
-  details. Format: `- {name}: {description} ({date}, {task count})`.
+- The `## Completed` section contains one-line summaries, not full chunk
+  details. Format: `- Chunk N: {description} ({date}, {task count})`.
 - No `## Plan Changelog` section — changelogs live in archive files.
 - No `[removed: reason]` markers — removed tasks are moved to the archive.
+- Multi-milestone projects archive whole milestone plans to `plan-history/`
+  per milestone-plans.md rather than summarizing completed milestones here.
 
 **Why summarize instead of remove entirely**: The one-line summaries provide
-context for milestone dependencies ("M3 depends on M1" is meaningful only if
-you can see what M1 was). A single line per milestone adds negligible size.
+context for chunk dependencies ("Chunk 4 depends on Chunk 3" is meaningful
+only if you can see what Chunk 3 was). A single line per chunk adds
+negligible size.
 
 ### Plan History
 
@@ -83,7 +91,7 @@ docs/plan-history/
 
 Archive files are complete snapshots of the plan at the time of archival,
 including:
-- All milestones (completed and pending at that time)
+- All chunks (completed and pending at that time)
 - Task completion status
 - The changelog entry that triggered the archival
 
@@ -107,17 +115,17 @@ The active plan is archived before these operations:
    `{date}-stale-rewrite.md` before creating the new one.
 
 2. **Significant replan** (`sdd-replan`): When replanning changes more than
-   task reordering — adding/removing milestones, changing approach. Archive as
+   task reordering — adding/removing chunks, changing approach. Archive as
    `{date}-replan-{reason}.md`. Minor replans (reordering tasks within a
-   milestone) do not trigger archival.
+   chunk) do not trigger archival.
 
 3. **Cycle completion** (`sdd-verify`): When verification passes and the cycle
    is complete, the plan becomes historical. Archive as
    `{date}-cycle-complete.md`.
 
-**What counts as "significant"**: If the replan adds or removes milestones, or
+**What counts as "significant"**: If the replan adds or removes chunks, or
 changes the approach described in the Overview section, it's significant.
-Task-level changes within existing milestones are minor.
+Task-level changes within existing chunks are minor.
 
 ### Replan Behavior Changes
 
@@ -129,7 +137,7 @@ When `sdd-replan` revises the plan:
 3. In both cases:
    - Removed tasks go to the archive file, not marked inline.
    - Changelog entries go to the archive file, not appended to the active plan.
-   - Completed milestone summaries are preserved in the `## Completed` section.
+   - Completed chunk summaries are preserved in the `## Completed` section.
 
 ### Interaction with Staleness Detection
 
@@ -146,7 +154,7 @@ spec). When the plan is stale:
 ### Automated
 - Validate `docs/plan.md` contains no `## Plan Changelog` section
 - Validate `docs/plan.md` contains no `[removed: ...]` markers
-- Validate completed milestones are single-line summaries
+- Validate completed chunks are single-line summaries
 - Validate `docs/plan-history/` files follow the naming convention
 
 ### Manual
@@ -154,8 +162,8 @@ spec). When the plan is stale:
 - After a cycle, confirm the archive captures the final plan state
 
 ### Acceptance Criteria
-- [ ] Active plan contains only current/future milestones (REQ-PLAN-001)
-- [ ] Completed milestones are one-line summaries (REQ-PLAN-001)
+- [ ] Active plan contains only current/future chunks (REQ-PLAN-001)
+- [ ] Completed chunks are one-line summaries (REQ-PLAN-001)
 - [ ] Plan is archived before rewrite or significant replan (REQ-PLAN-002)
 - [ ] Archive files use `{YYYY-MM-DD}-{reason}.md` naming (REQ-PLAN-002)
 - [ ] Changelogs are written to archive only (REQ-PLAN-003)

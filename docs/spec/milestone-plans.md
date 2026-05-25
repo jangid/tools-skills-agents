@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-MPLAN-001
