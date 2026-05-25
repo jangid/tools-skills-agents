@@ -42,7 +42,7 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 1. Read `docs/plan.md` — identify the current milestone and next task
 2. Read the relevant spec sections for the current task
 3. Read `docs/requirements/{category}/*.md` for requirement context when needed
-4. Identify which milestone you're starting from (ask if unclear)
+4. Identify which chunk you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
@@ -50,7 +50,7 @@ For each task, follow the process based on its type:
 
 #### [implement] tasks — TDD Inner Loop
 
-1. **Read the relevant spec section** before writing any code
+1. **Read the relevant spec section** before writing any code. Check the spec's `## Implementation Questions` section for existing Q-IMPL entries — these show how prior ambiguities were resolved and prevent contradictory choices
 2. **Write a failing test** that captures what the spec requires
 3. **Run the test** — confirm it fails (red)
 4. **Write minimal code** to make the test pass
@@ -109,48 +109,96 @@ When stuck:
 3. **Assess**: is this a spec gap, a plan ordering issue, or a research question?
 4. **Recommend**: invoke `sdd-replan` with the stuck context
 
-### Step 4: Milestone Checkpoints
+### Step 4: Chunk Close Review
 
-At each milestone boundary:
+A **chunk** is a contiguous group of tasks in the plan marked by an explicit `### Chunk N: <name>` header. Chunks are implementation work units (~5-15 hours each), distinct from **delivery milestones** (M1, M2, etc. — see Step 5).
+
+At each `### Chunk N:` boundary, run the chunk close checklist:
+
+1. Complete all tasks in the chunk
+2. Run per-task verification (build + lint + type-check + tests)
+3. Run the four checks below
+4. Present the chunk close report to the operator
+5. Resolve all blocking findings
+6. Record advisory overrides with rationale
+7. Mark the chunk closed; proceed to the next
+
+#### Check 1: Spec-Implementation Type Alignment (BLOCKING)
+
+For each spec referenced by the chunk's tasks, extract from code blocks:
+- (a) Class names — `class Foo` or `class Foo(Base)` declarations
+- (b) Field names — `field_name: Type` lines within class bodies
+- (c) Enum value lists — `VALUE = "literal"` lines in enum classes
+
+Grep the implementation tree for matching definitions. Report as findings:
+- Class in spec but not impl
+- Field name mismatch (present in spec, absent or renamed in impl)
+- Enum value differences between spec and impl
+
+Findings BLOCK chunk close. Fix by editing implementation, updating the spec, or documenting via Q-IMPL.
+
+#### Check 2: Traceability Matrix Update (BLOCKING)
+
+For each requirement covered by this chunk (identified via task → spec `requires:` → requirement IDs), verify `docs/requirements/traceability.md` has:
+- Test column populated (tests written during TDD)
+- Implementation column populated (code module path)
+
+Empty columns BLOCK chunk close. Fill them before proceeding.
+
+#### Check 3: Test Coverage Per Spec (ADVISORY)
+
+For each spec referenced by the chunk's tasks, identify the expected implementation module and search for test files that import from it. Specs with zero test imports are flagged.
+
+Advisory — the operator may override with rationale (e.g., "tested via integration test in `test_e2e.py`" or "verification task in next chunk").
+
+#### Check 4: Q-IMPL Audit (ADVISORY)
+
+Review the chunk's implementation for decisions that deviated from spec (different parameter, additional field, renamed type, different algorithm). For each, check the relevant spec's `## Implementation Questions` section for a corresponding Q-IMPL entry.
+
+Undocumented deviations are flagged. The operator may override if the deviation is trivially obvious. Otherwise, add the missing Q-IMPL entry per the protocol (see § Q-IMPL Deviation Protocol).
+
+#### Tiered Enforcement
+
+| Check | Severity | On failure |
+|-------|----------|------------|
+| 1: Type alignment | Blocking | Fix before closing chunk |
+| 2: Traceability | Blocking | Fill before closing chunk |
+| 3: Test coverage | Advisory | Override with written rationale |
+| 4: Q-IMPL audit | Advisory | Override with written rationale |
+
+#### Chunk Close Report
+
+After running all four checks, present a structured report:
+
+```
+Chunk N Close Report
+- Check 1 (Type Alignment): pass | block — [findings]
+- Check 2 (Traceability): pass | block — [findings]
+- Check 3 (Test Coverage): pass | advisory — [findings + override rationale]
+- Check 4 (Q-IMPL Audit): pass | advisory — [findings + override rationale]
+- Blocking: N remaining
+- Advisory: N overridden
+- Chunk N: CLOSED | BLOCKED
+```
+
+The report is presented inline — not persisted as a separate file. The traceability matrix updates and Q-IMPL entries are the durable artifacts.
+
+### Step 5: Milestone Checkpoints
+
+At each delivery milestone boundary (M1, M2, etc.):
 
 1. **Run full verification**: build + lint + type-check + test suite
 2. **Check acceptance criteria** from all specs covered by this milestone
 3. **Report to the user**: what's done, what passed, what failed
 4. **Get approval** before proceeding to the next milestone
 
-```
-Milestone M2 complete.
-- Tasks done: 4/4 (3 implement, 1 spike)
-- Build: pass
-- Types: pass
-- Lint: pass
-- Tests: 12 pass, 0 fail
-- Spike findings: OAuth2 works as expected, no replan needed
-- Acceptance criteria: all met for exchanges.md, providers.md
-Proceed to M3?
-```
-
-### Step 5: Handle Spec Gaps
-
-When implementation reveals something the spec didn't cover:
-
-1. **Stop implementing** the affected part
-2. **Describe the gap** to the user: "The spec says X, but I need to handle Y which isn't addressed"
-3. **Propose options** if you have them
-4. **Wait for the user** to decide: update the spec, adjust the approach, or defer
-
-Do NOT:
-- Silently add behavior the spec doesn't describe
-- Assume the spec "probably meant" something
-- Skip verification because "it's obvious"
-
 ### Step 6: Completion
 
-When all milestones are done:
+When the plan is complete:
 
 1. Run the full verification suite one final time
 2. Walk through every spec's acceptance criteria — confirm each one passes
-3. List any spec gaps that were discovered and how they were resolved
+3. List any spec gaps that were discovered and how they were resolved (Q-IMPL entries)
 4. Recommend invoking `sdd-verify` for holistic validation
 
 ## Rules
@@ -159,14 +207,15 @@ When all milestones are done:
 - **Plan is the order**: follow the task order unless you have a concrete reason to deviate (dependency issue, blocker). If you reorder, tell the user why
 - **TDD is not optional**: write the test first. If you catch yourself writing implementation before a test, stop and write the test
 - **Tests are not optional**: if the spec has acceptance criteria, there must be tests that verify them
-- **Small commits**: commit at logical boundaries (per-task or per-subtask), not per-milestone
+- **Small commits**: commit at logical boundaries (per-task or per-subtask), not per-chunk
 - **No gold-plating**: implement what the spec says. Don't add features, abstractions, or "nice to haves" that aren't in the spec
+- **No silent spec interpretation**: don't silently add behavior the spec doesn't describe, don't assume the spec "probably meant" something, don't skip verification because "it's obvious" — use the Q-IMPL protocol instead
 - **Stuck means stop**: if you're stuck, replan. Don't burn cycles on a broken approach
 - **Spike budget is real**: when a spike task exceeds its budget, stop and report findings so far
 
 ## Q-IMPL Deviation Protocol
 
-When implementation deviates from spec, classify the deviation and respond accordingly. See `docs/spec/deviation-protocol.md` for full design rationale.
+When implementation deviates from spec — including spec gaps discovered during implementation — classify the deviation and respond accordingly. See `docs/spec/deviation-protocol.md` for full design rationale.
 
 ### Tier 1: Implementation choice
 

@@ -255,3 +255,11 @@ is more granular and runs more frequently.
 - [ ] Type alignment and traceability are blocking; test coverage and Q-IMPL are advisory (REQ-CHKC-006)
 - [ ] Chunk close report lists each check with status and findings (REQ-CHKC-007)
 - [ ] Chunks are identified by `### Chunk N: <name>` headers in the plan (REQ-CHKC-008)
+
+## Implementation Questions
+
+### Q-IMPL-001: Step 5 (Handle Spec Gaps) folded into Q-IMPL Protocol
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Integration with sdd-implement, step 8 ("Proceed to chunk N+1")
+**Decision**: Removed the former Step 5 (Handle Spec Gaps) entirely. Q-IMPL Tier 3 covers spec gaps with more structure (stop, escalate, classify). The "Do NOT" rules (no silent additions, no assumptions, no verification skipping) were folded into sdd-implement's Rules section.
+**Impact**: Step numbering cascade adjusted — Step 5 is now Milestone Checkpoints, Step 6 is Completion.

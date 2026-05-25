@@ -31,17 +31,17 @@ last_updated: 2026-05-25
 | REQ-MIG-006 | migration.md | | | |
 | REQ-MIG-007 | migration.md | | | |
 | REQ-MIG-008 | migration.md | | | |
-| REQ-CHKC-001 | chunk-close-review.md | | | |
-| REQ-CHKC-002 | chunk-close-review.md | | | |
-| REQ-CHKC-003 | chunk-close-review.md | | | |
-| REQ-CHKC-004 | chunk-close-review.md | | | |
-| REQ-CHKC-005 | chunk-close-review.md | | | |
-| REQ-CHKC-006 | chunk-close-review.md | | | |
-| REQ-CHKC-007 | chunk-close-review.md | | | |
-| REQ-CHKC-008 | chunk-close-review.md | | | |
+| REQ-CHKC-001 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-002 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-003 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-004 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-005 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-006 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-007 | chunk-close-review.md | | sdd-implement/SKILL.md | |
+| REQ-CHKC-008 | chunk-close-review.md | | sdd-implement/SKILL.md | |
 | REQ-QIMPL-001 | deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-QIMPL-002 | deviation-protocol.md | | sdd-implement/SKILL.md | |
-| REQ-QIMPL-003 | deviation-protocol.md | | | |
+| REQ-QIMPL-003 | deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-MPLAN-001 | milestone-plans.md | | | |
 | REQ-MPLAN-002 | milestone-plans.md | | | |
 | REQ-MPLAN-003 | milestone-plans.md | | | |
