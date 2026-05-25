@@ -11,6 +11,10 @@ description: >
 
 You are performing holistic verification of a completed implementation. Your job is to confirm that the system works correctly from every angle — not just that tests pass.
 
+## Verification Layers
+
+`sdd-verify` is one of four verification layers in the SDD workflow. The others are: chunk-close (mechanical, in-session, per-chunk), XSPEC (structural, in-session, during sdd-specs), and sdd-review (semantic, out-of-session, at phase boundaries). sdd-verify is the holistic in-session pass at end of project. If you find this skill's scope crossing into another layer's territory, refer to that layer's skill or spec.
+
 ## Phase Detection
 
 Before starting, check project state. **Compare dates** to detect stale artifacts:
