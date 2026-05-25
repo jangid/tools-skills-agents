@@ -1,7 +1,7 @@
 ---
 domain: CHKC
 last_updated: 2026-05-25
-status: Draft
+status: Approved
 ---
 
 # Requirements: Chunk-Close Review

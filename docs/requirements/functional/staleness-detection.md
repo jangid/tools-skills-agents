@@ -1,7 +1,7 @@
 ---
 domain: STALE
 last_updated: 2026-05-25
-status: Draft
+status: Approved
 ---
 
 # Requirements: Staleness Detection
