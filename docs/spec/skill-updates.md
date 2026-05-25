@@ -20,6 +20,8 @@ requires:
   - REQ-SKILL-016
   - REQ-STALE-001
   - REQ-STALE-002
+  - REQ-SKILL-017
+  - REQ-SKILL-018
 ---
 
 # Skill Updates
@@ -255,6 +257,16 @@ user decides whether the new research affects requirements. This check is
 already specified in requirements-artifacts.md §Staleness Detection but is
 traced here for completeness.
 
+#### sdd-review Skill (REQ-SKILL-018)
+
+A new skill `skills/sdd-review/SKILL.md` implements the external review
+mechanism described in review.md. The skill is phase-agnostic (per
+REQ-REV-001) and must include the session-isolation prompt as its opening
+step (per REQ-REV-007). The skill operates out-of-session — it provides
+checklists and report structure for a reviewer in a separate Claude
+session, not in the working session. Target size: ~200-250 lines,
+comparable to sdd-verify.
+
 ### sdd-verify
 
 **Current behavior**: Reads all artifacts, writes `docs/verification.md`.
@@ -336,3 +348,5 @@ logic, and rules (minimize disruption, preserve history, cascade awareness).
 - [ ] Plan skills implement milestone-scoped staleness (REQ-SKILL-016)
 - [ ] All skills use `index.md` for staleness detection (REQ-STALE-001)
 - [ ] `sdd-requirements` detects research-to-requirements staleness (REQ-STALE-002)
+- [ ] `sdd-migrate` implements v2→v3 migration steps (REQ-SKILL-017)
+- [ ] `sdd-review` skill exists with session isolation, phase checklists, report format (REQ-SKILL-018)

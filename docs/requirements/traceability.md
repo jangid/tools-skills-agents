@@ -77,12 +77,12 @@ last_updated: 2026-05-25
 | REQ-MIG-013 | migration.md | | sdd-migrate/SKILL.md | pass |
 | REQ-MIG-014 | migration.md | | sdd-migrate/SKILL.md | pass |
 | REQ-MIG-015 | overview.md | | overview.md (spec) | pass |
-| REQ-REV-001 | | | | |
-| REQ-REV-002 | | | | |
-| REQ-REV-003 | | | | |
-| REQ-REV-004 | | | | |
-| REQ-REV-005 | | | | |
-| REQ-REV-006 | | | | |
-| REQ-REV-007 | | | | |
-| REQ-REV-008 | | | | |
-| REQ-SKILL-018 | | | | |
+| REQ-REV-001 | review.md | | | |
+| REQ-REV-002 | review.md | | | |
+| REQ-REV-003 | review.md | | | |
+| REQ-REV-004 | review.md | | | |
+| REQ-REV-005 | review.md | | | |
+| REQ-REV-006 | review.md | | | |
+| REQ-REV-007 | review.md | | | |
+| REQ-REV-008 | review.md | | | |
+| REQ-SKILL-018 | skill-updates.md, review.md | | | |
