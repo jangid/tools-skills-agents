@@ -149,6 +149,37 @@ When the user requests changes:
 2. Update `last_updated`
 3. Keep status as `Under Review` until the user approves
 
+### Step 4b: Cross-Spec Consistency Pass
+
+After all specs are individually reviewed and approved (Step 4) and before the coverage check (Step 5), run a cross-spec consistency pass to catch type reference mismatches between specs.
+
+This validates that when one spec references a type defined in another spec, the type exists with the expected fields. Catches the failure mode where spec A says "match by `contract_id`" but spec B's type doesn't include that field.
+
+**Process:**
+
+1. **Extract type definitions** from each spec's code blocks:
+   - Class declarations: `class Foo` or `class Foo(Base)`
+   - Enum declarations: `class Foo(Enum)` or `class Foo(StrEnum)`
+   - Type alias patterns: `Foo: TypeAlias = Bar` or `Foo = NewType("Foo", Bar)` only — bare `Foo = ...` is excluded to avoid noise on TypeVar/generic declarations
+
+2. **Build a type-to-spec map**: `{TypeName: spec-file.md}` across all specs. Flag duplicates (same type defined in multiple specs) as findings.
+
+3. **Scan for cross-spec references**: For each spec, search prose and code blocks for type names defined in other specs. A reference is any mention outside the defining spec.
+
+4. **Validate each reference**:
+   - Type exists in target spec? If not → finding
+   - Expected fields present? If the referencing spec mentions specific fields of the type, verify those fields exist in the target spec's definition → finding if missing
+   - Field name consistency? Same conceptual field with different names across specs → finding
+
+**Findings policy:** Flag-only, no auto-fix. Cross-spec mismatches typically have multiple valid resolutions (the referencing spec might be wrong, the defining spec might be incomplete, the types might need restructuring). Present findings to the operator with the referencing spec, target spec, and what's missing or inconsistent. The operator resolves each finding by editing the relevant spec(s) and re-running the pass until clean.
+
+**Scope limits:**
+- Type names only — semantic meaning isn't validated
+- Code blocks only — types described in prose without a code definition aren't picked up
+- No transitive checking — A→B is validated; if B references C, that's checked when processing B
+
+See `docs/spec/cross-spec-consistency.md` for full design rationale and edge cases.
+
 ### Step 5: Coverage Check
 
 After all specs are written, read `docs/requirements/traceability.md` and verify:

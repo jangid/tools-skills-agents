@@ -46,8 +46,8 @@ last_updated: 2026-05-25
 | REQ-MPLAN-002 | milestone-plans.md | | | |
 | REQ-MPLAN-003 | milestone-plans.md | | | |
 | REQ-MPLAN-004 | milestone-plans.md | | | |
-| REQ-XSPEC-001 | cross-spec-consistency.md | | | |
-| REQ-XSPEC-002 | cross-spec-consistency.md | | | |
+| REQ-XSPEC-001 | cross-spec-consistency.md | | sdd-specs/SKILL.md | |
+| REQ-XSPEC-002 | cross-spec-consistency.md | | sdd-specs/SKILL.md | |
 | REQ-CTX-001 | overview.md | | | |
 | REQ-CTX-002 | overview.md | | | |
 | REQ-COMPAT-001 | overview.md | | | |
@@ -63,7 +63,7 @@ last_updated: 2026-05-25
 | REQ-SKILL-010 | skill-updates.md, deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-011 | skill-updates.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-012 | skill-updates.md | | sdd-implement/SKILL.md | |
-| REQ-SKILL-013 | skill-updates.md, cross-spec-consistency.md | | | |
+| REQ-SKILL-013 | skill-updates.md, cross-spec-consistency.md | | sdd-specs/SKILL.md | |
 | REQ-SKILL-014 | skill-updates.md, milestone-plans.md | | | |
 | REQ-SKILL-015 | skill-updates.md, milestone-plans.md | | | |
 | REQ-SKILL-016 | skill-updates.md, milestone-plans.md | | | |
