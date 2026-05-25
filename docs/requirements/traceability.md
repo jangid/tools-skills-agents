@@ -38,6 +38,7 @@ last_updated: 2026-05-25
 | REQ-CHKC-005 | | | | |
 | REQ-CHKC-006 | | | | |
 | REQ-CHKC-007 | | | | |
+| REQ-CHKC-008 | | | | |
 | REQ-QIMPL-001 | | | | |
 | REQ-QIMPL-002 | | | | |
 | REQ-QIMPL-003 | | | | |

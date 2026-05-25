@@ -26,5 +26,6 @@ For each cross-spec type reference identified in REQ-XSPEC-001, the reading
 pass must verify that the referenced type exists in the target spec with the
 expected fields. Mismatches (missing type, missing field, field name
 discrepancy) must be flagged to the operator before specs are marked
-Approved.
+Approved. Flag only — no auto-fix. Cross-spec mismatches typically have
+multiple valid resolutions and require operator judgment.
 [Priority: must]

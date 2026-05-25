@@ -32,7 +32,7 @@ tools-skills-agents repository. Covers two scopes:
 | functional | [plan-management.md](functional/plan-management.md) | PLAN | REQ-PLAN-001..004 | Approved | 2026-04-28 |
 | functional | [staleness-detection.md](functional/staleness-detection.md) | STALE | REQ-STALE-001..003 | Draft | 2026-05-25 |
 | functional | [migration.md](functional/migration.md) | MIG | REQ-MIG-001..008 | Approved | 2026-04-28 |
-| functional | [chunk-close.md](functional/chunk-close.md) | CHKC | REQ-CHKC-001..007 | Draft | 2026-05-25 |
+| functional | [chunk-close.md](functional/chunk-close.md) | CHKC | REQ-CHKC-001..008 | Draft | 2026-05-25 |
 | functional | [deviation-protocol.md](functional/deviation-protocol.md) | QIMPL | REQ-QIMPL-001..003 | Draft | 2026-05-25 |
 | functional | [milestone-plans.md](functional/milestone-plans.md) | MPLAN | REQ-MPLAN-001..004 | Draft | 2026-05-25 |
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Draft | 2026-05-25 |

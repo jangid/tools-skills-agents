@@ -61,9 +61,12 @@ active plan.
 [Priority: must]
 
 ### REQ-SKILL-009: sdd-implement chunk-close checklist
-`sdd-implement` must add the structured milestone close review checklist
-(REQ-CHKC-001 through REQ-CHKC-007) to its milestone checkpoint step
-(currently Step 4).
+`sdd-implement` must add the structured chunk close review checklist
+(REQ-CHKC-001 through REQ-CHKC-008) to its implementation process. The
+current "Step 4: Milestone Checkpoints" must be renamed to distinguish
+chunk-level checkpoints (chunk close review) from milestone-level
+checkpoints (delivery approval). Chunk close runs at each `### Chunk N`
+boundary; milestone checkpoints run at delivery milestone boundaries.
 [Priority: must]
 
 ### REQ-SKILL-010: sdd-implement Q-IMPL protocol
@@ -74,9 +77,10 @@ including tier classification guidance and Q-IMPL entry format.
 
 ### REQ-SKILL-011: sdd-implement spike code separation
 `sdd-implement` must add a rule for `[spike]` tasks: spike code is throwaway
-and must be written in a scratch location (`scripts/spike_*` or a feature
-branch). Production code for the same functionality must be written fresh
-against the spec, not adapted from spike code.
+and must be written in a scratch location. Spike findings go to
+`docs/spikes/{topic}.md`, throwaway code goes to `scripts/spike_*`. Production
+code for the same functionality must be written fresh against the spec, not
+adapted from spike code.
 [Priority: should]
 
 ### REQ-SKILL-012: sdd-implement CLAUDE.md convention reading
@@ -84,7 +88,7 @@ against the spec, not adapted from spike code.
 first item in its context loading step. Project conventions from `CLAUDE.md`
 take precedence over generic patterns when choosing libraries, coding
 patterns, and project structure.
-[Priority: should]
+[Priority: must]
 
 ### REQ-SKILL-013: sdd-specs cross-spec consistency
 `sdd-specs` must add the cross-spec consistency reading pass (REQ-XSPEC-001,

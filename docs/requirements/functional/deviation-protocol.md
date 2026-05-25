@@ -36,7 +36,9 @@ Q-IMPL entries must use global sequential numbering (`Q-IMPL-001`,
 `Q-IMPL-002`, ... across all specs in the project) and be placed in an
 `## Implementation Questions` section at the bottom of the relevant spec
 file. Each entry must include: the question ID, a description of the
-deviation, and the rationale for the implementation choice.
+deviation, and the rationale for the implementation choice. Numbering is
+append-only; retired entries remain in their spec with a
+`[superseded by Q-IMPL-NNN]` status note.
 [Priority: must]
 
 ### REQ-QIMPL-003: Q-IMPL discovery on task start
