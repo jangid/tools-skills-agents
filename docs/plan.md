@@ -1,194 +1,102 @@
-# Implementation Plan: SDD Workflow Improvements (RS-002)
+# Implementation Plan: v3 Migration (RS-003)
 
 ## Overview
 
-Update 4 existing SDD skills (sdd-implement, sdd-specs, sdd-plan, sdd-replan)
-and touch 1 more (sdd-requirements) to implement the RS-002 workflow
-improvements: chunk-close review, Q-IMPL deviation protocol, milestone plan
-support, cross-spec consistency, and related staleness enhancements.
-Deliverables are SKILL.md files. Single-milestone scope — no per-milestone
-plan structure for this project's own plan (REQ-MPLAN-004 fallback).
+Add v2→v3 migration support to `sdd-migrate`, including plan vocabulary
+rename, optional multi-milestone split, capability reporting, and v1→v3
+sequential composition. Then bump the skills repo's own `.sdd-version` to
+`3` as dogfooding. Single skill modified (`skills/sdd-migrate/SKILL.md`),
+no test suite — deliverable is a Markdown skill definition.
 
 ## Conventions
 
-- **Tests alongside implementation**: skill changes are verified by reading
-  the updated SKILL.md against the spec's acceptance criteria. No code tests
-  — deliverables are Markdown skill definitions.
 - **Task types**: [implement] produces SKILL.md changes, [verify] validates
-  behavior by invoking the skill against a test scenario.
-- **Chunk headers**: `### Chunk N: <name>` per REQ-CHKC-008.
-- **Traceability**: each task's `traces to` reference identifies the spec.
-  After completing each task, update `docs/requirements/traceability.md`
+  behavior against spec acceptance criteria.
+- **Chunk headers**: `### Chunk N: <name>` per v3 conventions.
+- **Traceability**: each task's `traces to` reference identifies the spec
+  section. After completing each task, update `docs/requirements/traceability.md`
   Implementation column.
+- **Chunk close**: 4-check review per chunk-close-review.md at chunk boundary.
 
 ## Chunks
 
-### Chunk 0: sdd-implement foundational additions
+### Chunk 0: sdd-migrate v2→v3 implementation
 
-**Goal**: Add three self-contained sections to `sdd-implement` SKILL.md
-that don't restructure existing content.
-
-**Tasks**:
-1. [implement] Add CLAUDE.md convention reading as first context loading
-   step — traces to skill-updates.md §CLAUDE.md Convention Reading
-   (REQ-SKILL-012)
-2. [implement] Add spike code separation rule for [spike] tasks — traces to
-   skill-updates.md §Spike Code Separation (REQ-SKILL-011)
-3. [implement] Add Q-IMPL three-tier deviation protocol section with tier
-   classification, entry format, global numbering, and Tier 3 escalation —
-   traces to deviation-protocol.md (REQ-QIMPL-001, REQ-QIMPL-002,
-   REQ-QIMPL-003), skill-updates.md §Q-IMPL Deviation Protocol
-   (REQ-SKILL-010)
-
-**Entry criteria**: None (first chunk).
-**Exit criteria**: sdd-implement SKILL.md contains all three additions.
-Tier descriptions match spec. Q-IMPL entry format includes all required
-fields.
-
-### Chunk 1: sdd-implement chunk close review
-
-**Goal**: Integrate the 4-check structured chunk close checklist into
-`sdd-implement`, distinguishing chunk-level from milestone-level
-checkpoints.
+**Goal**: `sdd-migrate` handles v2→v3 migration (vocabulary rename, optional
+split, capability report, finalization) and v1→v3 composition. Skills repo
+runs as a v3 project.
 
 **Tasks**:
-1. [implement] Rename existing "Step 4: Milestone Checkpoints" to
-   distinguish chunk close review (per-chunk, 4 checks) from milestone
-   checkpoints (delivery approval). Add chunk definition and
-   `### Chunk N:` detection pattern — traces to chunk-close-review.md
-   §Chunk Definition, §Integration with sdd-implement (REQ-CHKC-001,
-   REQ-CHKC-008), skill-updates.md §Chunk Close Checklist (REQ-SKILL-009)
-2. [implement] Add Check 1 (spec-implementation type alignment) and Check 2
-   (traceability matrix update) as blocking checks — traces to
-   chunk-close-review.md §Check 1, §Check 2 (REQ-CHKC-002, REQ-CHKC-003)
-3. [implement] Add Check 3 (test coverage per spec) and Check 4 (Q-IMPL
-   audit) as advisory checks — traces to chunk-close-review.md §Check 3,
-   §Check 4 (REQ-CHKC-004, REQ-CHKC-005)
-4. [implement] Add tiered enforcement rules and chunk close report format —
-   traces to chunk-close-review.md §Tiered Enforcement, §Chunk Close Report
-   (REQ-CHKC-006, REQ-CHKC-007)
-5. [implement] Add Q-IMPL discovery on task start (advisory read of existing
-   entries) — traces to deviation-protocol.md §Discovery on Task Start
-   (REQ-QIMPL-003)
+1. [implement] Update version detection and routing logic — add v3 detection
+   (`.sdd-version == 3` → exit), v2→v3 offer, and v1→v3 composition entry
+   point. Traces to migration.md §Version Detection, §Version Routing.
+   (REQ-MIG-002, REQ-MIG-009)
+2. [implement] Add v2→v3 Step 1: plan vocabulary rename — `### M\d+:` pattern
+   matching, operator confirmation flow, numbering preservation (M1 → Chunk 1),
+   skip conditions (no plan, already chunk format, plan complete), edge cases
+   (mixed headers, completed sections). Traces to migration.md §Step 1.
+   (REQ-MIG-010)
+3. [implement] Add v2→v3 Step 2: multi-milestone split offer — detect
+   multi-milestone structure, offer operator-confirmed split into per-milestone
+   files, preserve single-file as valid default. Traces to migration.md §Step 2.
+   (REQ-MIG-011)
+4. [implement] Add v2→v3 Step 3: capability report — informational listing of
+   chunk-close, Q-IMPL, per-milestone, and cross-spec mechanisms. Traces to
+   migration.md §Step 3. (REQ-MIG-012)
+5. [implement] Add v2→v3 Step 4: finalization — write `3` to `.sdd-version`
+   last, present migration summary. Traces to migration.md §Step 4.
+   (REQ-MIG-014)
+6. [implement] Wire v1→v3 composition routing — after v1→v2 completes,
+   continue to v2→v3 in same invocation. Intermediate v2 state brief;
+   finalization writes `3`. Existing v1→v2 logic unchanged. Traces to
+   migration.md §v1 to v3 Composition. (REQ-MIG-013)
+7. [implement] Add backward compatibility notes — v2 projects work without
+   migration, chunk-close inactive without `### Chunk N:` headers, per-milestone
+   activates only with per-milestone files. Traces to overview.md §Version
+   Marker, migration.md §v2→v3 Overview. (REQ-COMPAT-002)
+8. [verify] Walk migration.md and overview.md acceptance criteria against the
+   updated SKILL.md — confirm every checkbox item has a corresponding
+   instruction. Traces to migration.md §v2→v3 Acceptance Criteria, §v1→v3
+   Acceptance Criteria, overview.md §Acceptance Criteria.
+9. [implement] Bump skills repo's own `docs/.sdd-version` from `2` to `3`.
+   Final step — the skills repo becomes a v3 project. (REQ-MIG-014, REQ-SKILL-017)
 
-**Entry criteria**: Chunk 0 complete (Q-IMPL protocol exists for Check 4
-cross-reference).
-**Exit criteria**: sdd-implement SKILL.md contains chunk close checklist
-with all 4 checks, tiered enforcement, report format, and chunk detection.
-Check 4 references Q-IMPL protocol from Chunk 0.
-
-### Chunk 2: sdd-specs cross-spec consistency
-
-**Goal**: Add the cross-spec consistency reading pass to `sdd-specs`.
-
-**Tasks**:
-1. [implement] Add cross-spec reading pass as new sub-step between Step 4
-   (review cycle) and Step 5 (coverage check). Include: type extraction from
-   code blocks, type-to-spec map building, reference scanning, validation
-   checks, flag-only findings — traces to cross-spec-consistency.md
-   (REQ-XSPEC-001, REQ-XSPEC-002), skill-updates.md §Cross-Spec Consistency
-   (REQ-SKILL-013)
-
-**Entry criteria**: None (independent of sdd-implement changes).
-**Exit criteria**: sdd-specs SKILL.md contains cross-spec pass positioned
-after individual review, before coverage check. Findings described as
-flag-only.
-
-### Chunk 3: Milestone plan and staleness support
-
-**Goal**: Add per-milestone plan support to sdd-plan, sdd-replan, and
-sdd-implement. Add research-to-requirements staleness to sdd-requirements.
-Align chunk vocabulary in sdd-plan's plan format instructions.
-
-**Tasks**:
-1. [implement] Update sdd-plan: add per-milestone file creation
-   (`docs/plan-{id}.md`), index format for `docs/plan.md` when multiple
-   milestones exist, `milestone:` frontmatter, single-milestone fallback.
-   Update plan format to use `### Chunk N:` headers instead of milestone
-   headers for work units — traces to milestone-plans.md §Per-Milestone
-   File Layout, §Single-Milestone Fallback (REQ-MPLAN-001, REQ-MPLAN-002,
-   REQ-MPLAN-004), plan-management.md §Active Plan Structure,
-   skill-updates.md §Milestone Plan Support in sdd-plan (REQ-SKILL-014)
-2. [implement] Update sdd-plan and sdd-implement: add milestone-scoped
-   staleness detection (compare only against requirements/specs traced by
-   the milestone's tasks) — traces to milestone-plans.md
-   §Milestone-Scoped Staleness (REQ-STALE-003), skill-updates.md
-   §Milestone-Scoped Staleness (REQ-SKILL-016)
-3. [implement] Update sdd-replan: add per-milestone archival (archive
-   correct milestone's plan file), cross-milestone replan handling, index
-   table updates — traces to milestone-plans.md §Interaction with
-   sdd-replan, skill-updates.md §Milestone Plan Support in sdd-replan
-   (REQ-SKILL-015)
-4. [implement] Update sdd-plan: add milestone lifecycle management
-   (planned → active → complete → archived) and archive naming
-   `{date}-{milestone-id}-complete.md` — traces to milestone-plans.md
-   §Milestone Lifecycle (REQ-MPLAN-003)
-5. [implement] Update sdd-requirements: add research-to-requirements
-   staleness check on entry (compare newest research date against
-   `index.md` last_updated, advisory) — traces to
-   requirements-artifacts.md §Research-to-requirements staleness,
-   skill-updates.md §Research-to-Requirements Staleness (REQ-STALE-002)
-
-**Entry criteria**: None (independent of Chunks 0-2, but sequential within
-this chunk).
-**Exit criteria**: sdd-plan creates per-milestone files when appropriate
-and falls back to single-file. sdd-replan handles per-milestone archival.
-sdd-implement uses milestone-scoped staleness. sdd-requirements detects
-research staleness. Plan format uses `### Chunk N:` headers.
-
-### Chunk 4: Verification
-
-**Goal**: End-to-end verification of all acceptance criteria across all
-10 specs.
-
-**Tasks**:
-1. [verify] Read each updated SKILL.md against its spec's acceptance
-   criteria. Verify every checkbox item is addressed in the skill
-   instructions — traces to chunk-close-review.md, deviation-protocol.md,
-   milestone-plans.md, cross-spec-consistency.md, skill-updates.md,
-   plan-management.md, overview.md
-2. [verify] Cross-skill consistency check: verify chunk vocabulary is
-   consistent across sdd-plan, sdd-implement, sdd-replan (all use
-   `### Chunk N:` for work units, "milestone" only for delivery groupings)
-3. [verify] Fill traceability matrix: update Test and Implementation
-   columns for all REQ-CHKC-*, REQ-QIMPL-*, REQ-MPLAN-*, REQ-XSPEC-*,
-   REQ-STALE-003, REQ-SKILL-009..016, REQ-STALE-002 — traces to
-   requirements-artifacts.md §Traceability Matrix
-
-**Entry criteria**: Chunks 0-3 complete.
-**Exit criteria**: All acceptance criteria verified. Traceability matrix
-Implementation column filled for all new requirements. No cross-skill
-vocabulary inconsistencies.
+**Entry criteria**: Approved specs (migration.md, overview.md).
+**Exit criteria**: Chunk close clean. `sdd-migrate` SKILL.md handles v2→v3
+and v1→v3 paths. All acceptance criteria verified. Skills repo `.sdd-version`
+is `3`.
 
 ## Replan Triggers
 
-- If sdd-implement SKILL.md exceeds ~500 lines after Chunk 0+1 additions →
-  split skill into base + chunk-close appendix or compress existing content
-- If milestone plan support in Chunk 3 conflicts with existing plan archival
-  logic → revisit plan-management.md and milestone-plans.md composition
-- If cross-spec consistency pass in Chunk 2 requires changes to the spec
-  format (e.g., standardized type block markers) → revisit specs before
-  proceeding
+- `sdd-migrate` SKILL.md exceeds 350 lines after additions → compress existing
+  content or extract shared utilities into a referenced section
+- Edge cases surface that aren't covered by migration.md §Step 1 (e.g.,
+  archived plans with unexpected header formats needing modification)
+- v1→v2 logic needs unexpected modification to support composition (would
+  violate REQ-MIG-013 "v1→v2 logic must remain unchanged")
 
 ## Completed
 
-- v2 artifact structure: All 8 skills updated for v2 paths (2026-04-28,
-  11 tasks)
+- v2 artifact structure: 8 skills updated for v2 paths (2026-04-28, 11 tasks)
+- RS-002 workflow improvements: chunk-close, Q-IMPL, milestone plans,
+  cross-spec consistency, staleness enhancements (2026-05-25, 5 chunks)
 
 ## Risks
 
-- **sdd-implement size**: After adding chunk-close (4 checks + report +
-  tiered enforcement), Q-IMPL (3 tiers + format + numbering), spike
-  separation, and CLAUDE.md reading, the skill may exceed 500 lines.
-  Mitigation: reference spec files for format details rather than
-  duplicating, keep instructions concise.
-- **Milestone plan complexity**: Per-milestone support touches 3 skills
-  (sdd-plan, sdd-replan, sdd-implement). Changes must be consistent.
-  Mitigation: do all three in one chunk, verify vocabulary consistency in
-  Chunk 4.
+- **External adopter migration paths**: First migration designed for external
+  operators. If the operator-confirmation flow is unclear or the rename pattern
+  over-matches, external adopters hit it before we do. Mitigation: precise
+  `### M\d+:` regex, clear acceptance criteria, operator-readable messages.
+- **Skills repo self-migration**: Bumping `.sdd-version` to `3` means future
+  skill work runs under v3 expectations (chunk-close, Q-IMPL). No mitigation
+  needed — intentional dogfooding — but flagging as a notable side-effect.
+- **SKILL.md size**: sdd-migrate may grow close to the 500-line budget. Current
+  size unknown. Mitigation: keep v2→v3 instructions concise, reference spec
+  sections for rationale instead of duplicating.
 
 ## Archive
 
 Full plan history:
 - [2026-04-28-pre-v2-migration.md](plan-history/2026-04-28-pre-v2-migration.md)
 - [2026-05-25-pre-rs002-rewrite.md](plan-history/2026-05-25-pre-rs002-rewrite.md)
+- [2026-05-25-rs002-complete.md](plan-history/2026-05-25-rs002-complete.md)

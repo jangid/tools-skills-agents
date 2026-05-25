@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-CTX-001
@@ -32,7 +32,7 @@ conventions that all other specs build on.
 
 ```
 docs/
-  .sdd-version                    # Plain text: "2"
+  .sdd-version                    # Plain text: "2" or "3"
   research/
     index.md                      # Auto-maintained research index
     RS-001-{topic}/

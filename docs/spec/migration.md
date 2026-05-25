@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 last_updated: 2026-05-25
 requires:
   - REQ-MIG-001
@@ -32,8 +32,10 @@ split requirements with versioned index, lean plans with archival). Existing
 projects using SDD skills need a migration path that handles mid-cycle
 projects safely.
 
-This spec defines a new `sdd-migrate` skill that performs the migration and
-supports future version transitions.
+This spec covers two migration procedures: v1→v2 (REQ-MIG-001..008, RS-001)
+and v2→v3 (REQ-MIG-009..015, RS-003). They share the same `sdd-migrate` skill
+and are co-located in one file so operators reading "how do I migrate" see all
+paths in one place.
 
 ## Design
 
