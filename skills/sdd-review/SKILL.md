@@ -96,6 +96,7 @@ Each checklist checks both **content correctness** (is what's here right?) and *
 - Check that each requirement is testable (you could write a verification for it)
 - Check that priorities (must/should/may) are appropriate for the scope
 - Check that IDs follow the project's `REQ-{DOMAIN}-{NNN}` convention
+- Check that Q-REQ decisions are documented with rationale
 
 **Scope completeness:**
 - Check that every research finding traces to at least one requirement
@@ -108,6 +109,7 @@ Each checklist checks both **content correctness** (is what's here right?) and *
 - Check that design rationale explains "why X not Y" for non-obvious decisions
 - Check that acceptance criteria are independently verifiable
 - Check that cross-references to other specs are accurate (file and section exist)
+- Check that code blocks and examples use the vocabulary defined in the spec
 
 **Scope completeness:**
 - Check that every requirement has spec coverage (traceability.md Spec column)

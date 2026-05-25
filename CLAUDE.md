@@ -80,13 +80,14 @@ Standalone scripts or utilities. Use the appropriate language for the task. Each
 
 A cyclic, phase-based workflow for building software with AI assistance. Each phase produces artifacts on disk that serve as state markers — any new session can detect the current phase and resume.
 
-### Phases (8 skills)
+### Phases (9 skills)
 
 ```
 ┌─ RESEARCH ──→ REQUIREMENTS ──→ SPECS ──→ PLAN ──→ IMPLEMENT ──→ VERIFY ─┐
-│      ↑              ↑                                  │           │      │
-│      └──────────────┴──────────── REPLAN ←─────────────┴───────────┘      │
-└───────────────────────────────────────────────────────────────────────────┘
+│      ↑              ↑            ↑         ↑          │           │      │
+│      └──────────────┴────────────┴─────────┴── REPLAN ←───────────┘      │
+└─────────────────────────────────────────────────────────────────────────┘
+                              ↕ REVIEW (cross-cutting, out-of-session)
 ```
 
 1. `sdd-research` — time-boxed exploration to reduce uncertainty (`docs/research/RS-NNN-{topic}/`)
@@ -97,6 +98,7 @@ A cyclic, phase-based workflow for building software with AI assistance. Each ph
 6. `sdd-verify` — holistic validation: quality gates + acceptance criteria + UX
 7. `sdd-replan` — structured replanning when assumptions break
 8. `sdd-migrate` — one-time migration between artifact structure versions
+9. `sdd-review` — structured external review in a separate session at phase boundaries (cross-cutting, not sequential)
 
 ### Phase Detection
 
@@ -133,6 +135,8 @@ When `sdd-plan` rewrites a plan or `sdd-replan` makes significant changes, the p
 - **Stuck detection**: if implementation hits a wall, trigger replan instead of spinning
 - **Replan triggers**: defined upfront in the plan — conditions that invalidate the approach
 - **Holistic verification**: goes beyond "tests pass" to user-perspective validation
+- **External review**: `sdd-review` runs in a separate session at phase boundaries to catch coherence gaps and scope omissions that in-session layers miss
+- **Four verification layers**: chunk-close (mechanical, per-chunk), XSPEC (structural, during specs), sdd-verify (holistic, end-of-project), sdd-review (semantic, out-of-session)
 - **Cyclic**: replan can route back to any earlier phase based on severity
 
 ### When to Use
