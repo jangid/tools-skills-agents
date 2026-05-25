@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-04-28
+last_updated: 2026-05-25
 ---
 
 # Traceability Matrix
@@ -22,6 +22,7 @@ last_updated: 2026-04-28
 | REQ-PLAN-004 | plan-management.md | | | |
 | REQ-STALE-001 | requirements-artifacts.md, skill-updates.md | | | |
 | REQ-STALE-002 | requirements-artifacts.md | | | |
+| REQ-STALE-003 | | | | |
 | REQ-MIG-001 | migration.md | | | |
 | REQ-MIG-002 | migration.md | | | |
 | REQ-MIG-003 | migration.md | | | |
@@ -30,6 +31,22 @@ last_updated: 2026-04-28
 | REQ-MIG-006 | migration.md | | | |
 | REQ-MIG-007 | migration.md | | | |
 | REQ-MIG-008 | migration.md | | | |
+| REQ-CHKC-001 | | | | |
+| REQ-CHKC-002 | | | | |
+| REQ-CHKC-003 | | | | |
+| REQ-CHKC-004 | | | | |
+| REQ-CHKC-005 | | | | |
+| REQ-CHKC-006 | | | | |
+| REQ-CHKC-007 | | | | |
+| REQ-QIMPL-001 | | | | |
+| REQ-QIMPL-002 | | | | |
+| REQ-QIMPL-003 | | | | |
+| REQ-MPLAN-001 | | | | |
+| REQ-MPLAN-002 | | | | |
+| REQ-MPLAN-003 | | | | |
+| REQ-MPLAN-004 | | | | |
+| REQ-XSPEC-001 | | | | |
+| REQ-XSPEC-002 | | | | |
 | REQ-CTX-001 | overview.md | | | |
 | REQ-CTX-002 | overview.md | | | |
 | REQ-COMPAT-001 | overview.md | | | |
@@ -41,4 +58,12 @@ last_updated: 2026-04-28
 | REQ-SKILL-006 | skill-updates.md | | | |
 | REQ-SKILL-007 | skill-updates.md | | | |
 | REQ-SKILL-008 | plan-management.md, skill-updates.md | | | |
+| REQ-SKILL-009 | | | | |
+| REQ-SKILL-010 | | | | |
+| REQ-SKILL-011 | | | | |
+| REQ-SKILL-012 | | | | |
+| REQ-SKILL-013 | | | | |
+| REQ-SKILL-014 | | | | |
+| REQ-SKILL-015 | | | | |
+| REQ-SKILL-016 | | | | |
 | REQ-CFG-001 | overview.md, migration.md | | | |

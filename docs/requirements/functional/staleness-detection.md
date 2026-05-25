@@ -1,7 +1,7 @@
 ---
 domain: STALE
-last_updated: 2026-04-28
-status: Approved
+last_updated: 2026-05-25
+status: Draft
 ---
 
 # Requirements: Staleness Detection
@@ -25,3 +25,12 @@ When new research is completed (a `findings.md` with `status: Complete`), the
 `sdd-requirements` skill should detect that research is newer than the
 requirements version and inform the user that requirements may need updating.
 [Priority: should]
+
+### REQ-STALE-003: Milestone-scoped plan staleness
+When a project uses per-milestone plan files (REQ-MPLAN-001), staleness
+detection for a plan file must compare only against the requirements and
+specs that are relevant to that milestone (identified via the plan's task →
+spec `requires:` → requirement IDs). Changes to requirements or specs not
+traced by the milestone's tasks must not trigger staleness for that
+milestone's plan.
+[Priority: must]
