@@ -59,7 +59,7 @@ last_updated: 2026-05-25
 | REQ-SKILL-006 | skill-updates.md | | | |
 | REQ-SKILL-007 | skill-updates.md | | | |
 | REQ-SKILL-008 | plan-management.md, skill-updates.md | | | |
-| REQ-SKILL-009 | skill-updates.md, chunk-close-review.md | | | |
+| REQ-SKILL-009 | skill-updates.md, chunk-close-review.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-010 | skill-updates.md, deviation-protocol.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-011 | skill-updates.md | | sdd-implement/SKILL.md | |
 | REQ-SKILL-012 | skill-updates.md | | sdd-implement/SKILL.md | |

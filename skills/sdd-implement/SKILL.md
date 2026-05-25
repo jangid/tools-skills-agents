@@ -39,7 +39,7 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 ### Step 1: Load Context
 
 0. **Read `CLAUDE.md` first (if present).** Project conventions in `CLAUDE.md` take precedence over generic patterns when choosing libraries, coding patterns, or project structure. The file may not exist — that's normal — but when it does, its conventions override defaults you might otherwise apply.
-1. Read `docs/plan.md` — identify the current milestone and next task
+1. Read `docs/plan.md` — identify the current chunk and next task
 2. Read the relevant spec sections for the current task
 3. Read `docs/requirements/{category}/*.md` for requirement context when needed
 4. Identify which chunk you're starting from (ask if unclear)
