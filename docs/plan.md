@@ -1,98 +1,112 @@
-# Implementation Plan: v3 Migration (RS-003)
+# Implementation Plan: sdd-review Skill (RS-004)
 
 ## Overview
 
-Add v2→v3 migration support to `sdd-migrate`, including plan vocabulary
-rename, optional multi-milestone split, capability reporting, and v1→v3
-sequential composition. Then bump the skills repo's own `.sdd-version` to
-`3` as dogfooding. Single skill modified (`skills/sdd-migrate/SKILL.md`),
-no test suite — deliverable is a Markdown skill definition.
+Create `skills/sdd-review/SKILL.md` per `docs/spec/review.md`. The
+skill provides structured external review at SDD phase boundaries,
+running in a separate session with phase-specific checklists and a
+tiered findings report. Also update `sdd-verify` to acknowledge
+sdd-review as the fourth verification layer. Single skill created,
+one skill updated — deliverable is Markdown skill definitions.
 
 ## Conventions
 
-- **Task types**: [implement] produces SKILL.md changes, [verify] validates
-  behavior against spec acceptance criteria.
+- **Task types**: [implement] produces SKILL.md changes, [verify]
+  validates against spec acceptance criteria.
 - **Chunk headers**: `### Chunk N: <name>` per v3 conventions.
-- **Traceability**: each task's `traces to` reference identifies the spec
-  section. After completing each task, update `docs/requirements/traceability.md`
-  Implementation column.
-- **Chunk close**: 4-check review per chunk-close-review.md at chunk boundary.
+- **Traceability**: each task's `traces to` reference identifies the
+  spec section. After completing each task, update
+  `docs/requirements/traceability.md` Implementation column.
+- **Chunk close**: 4-check review per chunk-close-review.md at chunk
+  boundary.
 
 ## Chunks
 
-### Chunk 0: sdd-migrate v2→v3 implementation
+### Chunk 0: sdd-review skill implementation
 
-**Goal**: `sdd-migrate` handles v2→v3 migration (vocabulary rename, optional
-split, capability report, finalization) and v1→v3 composition. Skills repo
-runs as a v3 project.
+**Goal**: `skills/sdd-review/SKILL.md` exists, implements all 8
+REQ-REV requirements, and is comparable in size to sdd-verify
+(~200-250 lines). `sdd-verify` acknowledges sdd-review.
 
 **Tasks**:
-1. [implement] Update version detection and routing logic — add v3 detection
-   (`.sdd-version == 3` → exit), v2→v3 offer, and v1→v3 composition entry
-   point. Traces to migration.md §Version Detection, §Version Routing.
-   (REQ-MIG-002, REQ-MIG-009)
-2. [implement] Add v2→v3 Step 1: plan vocabulary rename — `### M\d+:` pattern
-   matching, operator confirmation flow, numbering preservation (M1 → Chunk 1),
-   skip conditions (no plan, already chunk format, plan complete), edge cases
-   (mixed headers, completed sections). Traces to migration.md §Step 1.
-   (REQ-MIG-010)
-3. [implement] Add v2→v3 Step 2: multi-milestone split offer — detect
-   multi-milestone structure, offer operator-confirmed split into per-milestone
-   files, preserve single-file as valid default. Traces to migration.md §Step 2.
-   (REQ-MIG-011)
-4. [implement] Add v2→v3 Step 3: capability report — informational listing of
-   chunk-close, Q-IMPL, per-milestone, and cross-spec mechanisms. Traces to
-   migration.md §Step 3. (REQ-MIG-012)
-5. [implement] Add v2→v3 Step 4: finalization — write `3` to `.sdd-version`
-   last, present migration summary. Traces to migration.md §Step 4.
-   (REQ-MIG-014)
-6. [implement] Wire v1→v3 composition routing — after v1→v2 completes,
-   continue to v2→v3 in same invocation. Intermediate v2 state brief;
-   finalization writes `3`. Existing v1→v2 logic unchanged. Traces to
-   migration.md §v1 to v3 Composition. (REQ-MIG-013)
-7. [implement] Add backward compatibility notes — v2 projects work without
-   migration, chunk-close inactive without `### Chunk N:` headers, per-milestone
-   activates only with per-milestone files. Traces to overview.md §Version
-   Marker, migration.md §v2→v3 Overview. (REQ-COMPAT-002)
-8. [verify] Walk migration.md and overview.md acceptance criteria against the
-   updated SKILL.md — confirm every checkbox item has a corresponding
-   instruction. Traces to migration.md §v2→v3 Acceptance Criteria, §v1→v3
-   Acceptance Criteria, overview.md §Acceptance Criteria.
-9. [implement] Bump skills repo's own `docs/.sdd-version` from `2` to `3`.
-   Final step — the skills repo becomes a v3 project. (REQ-MIG-014, REQ-SKILL-017)
+1. [implement] Create skill scaffolding — frontmatter (`name`,
+   `description`), opening section establishing context and the
+   reviewer's role, phase detection logic for six reviewable phases.
+   Traces to review.md §Phase Detection. (REQ-REV-001, REQ-SKILL-018)
+2. [implement] Add session-isolation confirmation prompt as the
+   skill's opening step — concrete wording per spec, confirm/stop
+   options, note on operator responsibility. Traces to review.md
+   §Session Isolation. (REQ-REV-007)
+3. [implement] Add required inputs section — deliverable, prior phase
+   output, traceability matrix as the three inputs; explicit exclusion
+   of working-session deliberations. Traces to review.md §Required
+   Inputs. (REQ-REV-003)
+4. [implement] Add six per-phase checklists — research, requirements,
+   specs, plan, implement, verify. Each with content-correctness and
+   scope-completeness items. Include RS-004 F2 evidence citation for
+   the scope-completeness rationale. Traces to review.md §Per-Phase
+   Checklists. (REQ-REV-001, REQ-REV-008)
+5. [implement] Add report format section — verdict (Approve / Approve
+   with fixes / Reject), strengths (required, substantive), tiered
+   findings (critical/material/minor), recommendation. Inline-only,
+   not persisted. Traces to review.md §Report Format. (REQ-REV-002)
+6. [implement] Add bias disclosure pattern — section template, prior
+   involvement description, omission rule when no prior involvement.
+   Traces to review.md §Bias Disclosure. (REQ-REV-004)
+7. [implement] Add trigger classification — mandatory (requirements→
+   specs, specs→plan), recommended (plan→implement, post-verification),
+   ad-hoc (any time), skip (chunk-close boundaries). Traces to
+   review.md §Trigger Classification. (REQ-REV-005)
+8. [implement] Add scope boundaries — explicit delineation against
+   chunk-close (mechanical), XSPEC (structural), sdd-verify (holistic).
+   Verification stack positioning table. Traces to review.md
+   §Verification Stack Positioning. (REQ-REV-006)
+9. [verify] Walk all 13 spec acceptance criteria against the completed
+   SKILL.md — confirm every checkbox item has a corresponding
+   instruction in the skill. Traces to review.md §Acceptance Criteria.
+10. [implement] Update `skills/sdd-verify/SKILL.md` — add one paragraph
+    acknowledging sdd-review as the fourth verification layer
+    (out-of-session semantic review complementing sdd-verify's
+    in-session holistic check). Traces to skill-updates.md
+    §REQ-SKILL-018.
 
-**Entry criteria**: Approved specs (migration.md, overview.md).
-**Exit criteria**: Chunk close clean. `sdd-migrate` SKILL.md handles v2→v3
-and v1→v3 paths. All acceptance criteria verified. Skills repo `.sdd-version`
-is `3`.
+**Entry criteria**: Approved specs (review.md, skill-updates.md).
+**Exit criteria**: Chunk close clean. `sdd-review` SKILL.md handles
+all 6 phases with content + scope checklists. All 13 acceptance
+criteria verified. `sdd-verify` references sdd-review.
 
 ## Replan Triggers
 
-- `sdd-migrate` SKILL.md exceeds 350 lines after additions → compress existing
-  content or extract shared utilities into a referenced section
-- Edge cases surface that aren't covered by migration.md §Step 1 (e.g.,
-  archived plans with unexpected header formats needing modification)
-- v1→v2 logic needs unexpected modification to support composition (would
-  violate REQ-MIG-013 "v1→v2 logic must remain unchanged")
+- `skills/sdd-review/SKILL.md` exceeds 350 lines → compress existing
+  content or restructure checklists into a more compact format
+- Session-isolation prompt wording from the spec proves ambiguous when
+  read by an external operator → would require spec edit (Tier 3)
+- Six per-phase checklists resist compression below ~8 items each →
+  would suggest the spec needs structural rethink
 
 ## Completed
 
 - v2 artifact structure: 8 skills updated for v2 paths (2026-04-28, 11 tasks)
-- RS-002 workflow improvements: chunk-close, Q-IMPL, milestone plans,
+- RS-002 workflow improvements: chunk-close, Q-IMPL, per-milestone,
   cross-spec consistency, staleness enhancements (2026-05-25, 5 chunks)
+- RS-003 v3 migration: sdd-migrate v2→v3, v1→v3 composition, version
+  bump to v3 (2026-05-25, 9 tasks)
 
 ## Risks
 
-- **External adopter migration paths**: First migration designed for external
-  operators. If the operator-confirmation flow is unclear or the rename pattern
-  over-matches, external adopters hit it before we do. Mitigation: precise
-  `### M\d+:` regex, clear acceptance criteria, operator-readable messages.
-- **Skills repo self-migration**: Bumping `.sdd-version` to `3` means future
-  skill work runs under v3 expectations (chunk-close, Q-IMPL). No mitigation
-  needed — intentional dogfooding — but flagging as a notable side-effect.
-- **SKILL.md size**: sdd-migrate may grow close to the 500-line budget. Current
-  size unknown. Mitigation: keep v2→v3 instructions concise, reference spec
-  sections for rationale instead of duplicating.
+- **External-adopter ergonomics**: sdd-review is the second
+  external-adopter-facing skill (after sdd-migrate). The
+  session-isolation prompt is the operator's first interaction. If
+  confusing, adopters bounce. Mitigation: spec specifies concrete
+  prompt wording; verify task confirms readability.
+- **Bias disclosure adoption**: Whether reviewers consistently follow
+  the disclosure rule is unenforceable. If silently skipped, the
+  protection is theoretical. No mitigation beyond making the prompt
+  clear and the rationale visible.
+- **Skill size**: sdd-review has more structural sections than
+  sdd-verify (6 checklists vs none). Risk of exceeding the 350-line
+  replan trigger. Mitigation: compress checklists to ~4-6 items each;
+  reference spec for rationale rather than duplicating.
 
 ## Archive
 
@@ -100,3 +114,4 @@ Full plan history:
 - [2026-04-28-pre-v2-migration.md](plan-history/2026-04-28-pre-v2-migration.md)
 - [2026-05-25-pre-rs002-rewrite.md](plan-history/2026-05-25-pre-rs002-rewrite.md)
 - [2026-05-25-rs002-complete.md](plan-history/2026-05-25-rs002-complete.md)
+- [2026-05-25-rs003-complete.md](plan-history/2026-05-25-rs003-complete.md)
