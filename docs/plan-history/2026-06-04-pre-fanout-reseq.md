@@ -37,64 +37,50 @@ only wall-clock speedup, never correctness. Out of scope: modifying any other
 
 ## Chunks
 
-### Chunk 0: Extract the fan-out procedure to references/, then promote the SKILL.md body
+### Chunk 0: Promote the Execution Model to active fan-out (SKILL.md body)
 
-**Goal**: The bulky fan-out dispatch/merge procedure lives in
-`skills/sdd-orchestrate/references/` **from the outset**, and
-`skills/sdd-orchestrate/SKILL.md` describes the active Design B fan-out behavior
-in concise prose that **points to** that reference — boundary derivation, opt-in
-gate, the fan-out lifecycle (provision → dispatch → merge → teardown), and
-conflict handling — replacing the "sequential / fan-out deferred" framing, while
-modifying no other `sdd-*` skill and keeping SKILL.md under the ~500-line ceiling.
+**Goal**: `skills/sdd-orchestrate/SKILL.md` describes the active Design B fan-out
+behavior in prose — boundary derivation, opt-in gate, the fan-out lifecycle
+(provision → dispatch → merge → teardown), and conflict handling — replacing the
+"sequential / fan-out deferred" framing, while modifying no other `sdd-*` skill.
 
 **Tasks**:
-1. [implement] Create the fan-out reference **first** — add the fan-out dispatch +
-   worktree-merge procedure to `skills/sdd-orchestrate/references/` (extend
-   `dispatch-templates.md` or add a `fan-out.md`): the per-group implement dispatch
-   prompt (worktree path/branch pinned, leaf clause, inline `git -c` identity,
-   chunk-group tasks) and the orchestrator merge/teardown/conflict-redo command
-   sequence. This is the bulky procedure; landing it in `references/` before the
-   SKILL.md prose keeps SKILL.md lean from the start (the ~500-line ceiling is a
-   replan trigger). Traces to §Packaging, §Worktree Provisioning, §Merge-Conflict
-   Handling. (REQ-ORCH-019, supports 022..027)
-2. [implement] Rewrite the Execution Model / sequential section so sequential is
+1. [implement] Rewrite the Execution Model / sequential section so sequential is
    the default but fan-out is an **active opt-in** at the implement gate (not
-   deferred); fan-out is available **only** at the implement stage; concise prose
-   that points to the fan-out reference from task 1 rather than inlining the
-   procedure. Traces to §Sequential Execution and Implement-Stage Fan-out, §Fan-out
-   Design Resolution (Design B selected, Design A ruled out infeasible).
-   (REQ-ORCH-015, REQ-ORCH-022)
-3. [implement] Boundary-derivation rule — orchestrator computes independent
+   deferred); fan-out is available **only** at the implement stage. Traces to
+   §Sequential Execution and Implement-Stage Fan-out, §Fan-out Design Resolution
+   (Design B selected, Design A ruled out infeasible). (REQ-ORCH-015,
+   REQ-ORCH-022)
+2. [implement] Boundary-derivation rule — orchestrator computes independent
    chunk-groups by parsing the plan's chunk-level `**Depends on**: Chunk N` field
    (or its `Entry criteria: Chunk N complete` prose equivalent), **not**
    milestone-level Entry/Exit; fan-out applies only when ≥2 independent branches
    exist; if the plan has no parseable chunk-level dependencies, **degrade to
    sequential** and never guess a boundary. Traces to §Fan-out Boundary Rule.
    (REQ-ORCH-016)
-4. [implement] Opt-in gate behavior — fan-out is never automatic; at the implement
+3. [implement] Opt-in gate behavior — fan-out is never automatic; at the implement
    gate the orchestrator offers it as an explicit choice, may surface the
    independent-group count, and when the graph is a **single chain** (or has no
    parseable chunk deps) tells the operator **at the gate** that fan-out will
    degrade to sequential. Traces to §Fan-out Opt-in Gate. (REQ-ORCH-024)
-5. [implement] Worktree provisioning + dispatch (orchestrator-owned) — for each
+4. [implement] Worktree provisioning + dispatch (orchestrator-owned) — for each
    group, the orchestrator runs `git worktree add -b <branch> <path> <base>`,
    dispatches one implement subagent pinned to its worktree/branch carrying that
    group's chunks; each subagent is a **leaf** (runs `sdd-implement`, must not
    sub-dispatch); non-interactivity contract + central ID assignment apply;
-   orchestrator awaits all returns before merging; the SKILL.md prose points to the
-   task-1 reference for the full dispatch template. Traces to §Worktree
+   orchestrator awaits all returns before merging. Traces to §Worktree
    Provisioning and Dispatch. (REQ-ORCH-022, REQ-ORCH-023)
-6. [implement] Subagent git identity — fan-out subagents commit with inline
+5. [implement] Subagent git identity — fan-out subagents commit with inline
    `git -c user.email=<id> -c user.name=<name> commit ...`; orchestrator must
    **not** instruct subagents to write a shared `.git/config` (sandbox blocks it).
    Traces to §Worktree Provisioning and Dispatch step 4. (REQ-ORCH-027)
-7. [implement] Sequential merge to main + teardown — after returns, merge each
+6. [implement] Sequential merge to main + teardown — after returns, merge each
    branch into `main` one at a time (`git merge --no-edit <branch>`), completing
    **all** merges before the implement-stage review; on each clean merge remove the
    worktree (`git worktree remove <path>`) and delete its branch (`git branch -d`),
    leaving only `main` for the review. Traces to §Sequential Merge to Main.
    (REQ-ORCH-025, REQ-ORCH-023/Q-REQ-G)
-8. [implement] Merge-conflict handling — on non-zero `git merge` exit: optional
+7. [implement] Merge-conflict handling — on non-zero `git merge` exit: optional
    best-effort auto-resolve (a clean auto-resolve = PASS, no abort); otherwise
    `git merge --abort` then **redo by re-derivation** in a fresh worktree
    re-branched from the updated `main` (`git worktree add -b <branch>-redo <path>
@@ -103,24 +89,30 @@ modifying no other `sdd-*` skill and keeping SKILL.md under the ~500-line ceilin
    boundary-selection error and **fall back to sequential** for the affected
    groups (guaranteed termination); never corrupt already-merged work. Traces to
    §Merge-Conflict Handling and Q-IMPL-1. (REQ-ORCH-026)
-9. [implement] Note the dispatch-concurrency uncertainty in the body — fan-out is
+8. [implement] Note the dispatch-concurrency uncertainty in the body — fan-out is
    correct whether dispatches run concurrently or serialized; only wall-clock
    speedup is at stake; do not claim a speedup guarantee (defer to the spike in
    Chunk 1). Traces to §Dispatch Concurrency [high-uncertainty]. (REQ-ORCH-028)
 
 **Entry criteria**: None (first chunk).
-**Exit criteria**: Fan-out procedure lives in `references/`; SKILL.md describes
-active Design B fan-out covering REQ-ORCH-015/016/022..027 (pointing to the
-reference for the bulky procedure) and notes REQ-ORCH-028; no other `sdd-*` skill
-modified; SKILL.md under ~500 lines; chunk-close 4-check passes.
+**Exit criteria**: SKILL.md describes active Design B fan-out covering
+REQ-ORCH-015/016/022..027 and notes REQ-ORCH-028; no other `sdd-*` skill modified;
+SKILL.md still under ~500 lines; chunk-close 4-check passes.
 
-### Chunk 1: Concurrency spike, doc + requirements reconciliation, verification
+### Chunk 1: Reference procedure, concurrency spike, doc reconciliation, verification
 
-**Goal**: The one open uncertainty is measured, the operator docs **and** the
-governing requirement text no longer say "no fan-out", and all fan-out acceptance
-criteria are walked with traceability filled.
+**Goal**: The bulky fan-out dispatch/merge procedure lives in `references/`, the
+one open uncertainty is measured, the operator docs no longer say "no fan-out",
+and all fan-out acceptance criteria are walked with traceability filled.
 
 **Tasks**:
+9.  [implement] Add the fan-out dispatch + worktree-merge procedure to
+    `skills/sdd-orchestrate/references/` (extend `dispatch-templates.md` or add a
+    `fan-out.md`): the per-group implement dispatch prompt (worktree path/branch
+    pinned, leaf clause, inline `git -c` identity, chunk-group tasks) and the
+    orchestrator merge/teardown/conflict-redo command sequence. Keeps SKILL.md
+    lean. Traces to §Packaging, §Worktree Provisioning, §Merge-Conflict Handling.
+    (REQ-ORCH-019, supports 022..027)
 10. [spike] Dispatch concurrency (budget: ~30 min) — measure whether a batch of
     ≥2 orchestrator-issued implement dispatches runs **truly concurrently** vs.
     issued-together-but-serialized (e.g. dispatch two trivial timestamped
@@ -130,22 +122,14 @@ criteria are walked with traceability filled.
     ship Design B as-is and document "isolation + ordered integration, not
     necessarily parallel speedup on this harness." Traces to §Dispatch Concurrency
     [high-uncertainty]. (REQ-ORCH-028)
-11. [implement] Reconcile OPERATOR DOCS **and the governing requirement text**
-    (carried-forward finding m3 + review finding M1) — remove the "no fan-out" /
-    "sequential only" language now that fan-out is active:
+11. [implement] Reconcile OPERATOR DOCS (carried-forward finding m3) — remove the
+    "no fan-out" / "sequential only" language now that fan-out is active:
     - `skills/sdd-orchestrate/USAGE.md` §v1 limitations / deferred features — fan-out
       is now an opt-in implement-stage mode; describe it and its single-chain
       degrade-to-sequential behavior.
     - `README.org` — update the driver description so it no longer claims no fan-out.
     - `skills/sdd-orchestrate/SKILL.md` scope notes — any residual "fan-out
       deferred" wording.
-    - `docs/requirements/functional/orchestration.md` — REQ-ORCH-020 and
-      REQ-ORCH-021 still literally mandate that the operator docs cover "v1
-      limitations (research-entry, sequential, no fan-out)", which now contradicts
-      the active fan-out feature. Reword both so they no longer say "no fan-out":
-      fan-out is active/opt-in at the implement stage only (sequential remains the
-      default), and the remaining genuine v1 limitation is **research-entry-only /
-      no non-research entry**. Keep REQ-ORCH-020/021 otherwise intact.
     Reflect the spike outcome (speedup claim or its absence). Traces to §User
     Documentation, §Sequential Execution and Implement-Stage Fan-out.
     (REQ-ORCH-020, REQ-ORCH-021, REQ-ORCH-015)
@@ -161,11 +145,9 @@ criteria are walked with traceability filled.
     columns for REQ-ORCH-015/016/022..028. Traces to §Verification (Manual +
     Acceptance Criteria). (all fan-out REQ-ORCH)
 
-**Entry criteria**: Chunk 0 complete (fan-out procedure already in `references/`,
-SKILL.md body promoted).
-**Exit criteria**: Concurrency spike finding recorded; operator docs (USAGE.md,
-README.org, SKILL.md scope notes) **and** the governing requirement text
-(REQ-ORCH-020/021 in `docs/requirements/functional/orchestration.md`) no longer say
+**Entry criteria**: Chunk 0 complete.
+**Exit criteria**: Fan-out procedure in `references/`; concurrency spike finding
+recorded; operator docs (USAGE.md, README.org, SKILL.md scope notes) no longer say
 "no fan-out"; all fan-out acceptance criteria pass with traceability
 Implementation + Verified filled; `pre-commit run --all-files` clean; chunk-close
 4-check passes.
@@ -236,4 +218,3 @@ Full plan history:
 - [2026-05-25-rs003-complete.md](plan-history/2026-05-25-rs003-complete.md)
 - [2026-06-04-rs004-complete.md](plan-history/2026-06-04-rs004-complete.md)
 - [2026-06-04-rs005-orchestrate-complete.md](plan-history/2026-06-04-rs005-orchestrate-complete.md)
-- [2026-06-04-pre-fanout-reseq.md](plan-history/2026-06-04-pre-fanout-reseq.md)
