@@ -105,3 +105,5 @@ last_updated: 2026-06-04
 | REQ-ORCH-017 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-018 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
+| REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
+| REQ-ORCH-021 | orchestration.md | | README.org | pass |

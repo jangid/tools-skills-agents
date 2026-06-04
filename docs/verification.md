@@ -2,7 +2,7 @@
 date: 2026-06-04
 status: pass
 plan_ref: docs/plan.md
-scope: RS-005 sdd-orchestrate driver skill
+scope: RS-005 sdd-orchestrate driver skill (incl. validation pass + operator docs)
 prior_reports:
   - docs/verification-rs004.md (full v3 + sdd-review, 2026-05-25)
   - docs/verification-rs002.md (RS-002 internal, 68 criteria)
@@ -13,14 +13,18 @@ prior_reports:
 ## Summary
 
 Holistic verification of the RS-005 `sdd-orchestrate` driver skill. All 5
-structural quality gates pass, all 20 acceptance criteria in
+structural quality gates pass, all **23** acceptance criteria in
 `docs/spec/orchestration.md` pass with evidence, traceability is complete for
-REQ-ORCH-001..019, and no regressions were introduced — no existing `sdd-*`
+REQ-ORCH-001..021, and no regressions were introduced — no existing `sdd-*`
 skill or spec was modified. **Status: pass — ready to ship.** Zero critical or
-minor issues. The two riskiest behaviors (subagent skill execution, dispatch-time
-review isolation) carry independent live-dispatch evidence from RS-005, not just
-prose assertion. The 11 specs from prior cycles were verified in
-`verification-rs004.md` and are unchanged; this report covers only the new spec.
+minor issues.
+
+This report incorporates a post-implementation **validation pass** (plan
+Chunk 2): a live pipeline-template smoke test and an out-of-session review
+dogfood, both run as real subagent dispatches. They confirmed the driver's core
+mechanisms and surfaced one material template gap (M1), which was fixed. The
+cycle also added extensive operator documentation (REQ-ORCH-020) and a README
+update (REQ-ORCH-021).
 
 ## Quality Gates
 
@@ -60,9 +64,11 @@ language compilers apply).
 | Replan → gate event (017) | pass | §Edge cases routed through the gate |
 | Reject-no-findings pauses (018) | pass | §Edge cases |
 | Single SKILL.md <500, templates in references/ (019) | pass | 251 lines; `references/dispatch-templates.md` |
+| Operator guide USAGE.md complete (020) | pass | `skills/sdd-orchestrate/USAGE.md` (183 lines): when-to-use, four phases, worked example, isolation, install symlink, troubleshooting w/ write fallback, v1 limits |
+| README introduces driver + install convention (021) | pass | `README.org` introduces driver/suite, documents `~/.claude/skills/` symlink, links USAGE.md |
 | Well-formed MD, valid frontmatter, kebab name | pass | gate checks above |
 
-20/20 pass.
+23/23 pass.
 
 ## Traceability Verification
 
@@ -86,6 +92,21 @@ Note: a full DISCUSS→DONE run over six real stages was not executed as a singl
 test (expensive, and explicitly bounded in the plan's risk mitigation). The
 mechanism-level behaviors it depends on are covered by the RS-005 live dispatches
 above.
+
+## Validation Pass (Chunk 2 — live)
+
+| Activity | Result | Evidence |
+|----------|--------|----------|
+| Pipeline-template smoke test | pass | A real subagent ran the exact `references/` PIPELINE template for a throwaway `sdd-research` stage: Skill tool present, `sdd-research` loaded synchronously, the non-interactivity clause let it proceed with no operator questions, and `RS-SMOKE` did not leak into `docs/research/`. |
+| Subagent disk-write reality | finding → fixed | The subagent's write was blocked by harness policy; the labeled-content fallback returned the content for the orchestrator to persist — exactly as designed. Captured as explicit "Disk-write reality" guidance in the pipeline template. |
+| D7 external review dogfood | Approve with fixes → fixed | A fresh-session review subagent (REVIEW template, paths only) reviewed the implementation and returned a tiered verdict. Its input audit confirmed isolation held. |
+| Review finding M1 | applied | Pipeline template was missing the success-criterion, budget, and deliverable-contract front-load slots REQ-ORCH-007 mandates; added to the template and slot contract. |
+| Review cross-layer note (Spec column "empty") | dismissed | Verified false against `traceability.md` — the Spec column is populated (`orchestration.md`) for all ORCH rows; the reviewer conflated it with the intentionally-empty Test column. |
+
+The earlier "no live end-to-end run" gap is now **partially closed**: both the
+pipeline and review dispatch paths were exercised live (separately). A single
+unbroken DISCUSS→DONE run over six real stages remains unexecuted by design
+(cost), but every mechanism it composes now has live evidence.
 
 ## Regressions
 
