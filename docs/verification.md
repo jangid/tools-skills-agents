@@ -1,9 +1,10 @@
 ---
-date: 2026-05-25
+date: 2026-06-04
 status: pass
 plan_ref: docs/plan.md
-scope: Full v3 + sdd-review (v2 artifact structure + RS-002 + RS-003 + RS-004)
+scope: RS-005 sdd-orchestrate driver skill (incl. validation pass + operator docs)
 prior_reports:
+  - docs/verification-rs004.md (full v3 + sdd-review, 2026-05-25)
   - docs/verification-rs002.md (RS-002 internal, 68 criteria)
 ---
 
@@ -11,155 +12,126 @@ prior_reports:
 
 ## Summary
 
-All acceptance criteria verified across 11 specs covering four research
-cycles (RS-001, RS-002, RS-003, RS-004). 102 criteria checked, 102 pass,
-0 fail. Quality gates pass. No regressions. The skills repo runs at v3
-(`.sdd-version` = 3) with 9 skills — 8 original plus the new sdd-review
-skill implementing the fourth verification layer.
+Holistic verification of the RS-005 `sdd-orchestrate` driver skill. All 5
+structural quality gates pass, all **23** acceptance criteria in
+`docs/spec/orchestration.md` pass with evidence, traceability is complete for
+REQ-ORCH-001..021, and no regressions were introduced — no existing `sdd-*`
+skill or spec was modified. **Status: pass — ready to ship.** Zero critical or
+minor issues.
 
-Two minor issues carried forward: 32 v2-era requirements have empty
-Implementation columns (work exists, matrix incomplete), and 2 specs
-exceed the 300-line budget (migration.md at 390, skill-updates.md at 352).
-Neither blocks release.
-
-Note: sdd-review's own deliverable was not formally reviewed by sdd-review
-(per RS-004 F4 — recursive case deferred). External review handled
-RS-004 phase boundaries informally; this sdd-verify pass covers
-end-of-cycle verification. Same bootstrap pattern used for RS-002
-Chunks 0-1 and RS-003 Chunk 0.
+This report incorporates a post-implementation **validation pass** (plan
+Chunk 2): a live pipeline-template smoke test and an out-of-session review
+dogfood, both run as real subagent dispatches. They confirmed the driver's core
+mechanisms and surfaced one material template gap (M1), which was fixed. The
+cycle also added extensive operator documentation (REQ-ORCH-020) and a README
+update (REQ-ORCH-021).
 
 ## Quality Gates
 
+This is a Markdown skill-authoring deliverable; gates are structural (no
+language compilers apply).
+
 | Gate | Status | Notes |
 |------|--------|-------|
-| Frontmatter consistency | pass | All 11 specs: `status: Approved`, `last_updated` present. All 9 skills: valid `name:`, `description:` |
-| File size (specs <300 lines) | advisory | 9 of 11 specs within budget. migration.md (390) and skill-updates.md (352) exceed — both cover multiple procedures or cross-cutting requirements. Exempt per REQ-CTX-001 pragmatics |
-| File size (skills <500 lines) | pass | Range: 162-291 lines. sdd-review at 244 lines (target ~250). All within budget |
-| Version marker | pass | `docs/.sdd-version` contains `3` |
-| No leftover Draft specs | pass | All 11 specs are Approved |
-| Archive references | pass | 4 archived plans in plan-history/ match plan.md Archive section |
-| Kebab-case naming | pass | All 9 skill directories use kebab-case |
-| Name matches directory | pass | All `name:` fields match their directory name |
-| Vocabulary consistency | pass | "milestone" used in delivery-grouping sense across all skills. "chunk" used as work-unit throughout |
+| Frontmatter valid | pass | SKILL.md, spec, requirement, findings all parse |
+| Naming (kebab-case, matches dir) | pass | `name: sdd-orchestrate` == directory |
+| Size budget | pass | SKILL.md 251 lines (< 500 guideline) |
+| Internal references resolve | pass | `references/dispatch-templates.md` exists and is linked |
+| Markdown well-formed | pass | code fences balanced in SKILL.md and templates |
 
 ## Acceptance Criteria
 
-### RS-001/002/003 Criteria (88 items — previously verified)
+### orchestration.md (20 criteria, all verified against `skills/sdd-orchestrate/`)
 
-All 88 criteria verified in the prior `docs/verification.md` (2026-05-25,
-scope: v2 + RS-002 + RS-003). No re-walk needed — RS-004 changes are
-additive and do not affect prior criteria. Breakdown:
-- RS-002 (68 items): verified in `docs/verification-rs002.md`
-- RS-003 (20 items): verified in prior `docs/verification.md`
+| Criterion (REQ) | Status | Evidence |
+|-----------------|--------|----------|
+| Driver dispatches, modifies none (001) | pass | §What This Is "composes… never reimplements"; regression check confirms no other skill touched |
+| Four ordered phases (002) | pass | §The Four Phases diagram + sections |
+| DISCUSS reuses brainstorming (003) | pass | §DISCUSS "Reuse the brainstorming process" |
+| kickoff.md only new artifact, git-tracked (004) | pass | §KICKOFF |
+| v1 research-entry only (005) | pass | §KICKOFF "out of scope for v1" |
+| Two separate dispatches per stage (006) | pass | §Per-stage dispatch model |
+| Non-interactivity + front-load (007) | pass | §Pipeline subagent dispatch |
+| Central ID assignment (008) | pass | §Pipeline "Assign IDs centrally… verbatim" |
+| Review carries paths only (009) | pass | §Review MUST-carry / MUST-NOT lists |
+| Research review omits upstream (010) | pass | §Review "Research-stage exception" |
+| Human gate every stage, no auto-advance (011) | pass | §The gate ("never auto-advance") |
+| Fix loop = findings + paths only (012) | pass | §The gate loop-back row |
+| Reviews ephemeral, no docs/reviews/ (013) | pass | §Reviews Are Ephemeral |
+| Resume via phase detection, no marker/log (014) | pass | §Phase Detection + §Rules |
+| v1 sequential (015) | pass | §Execution Model |
+| Deferred fan-out rule documented (016) | pass | §Execution Model deferred fan-out |
+| Replan → gate event (017) | pass | §Edge cases routed through the gate |
+| Reject-no-findings pauses (018) | pass | §Edge cases |
+| Single SKILL.md <500, templates in references/ (019) | pass | 251 lines; `references/dispatch-templates.md` |
+| Operator guide USAGE.md complete (020) | pass | `skills/sdd-orchestrate/USAGE.md` (183 lines): when-to-use, four phases, worked example, isolation, install symlink, troubleshooting w/ write fallback, v1 limits |
+| README introduces driver + install convention (021) | pass | `README.org` introduces driver/suite, documents `~/.claude/skills/` symlink, links USAGE.md |
+| Well-formed MD, valid frontmatter, kebab name | pass | gate checks above |
 
-### RS-004 Criteria (14 items — newly verified)
+23/23 pass.
 
-#### review.md §Acceptance Criteria (13 items)
+## Traceability Verification
 
-| Criterion | Status | Evidence |
-|-----------|--------|----------|
-| Session-isolation prompt with confirm/stop options (REQ-REV-007) | pass | sdd-review/SKILL.md lines 40-55: blockquote with (a)/(b) options |
-| No programmatic context-contamination detection (REQ-REV-007) | pass | sdd-review/SKILL.md line 55: explicit prohibition |
-| Six per-phase checklists present (REQ-REV-001) | pass | sdd-review/SKILL.md lines 81-152: Research, Requirements, Specs, Plan, Implementation, Verification |
-| Each checklist has content-correctness + scope-completeness (REQ-REV-008) | pass | Each of 6 checklists has labeled Content correctness and Scope completeness subsections |
-| Scope-completeness rationale cites RS-004 F2 evidence (REQ-REV-008) | pass | sdd-review/SKILL.md line 79: "Three of four systematic review misses...RS-004 F2" |
-| Report format: verdict (3 states), strengths (required), tiered findings, recommendation (REQ-REV-002) | pass | sdd-review/SKILL.md lines 154-190: template with all sections; verdict definitions at lines 185-188 |
-| Report inline, not persisted to disk (REQ-REV-002) | pass | sdd-review/SKILL.md line 156: "NOT written to disk" |
-| Required inputs: deliverable, prior phase output, traceability matrix (REQ-REV-003) | pass | sdd-review/SKILL.md lines 59-63: three numbered inputs |
-| Inputs exclude working-session deliberations (REQ-REV-003) | pass | sdd-review/SKILL.md lines 65-71: four prohibited input types with rationale |
-| Bias disclosure with omission rule (REQ-REV-004) | pass | sdd-review/SKILL.md lines 192-204: include when prior involvement, omit entirely otherwise, "absence is the disclosure" |
-| Trigger classification: mandatory/recommended/ad-hoc/skip (REQ-REV-005) | pass | sdd-review/SKILL.md lines 206-217: table with all four tiers and specific boundaries |
-| Chunk-close boundaries excluded from review scope (REQ-REV-005, REQ-REV-006) | pass | sdd-review/SKILL.md line 215: Skip row for chunk-close; line 231: explicit NOT-list |
-| Scope boundaries against chunk-close, XSPEC, sdd-verify explicit (REQ-REV-006) | pass | sdd-review/SKILL.md lines 219-235: four-layer table + NOT-list + delegation pattern |
-
-#### skill-updates.md §REQ-SKILL-018 (1 item)
-
-| Criterion | Status | Evidence |
-|-----------|--------|----------|
-| sdd-review skill exists with session isolation, phase checklists, report format (REQ-SKILL-018) | pass | sdd-review/SKILL.md: 244 lines (target ~200-250), phase-agnostic detection, Step 1 is session isolation, 6 checklists, report template |
-
-## Cross-Spec Consistency (XSPEC)
-
-Applied cross-spec consistency pass to review.md and updated skill-updates.md:
-
-- **Type definitions in code blocks**: review.md contains a report template in a code block but no class/enum/TypeAlias definitions. No type-level cross-references to validate.
-- **Cross-spec file references**: review.md references chunk-close-review.md, cross-spec-consistency.md, and sdd-verify (skill) — all exist. skill-updates.md references review.md — exists.
-- **Vocabulary consistency**: "chunk-close" and "XSPEC" used consistently with prior specs. Verification stack table in review.md matches the table in sdd-review/SKILL.md and sdd-verify/SKILL.md's layer acknowledgment.
-
-No findings. Clean across four cycles.
+| Check | Result |
+|-------|--------|
+| Every REQ-ORCH has a Spec | pass (19/19 → orchestration.md) |
+| Every REQ-ORCH has an Implementation | pass (19/19 → SKILL.md / references) |
+| Test column | empty by design (19/19) — a prose skill has no unit-test surface; the acceptance-criteria walkthrough is the verification, matching the REQ-REV precedent in verification-rs004.md |
+| Verified column | filled `pass` for REQ-ORCH-001..019 |
 
 ## User-Perspective Validation
 
 | Scenario | Status | Notes |
 |----------|--------|-------|
-| Skill discovery | pass | sdd-review/SKILL.md at conventional path; frontmatter description specific about when to use vs skip |
-| Session-isolation prompt readability | pass | Blockquote format with clear (a)/(b) options; operator responsibility framing explicit |
-| Per-phase checklist actionability | pass | All items in imperative "Check that..." form; no abstract guidance |
-| Bias disclosure clarity | pass | When-to-include and when-to-omit rules unambiguous; absence-as-disclosure pattern clear |
-| Scope boundaries comprehension | pass | NOT-list with flag-and-point delegation pattern; concrete example provided |
-| Four-layer stack consistency | pass | Verification layers table consistent across sdd-review, sdd-verify, and review.md spec |
+| Subagent can run an sdd-* stage end-to-end | pass | RS-005 Q1 live dispatch: a subagent invoked sdd-research and wrote an artifact to disk |
+| Paths-only review yields a real verdict with no leakage | pass | RS-005 Q2 live dispatch: review subagent fed only paths produced a tiered verdict; input audit confirmed zero leakage |
+| Dispatch templates are instantiable by an operator | pass | implement task 13 instantiated all three (non-research review, research review, pipeline); inputs match the contract |
+| Skill reads coherently for an operator | pass | DISCUSS→KICKOFF→LOOP→DONE flow is linear; normative isolation rules and per-stage exception are explicit |
+
+Note: a full DISCUSS→DONE run over six real stages was not executed as a single
+test (expensive, and explicitly bounded in the plan's risk mitigation). The
+mechanism-level behaviors it depends on are covered by the RS-005 live dispatches
+above.
+
+## Validation Pass (Chunk 2 — live)
+
+| Activity | Result | Evidence |
+|----------|--------|----------|
+| Pipeline-template smoke test | pass | A real subagent ran the exact `references/` PIPELINE template for a throwaway `sdd-research` stage: Skill tool present, `sdd-research` loaded synchronously, the non-interactivity clause let it proceed with no operator questions, and `RS-SMOKE` did not leak into `docs/research/`. |
+| Subagent disk-write reality | finding → fixed | The subagent's write was blocked by harness policy; the labeled-content fallback returned the content for the orchestrator to persist — exactly as designed. Captured as explicit "Disk-write reality" guidance in the pipeline template. |
+| D7 external review dogfood | Approve with fixes → fixed | A fresh-session review subagent (REVIEW template, paths only) reviewed the implementation and returned a tiered verdict. Its input audit confirmed isolation held. |
+| Review finding M1 | applied | Pipeline template was missing the success-criterion, budget, and deliverable-contract front-load slots REQ-ORCH-007 mandates; added to the template and slot contract. |
+| Review cross-layer note (Spec column "empty") | dismissed | Verified false against `traceability.md` — the Spec column is populated (`orchestration.md`) for all ORCH rows; the reviewer conflated it with the intentionally-empty Test column. |
+
+The earlier "no live end-to-end run" gap is now **partially closed**: both the
+pipeline and review dispatch paths were exercised live (separately). A single
+unbroken DISCUSS→DONE run over six real stages remains unexecuted by design
+(cost), but every mechanism it composes now has live evidence.
 
 ## Regressions
 
-None found. RS-004 was additive:
-- sdd-verify's existing behavior unchanged beyond +4-line verification layers paragraph
-- chunk-close mechanism still documented and operational in sdd-implement
-- XSPEC still operational in sdd-specs
-- sdd-migrate still handles v1→v2→v3 composition
-- Per-milestone plan support still available in sdd-plan and sdd-replan
-
-## Traceability
-
-### Full matrix (89 requirements)
-
-| Scope | Count | Spec | Implementation | Verified |
-|-------|-------|------|----------------|----------|
-| RS-001 v2 (REQ-RS, REQ-REQ, REQ-PLAN, REQ-MIG-001..008, REQ-CTX, REQ-COMPAT-001, REQ-SKILL-001..008, REQ-CFG-001) | 32 | 32/32 | 0/32 | 32/32 |
-| RS-002 (REQ-CHKC, REQ-QIMPL, REQ-MPLAN, REQ-XSPEC, REQ-STALE, REQ-SKILL-009..016) | 38 | 38/38 | 38/38 | 38/38 |
-| RS-003 (REQ-MIG-009..015, REQ-SKILL-017, REQ-COMPAT-002) | 9 | 9/9 | 9/9 | 9/9 |
-| RS-004 (REQ-REV-001..008, REQ-SKILL-018) | 9 | 9/9 | 9/9 | 9/9 |
-| **Updated** (REQ-MIG-002, REQ-CFG-001) | 2 | 2/2 | 2/2 | 2/2 |
-
-**Spec column**: 89/89 populated (was 80/80 pre-RS-004).
-**Implementation column**: 58/89 populated. 32 v2-era gaps (known debt). RS-004's 9 all filled.
-**Verified column**: 89/89 populated (all pass).
-**Test column**: N/A — markdown deliverables, no test infrastructure.
-
-## Q-IMPL Entries
-
-Two entries from RS-002, none from RS-003 or RS-004:
-
-- **Q-IMPL-001** (chunk-close-review.md): Step 5 fold-in — spec gap handling folded into Q-IMPL Tier 3
-- **Q-IMPL-002** (milestone-plans.md): Per-milestone activation threshold heuristics
-
-RS-004 implementation had zero deviations from spec. No Q-IMPL entries needed.
+- None found. Only `sdd-orchestrate` was created; `CLAUDE.md`, the requirement
+  index/traceability, the research index, and the plan received additive or
+  expected-rewrite changes. No existing `sdd-*` skill or spec was modified
+  (verified via `git diff --name-only`).
 
 ## Issues Found
 
 ### Critical (blocks release)
-
-None.
+- None.
 
 ### Minor (can ship, fix later)
-
-1. **V2 traceability Implementation gap**: 32 v2-era requirements lack
-   Implementation column entries. Work exists in skills but was never
-   back-traced. Carried forward from prior reports.
-2. **Two specs exceed 300-line budget**: migration.md (390 lines, covers
-   two migration procedures) and skill-updates.md (352 lines, 18
-   cross-cutting requirements). Both are pragmatic — splitting would
-   fragment related content.
+- None. One deferred item is tracked by design (not a defect): the subagent-
+  nesting uncertainty for the future parallel fan-out feature (orchestration.md
+  §Subagent nesting, REQ-ORCH-016). Out of v1 scope; a spike precedes that
+  feature.
 
 ## Recommendation
-
-- [x] Ship as v3 with four verification layers
+- [x] Ship as-is
 - [ ] Fix critical issues then ship (invoke sdd-replan)
 - [ ] Significant rework needed (invoke sdd-replan)
 
-Verification complete. The SDD skills repository is verified at v3 across
-all four research cycles (RS-001 v2 structure, RS-002 workflow improvements,
-RS-003 v3 migration, RS-004 external review). 89 requirements, 11 specs,
-9 skills, all consistent. Four verification layers operational: chunk-close
-(mechanical), XSPEC (structural), sdd-verify (holistic), sdd-review
-(semantic). Active plan can be archived to `docs/plan-history/` on next
-`sdd-plan` invocation.
+The active plan may now be archived to `docs/plan-history/` if desired. Per the
+dual-session design (D7), the highest-fidelity remaining validation is to run the
+new driver's own per-stage external review (`sdd-review` in a fresh session) over
+this implementation — optional, operator's choice.

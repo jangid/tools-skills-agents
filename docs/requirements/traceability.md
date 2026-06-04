@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-05-25
+last_updated: 2026-06-04
 ---
 
 # Traceability Matrix
@@ -86,3 +86,24 @@ last_updated: 2026-05-25
 | REQ-REV-007 | review.md | | sdd-review/SKILL.md | pass |
 | REQ-REV-008 | review.md | | sdd-review/SKILL.md | pass |
 | REQ-SKILL-018 | skill-updates.md, review.md | | sdd-review/SKILL.md | pass |
+| REQ-ORCH-001 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-002 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-003 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-004 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-005 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-006 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-007 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-008 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-009 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-010 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-011 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-012 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-013 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-014 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-015 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-016 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-017 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-018 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
+| REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
+| REQ-ORCH-021 | orchestration.md | | README.org | pass |
