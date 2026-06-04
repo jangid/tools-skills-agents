@@ -172,3 +172,24 @@ the project's ~500-line guideline. The kickoff-writer must not be a separate
 skill. The dispatch prompt templates (pipeline and review) may live in a
 `skills/sdd-orchestrate/references/` file to keep the body lean.
 [Priority: should]
+
+### REQ-ORCH-020: Extensive operator user documentation
+The skill must ship with extensive end-user (operator) documentation, distinct
+from the `SKILL.md` (which is Claude-facing instructions). The documentation must
+cover, at minimum: what the driver is and when to use vs. skip it; each of the
+four phases (DISCUSS, KICKOFF, LOOP, DONE) explained for a human operator; a
+complete worked example walking one idea from DISCUSS through a per-stage
+pipeline→review→gate to DONE; the isolation guarantees and why they matter;
+**installation** instructions, including linking the skill into the Claude skills
+directory (`~/.claude/skills/<name>` → repo `skills/<name>`) as the project does
+for every SDD skill; troubleshooting (including the blocked-subagent-write
+labeled-content fallback); and the v1 limitations (research-entry, sequential, no
+fan-out). It must live at a discoverable path under `skills/sdd-orchestrate/`.
+[Priority: must]
+
+### REQ-ORCH-021: Project README introduces the driver and links the docs
+The project README must be updated to introduce `sdd-orchestrate` (and the SDD
+skill suite it drives) and link to the operator documentation (REQ-ORCH-020) and
+the skills directory. Installation guidance in the README must describe the
+`~/.claude/skills/` symlink convention so a new adopter can install the skills.
+[Priority: must]

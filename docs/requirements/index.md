@@ -1,5 +1,5 @@
 ---
-version: "6.0"
+version: "7.0"
 last_updated: 2026-06-04
 traceability: traceability.md
 ---
@@ -47,7 +47,7 @@ tools-skills-agents repository. Covers three scopes:
 | functional | [milestone-plans.md](functional/milestone-plans.md) | MPLAN | REQ-MPLAN-001..004 | Approved | 2026-05-25 |
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
 | functional | [review.md](functional/review.md) | REV | REQ-REV-001..008 | Approved | 2026-05-25 |
-| functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..019 | Approved | 2026-06-04 |
+| functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..021 | Approved | 2026-06-04 |
 | non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
 | integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..018 | Approved | 2026-05-25 |
 | configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
