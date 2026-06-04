@@ -100,6 +100,17 @@ A cyclic, phase-based workflow for building software with AI assistance. Each ph
 8. `sdd-migrate` — one-time migration between artifact structure versions
 9. `sdd-review` — structured external review in a separate session at phase boundaries (cross-cutting, not sequential)
 
+### Driver (`sdd-orchestrate`)
+
+`sdd-orchestrate` is a **driver**, not a tenth phase skill. It runs the nine
+skills above as a single-operator loop — DISCUSS → KICKOFF → LOOP → DONE — where
+each pipeline stage and each `sdd-review` run as **separate, context-isolated
+subagents** and the operator gates after every stage (proceed │ loop-back-to-fix
+│ stop). It introduces one new artifact, `docs/handoff/kickoff.md`; reviews stay
+ephemeral. v1 is research-entry and sequential (no mid-pipeline entry, no
+parallel fan-out). Use it to run a whole SDD cycle end-to-end with built-in
+external review; invoke an individual `sdd-*` skill directly for a single phase.
+
 ### Phase Detection
 
 Every skill checks `docs/.sdd-version` on entry. If missing, it suggests running `sdd-migrate`. Skills then detect the current phase by checking which artifacts exist **and whether they are stale**:
