@@ -1,5 +1,5 @@
 ---
-version: "7.0"
+version: "8.0"
 last_updated: 2026-06-04
 traceability: traceability.md
 ---
@@ -47,10 +47,18 @@ tools-skills-agents repository. Covers three scopes:
 | functional | [milestone-plans.md](functional/milestone-plans.md) | MPLAN | REQ-MPLAN-001..004 | Approved | 2026-05-25 |
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
 | functional | [review.md](functional/review.md) | REV | REQ-REV-001..008 | Approved | 2026-05-25 |
-| functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..021 | Approved | 2026-06-04 |
+| functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..028 | Approved | 2026-06-04 |
 | non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
 | integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..018 | Approved | 2026-05-25 |
 | configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
+
+> **ORCH delta note:** The ORCH domain mixes shipped requirements (REQ-ORCH-001..015,
+> 017..021, all traced and `pass`) with a freshly-added implement-fan-out delta —
+> REQ-ORCH-016 (promoted) and REQ-ORCH-022..028. That delta was added at the
+> requirements phase and is **not yet specced or implemented**; its traceability
+> Spec/Impl/Verified columns are intentionally blank pending the specs and implement
+> phases. The specs phase should treat REQ-ORCH-016 and REQ-ORCH-022..028 as the
+> new work to design.
 
 ## Domain Prefixes
 
@@ -74,6 +82,40 @@ tools-skills-agents repository. Covers three scopes:
 
 ## Q-REQ Resolutions
 
+Resolved during requirements gathering for RS-006 (implement-stage fan-out):
+
+- **Q-REQ-A** (fan-out feasibility / design): Implement-stage fan-out is now
+  **supported** (REQ-ORCH-016 promoted from `may`/deferred to `must`), built as
+  **Design B — orchestrator-owned fan-out, one level deep** (REQ-ORCH-022). RS-006
+  Q1 proved a dispatched subagent has no subagent-dispatch tool, so the nested
+  Design A (implement subagent owns its own fan-out) is infeasible; the
+  orchestrator must dispatch the parallel implement subagents itself.
+- **Q-REQ-B** (fan-out boundaries & worktrees): Fan out along the plan's
+  independent chunk-dependency branches, one git worktree per concurrently-runnable
+  chunk-group (REQ-ORCH-016, REQ-ORCH-023).
+- **Q-REQ-C** (opt-in vs default): Fan-out is opt-in at the implement gate
+  (REQ-ORCH-024); sequential execution remains the default (REQ-ORCH-015 updated).
+- **Q-REQ-D** (merge & conflict policy): Worktree branches merge sequentially into
+  `main` before the implement-stage review (REQ-ORCH-025); conflicts are resolved
+  automatically, with `git merge --abort` + redo-at-orchestrator as the fallback,
+  never corrupting already-merged work (REQ-ORCH-026). RS-006 Q3 proved this safe.
+- **Q-REQ-E** (subagent git identity): Fan-out subagents commit with inline
+  `git -c user.email=... -c user.name=...` flags because the subagent sandbox
+  blocks shared `.git/config` writes (REQ-ORCH-027; RS-006 Q2 caveat).
+- **Q-REQ-F** (dispatch concurrency): Whether N parallel subagents run truly
+  concurrently vs serialized is **unverified** and carried as a `[needs-spike]`
+  requirement (REQ-ORCH-028) to resolve at spec/implementation time. The design
+  holds either way; only wall-clock speedup is at stake (RS-006 Open Questions).
+- **Q-REQ-G** (worktree ownership): **Decision — the orchestrator provisions the
+  worktrees** (REQ-ORCH-023), not the fan-out subagents. RS-006 Q2 showed BOTH
+  approaches work — an orchestrator-pre-created worktree and a subagent-created
+  worktree both succeed — and permitted either; orchestrator ownership was merely
+  noted as "cleaner." We harden that preference into a requirement so worktree
+  lifecycle and cleanup belong to a single owner (the orchestrator), which keeps
+  provisioning and teardown symmetric and avoids orphaned subagent-created
+  worktrees. RS-006 permitted either approach; this entry records the deliberate
+  narrowing to orchestrator-provisioned.
+
 Resolved during requirements gathering for RS-005:
 
 - **Q-REQ-A** (entry points): Research-entry only for v1 (REQ-ORCH-005). The
@@ -84,11 +126,12 @@ Resolved during requirements gathering for RS-005:
   stage sequentially in the main workspace; parallel implement-stage fan-out is
   a follow-on feature. Gets the loop working before adding worktree merge
   complexity that RS-005 flagged as reasoned-not-prototyped.
-- **Q-REQ-C** (fan-out boundary rule): Pinned now even though deferred
-  (REQ-ORCH-016, priority may). Fan out along independent branches of the plan's
-  chunk dependency graph; one worktree per concurrently-runnable chunk-group;
-  merge sequentially to main before the implement-stage review. Documents a
-  settled rule so the later feature inherits a design, not a [needs-spike].
+- **Q-REQ-C** (fan-out boundary rule): _(superseded — see RS-006 Q-REQ-A)_ Pinned
+  now even though deferred (REQ-ORCH-016, priority may). Fan out along independent
+  branches of the plan's chunk dependency graph; one worktree per
+  concurrently-runnable chunk-group; merge sequentially to main before the
+  implement-stage review. Documents a settled rule so the later feature inherits a
+  design, not a [needs-spike].
 - **Q-REQ-D** (resume marker): No new marker, no authoritative loop log
   (REQ-ORCH-014). Resume relies on existing phase detection + staleness; reviews
   are reproduced by re-dispatch. Preserves D5 (kickoff.md the only new artifact).
@@ -144,17 +187,22 @@ Resolved during requirements gathering for RS-002:
 - Review automation or auto-triggering
 - Review of sdd-review's own output (recursive case deferred)
 - Non-research orchestrator entry points / starting the loop mid-pipeline (v1)
-- Parallel implement-stage fan-out and worktree isolation (v1 — deferred follow-on)
+- Nested subagent fan-out (Design A) — infeasible: a dispatched subagent has no
+  subagent-dispatch tool (RS-006 Q1). Fan-out is orchestrator-owned, one level deep
+- Fan-out of any stage other than implement; changes to `sdd-implement` itself
 - Persisting review verdicts to disk (no docs/reviews/ — reaffirmed for the driver)
 - Two literal human terminal sessions (superseded by the orchestrator + subagent model)
 
 ## Open Questions
 
-- **Subagent nesting (deferred fan-out):** when the implement stage later fans
-  out, a pipeline subagent that itself spawns worktree subagents
-  (subagent-spawning-subagent) was not exercised in RS-005. Confirm nesting
-  behavior before the fan-out feature (REQ-ORCH-016) ships. Not blocking for v1
-  (REQ-ORCH-015 keeps v1 sequential).
+- **Subagent nesting (fan-out):** RESOLVED by RS-006 Q1 — a dispatched subagent
+  has no subagent-dispatch tool, so nesting is impossible. Fan-out is therefore
+  orchestrator-owned, one level deep (Design B; REQ-ORCH-022).
+- **Fan-out dispatch concurrency [needs-spike]:** whether the orchestrator can run
+  multiple implement subagents truly concurrently (vs. issued-together-but-serialized)
+  is unverified (REQ-ORCH-028). The fan-out design is correct either way — only
+  wall-clock speedup depends on it. Resolve at spec/implementation time before
+  claiming a speedup guarantee. (RS-006 Open Questions; see also RS-005 Q4)
 
 All other Q-REQ items resolved.
 
@@ -165,6 +213,7 @@ All other Q-REQ items resolved.
 - [RS-003: v3 Migration Path](../research/RS-003-v3-migration/findings.md)
 - [RS-004: sdd-review Skill Design](../research/RS-004-sdd-review/findings.md)
 - [RS-005: sdd-orchestrate Feasibility](../research/RS-005-sdd-orchestrate-feasibility/findings.md)
+- [RS-006: Subagent Nesting & Worktrees (implement-stage fan-out)](../research/RS-006-subagent-nesting-worktrees/findings.md)
 
 ## See Also
 
