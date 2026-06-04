@@ -103,6 +103,33 @@ budget, documentation consistent, and all acceptance criteria verified.
 **Exit criteria**: All 20 acceptance criteria pass; traceability Implementation
 column filled; `pre-commit run --all-files` clean; chunk-close 4-check passes.
 
+### Chunk 2: Validation pass and operator documentation
+
+**Goal**: Close the "never run live" gap, apply review findings, and ship
+extensive operator documentation + README.
+
+**Tasks**:
+15. [verify] Live smoke test — dispatch a real pipeline subagent using the
+    actual `references/` PIPELINE template; confirm the skill loads, the
+    non-interactivity clause works, and the labeled-content fallback handles a
+    blocked write. (REQ-ORCH-007)
+16. [verify] D7 dogfood — dispatch a fresh-session review subagent (the REVIEW
+    template) over the implementation; record the verdict. (REQ-ORCH-009)
+17. [implement] Apply review finding M1 — add success-criterion, budget, and
+    deliverable-contract slots to the PIPELINE template; add a precedence note
+    and the validated blocked-write/fallback guidance. (REQ-ORCH-007)
+18. [implement] Install the skill link `~/.claude/skills/sdd-orchestrate` and
+    write the operator guide `skills/sdd-orchestrate/USAGE.md`. (REQ-ORCH-020)
+19. [implement] Update `README.org` — introduce the driver/suite, the
+    `~/.claude/skills/` symlink convention, and link the operator guide.
+    (REQ-ORCH-021)
+20. [verify] Re-verify — 23 acceptance criteria, traceability complete for
+    REQ-ORCH-001..021, structural gates green. (all REQ-ORCH)
+
+**Entry criteria**: Chunk 1 complete.
+**Exit criteria**: Smoke + dogfood recorded; M1 applied; USAGE.md + README
+shipped; REQ-ORCH-020/021 traced and verified.
+
 ## Replan Triggers
 
 - `skills/sdd-orchestrate/SKILL.md` exceeds ~500 lines even after moving the
