@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-05-25
+last_updated: 2026-06-04
 ---
 
 # Research Index
@@ -10,3 +10,4 @@ last_updated: 2026-05-25
 | RS-002 | SDD skill improvements | 2026-05-25 | Complete | Chunk-close review checklist, Q-IMPL protocol, per-milestone plans, drift detection — six workflow gaps identified from rubric M1 |
 | RS-003 | v3 migration path | 2026-05-25 | Complete | One migration-required change (plan vocabulary), lightweight v2→v3 procedure, v1→v3 via sequential composition |
 | RS-004 | sdd-review skill design | 2026-05-25 | Complete | External review catches critical issues at phase boundaries; ~7 requirements for a formal skill covering phase detection, report format, trigger classification, and session isolation |
+| RS-005 | sdd-orchestrate feasibility | 2026-06-04 | Complete | Subagent skill-invocation and dispatch-time review isolation both proven with live dispatches; no new resume marker needed, fan out along independent plan chunks, package as one skill — greenlight for requirements |
