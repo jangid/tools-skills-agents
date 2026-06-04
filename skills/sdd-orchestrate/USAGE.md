@@ -65,7 +65,80 @@ Notes:
 
 ---
 
-## 3. The four phases
+## 3. Invoking and driving the loop
+
+You invoke the driver **once** and then mostly just talk to it. You do **not**
+invoke each `sdd-*` skill yourself — the orchestrator does that for you.
+
+### Start it
+
+In a Claude Code session, either run the slash command:
+
+```
+/sdd-orchestrate
+```
+
+or ask in plain language:
+
+> Use sdd-orchestrate to take "<your idea>" through a full SDD cycle.
+
+Either way, Claude loads the driver and becomes the **orchestrator** for the rest
+of the session.
+
+### Then: discuss (DISCUSS)
+
+The orchestrator opens by brainstorming the idea with you. Just talk — answer its
+clarifying questions, push back, refine scope. Nothing is written to disk yet.
+When you and it share an understanding of the scope and the open questions, DISCUSS
+is done.
+
+### Then: it picks up the loop on its own
+
+Once you've converged, the orchestrator runs the rest **autonomously**, pausing
+only at the gates:
+
+1. It writes `docs/handoff/kickoff.md` (KICKOFF).
+2. For each stage (research → requirements → specs → plan → implement → verify) it
+   dispatches the **pipeline** subagent, then the **review** subagent, handling
+   skill invocation, ID assignment, paths, and isolation for you.
+3. It **stops at each gate**, shows you the review verdict, and waits for your
+   one-word decision: **proceed**, **loop-back-to-fix**, or **stop**.
+
+So after DISCUSS your job shrinks to making gate decisions. You are not copy-
+pasting between sessions or remembering which skill comes next — the orchestrator
+sequences the whole loop and only ever hands control back at a gate.
+
+### A typical exchange (abridged)
+
+```
+you  > /sdd-orchestrate
+      Idea: add a --dry-run flag to the deploy tool.
+orch > A few questions before I write a kickoff:
+       - dry-run prints the plan only, or a diff?  - exit-code contract? ...
+you  > plan + diff; non-zero exit if drift. partial applies are out of scope.
+orch > Good — we're aligned. Writing docs/handoff/kickoff.md and starting research.
+       [dispatches research pipeline → research review]
+orch > GATE (research): reviewer says Approve. proceed / loop-back / stop?
+you  > proceed
+orch > [requirements pipeline → review]
+       GATE (requirements): Approve with fixes — REQ-DRY-003 not testable. ...?
+you  > loop-back-to-fix
+orch > [re-dispatch with that finding → re-review] Approve now. proceed?
+you  > proceed
+       ... specs, plan, implement, verify, each with a gate ...
+orch > DONE — verify passed review. Recommend committing the cycle.
+```
+
+### Coming back later (resume)
+
+If you stop partway and return in a **new** session, just invoke
+`/sdd-orchestrate` again. It reads the existing artifacts on disk, detects which
+stage you're at (no hidden marker file), and continues the loop from there — re-
+running the current stage's review if needed.
+
+---
+
+## 4. The four phases
 
 ```
 DISCUSS ──▶ KICKOFF ──▶ LOOP ──▶ DONE
@@ -103,7 +176,7 @@ cycle's artifacts (including `docs/handoff/kickoff.md`).
 
 ---
 
-## 4. A complete worked example
+## 5. A complete worked example
 
 Idea: *"Add a `--dry-run` flag to our deploy tool."*
 
@@ -131,7 +204,7 @@ artifacts on disk.
 
 ---
 
-## 5. Isolation — why two subagents
+## 6. Isolation — why two subagents
 
 The review subagent is dispatched with **only**: the repo root, the deliverable
 path(s), and (for non-research stages) the upstream artifact path. It never
@@ -147,7 +220,7 @@ research questions from the findings file's own frontmatter.)
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 | Symptom | Cause | What to do |
 |---------|-------|------------|
@@ -160,20 +233,35 @@ research questions from the findings file's own frontmatter.)
 
 ---
 
-## 7. v1 limitations
+## 8. v1 limitations and roadmap
 
+### What v1 does *not* do
 - **Research-entry only** — a cycle always starts from a research kickoff. You
   cannot yet start mid-pipeline with pre-existing requirements.
 - **Sequential** — every stage runs single-threaded in the main workspace. There
-  is no parallel implement-stage fan-out and no worktrees in v1. (The fan-out
-  boundary rule is documented in the spec for a future version.)
+  is no parallel implement-stage fan-out and no worktrees in v1.
 - **Reviews are ephemeral** — verdicts are shown inline and never written to
   disk; there is no `docs/reviews/`. Decisions live in the artifacts (commits,
-  spec edits, Q-IMPL entries, replan triggers).
+  spec edits, Q-IMPL entries, replan triggers). *(This one is permanent, by
+  design — not a future change.)*
+
+### Deferred features (planned, not yet built)
+These are specified but intentionally out of v1 scope. They are listed here so you
+know what is coming and what each depends on.
+
+| Feature | What it will add | Requirement | Depends on |
+|---------|------------------|-------------|------------|
+| **Parallel implement fan-out** | When the implement stage has independent work, fan out along the **independent branches of the plan's chunk dependency graph** — one worktree per concurrently-runnable chunk-group — then merge branches **sequentially** back to `main` before the implement-stage review. Falls back to sequential when the graph has no independent branches. | REQ-ORCH-016 | the nesting spike below |
+| **Subagent-nesting spike** | Verify that a pipeline subagent can itself dispatch worktree subagents and merge their branches (subagent-spawning-subagent), unverified in RS-005. **Fallback if it can't:** the orchestrator owns the fan-out directly, keeping nesting one level deep. | — (open question) | — (do this first) |
+| **Non-research entry points** | Start the loop mid-pipeline when upstream artifacts already exist (e.g. requirements are approved and you want to begin at specs), instead of always emitting a research kickoff. | design Q4 | — |
+
+When any of these is built, it follows the same SDD cycle the driver itself runs:
+a research/spike first where there's uncertainty, then requirements → specs → plan
+→ implement → verify, each gated.
 
 ---
 
-## 8. See also
+## 9. See also
 
 - [`SKILL.md`](SKILL.md) — the driver's operational instructions
 - [`references/dispatch-templates.md`](references/dispatch-templates.md) — the
