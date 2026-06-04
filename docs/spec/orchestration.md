@@ -21,6 +21,8 @@ requires:
   - REQ-ORCH-017
   - REQ-ORCH-018
   - REQ-ORCH-019
+  - REQ-ORCH-020
+  - REQ-ORCH-021
 ---
 
 # SDD Orchestration Driver
@@ -254,6 +256,23 @@ prompt templates (pipeline and review) live in
 moving the bulkiest component out is what makes the ~500-line target comfortable
 (RS-005 Q5; existing skills run 162–291 lines).
 
+### User Documentation
+
+`SKILL.md` is Claude-facing operational instruction. Operators also need a
+human-facing guide (REQ-ORCH-020), shipped at
+`skills/sdd-orchestrate/USAGE.md`. It must cover: what the driver is and when to
+use vs. skip; each phase explained for an operator; a complete worked example
+(one idea → DISCUSS → KICKOFF → per-stage pipeline→review→gate → DONE); the
+isolation guarantees and why they matter; **installation** via the
+`~/.claude/skills/<name>` → repo `skills/<name>` symlink convention this project
+uses for every SDD skill; troubleshooting, including the blocked-subagent-write
+labeled-content fallback observed live in RS-005; and the v1 limitations
+(research-entry, sequential, no fan-out).
+
+The project README (`README.org`) introduces the driver and the SDD suite, links
+the operator guide, and documents the `~/.claude/skills/` symlink install
+convention so a new adopter can install the skills (REQ-ORCH-021).
+
 ## Verification
 
 ### Manual
@@ -290,4 +309,6 @@ moving the bulkiest component out is what makes the ~500-line target comfortable
 - [ ] Replan triggers surface to the operator as gate events, not silently absorbed (REQ-ORCH-017)
 - [ ] A reject verdict with no actionable findings pauses for an operator decision (REQ-ORCH-018)
 - [ ] Skill is a single `SKILL.md` under ~500 lines with templates in `references/` (REQ-ORCH-019)
+- [ ] Operator guide `skills/sdd-orchestrate/USAGE.md` exists covering when-to-use, the four phases, a complete worked example, isolation, installation via `~/.claude/skills/` symlink, troubleshooting (write fallback), and v1 limitations (REQ-ORCH-020)
+- [ ] README introduces `sdd-orchestrate`, links the operator guide, and documents the `~/.claude/skills/` symlink install convention (REQ-ORCH-021)
 - [ ] Markdown well-formed; frontmatter valid; kebab-case skill name (project quality checks)
