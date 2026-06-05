@@ -30,6 +30,8 @@ requires:
   - REQ-ORCH-026
   - REQ-ORCH-027
   - REQ-ORCH-028
+  - REQ-ORCH-029
+  - REQ-ORCH-030
 ---
 
 # SDD Orchestration Driver
@@ -235,6 +237,47 @@ artifacts.
 Therefore the driver introduces **no** dedicated loop-position marker file, and
 `docs/handoff/kickoff.md` carries **no** authoritative loop log. The artifacts
 are the single source of truth for resume.
+
+#### New cycle vs. resume (REQ-ORCH-029)
+
+Artifact-only phase detection has one ambiguity, observed while dogfooding the
+RS-006 cycle: when the prior cycle is **complete** (`docs/verification.md` with
+`status: pass`), the same on-disk state that means "DONE — nothing to resume"
+also describes the starting point for the *next* feature. The driver must not
+silently report the prior DONE and stop when the operator is in fact opening a new
+cycle.
+
+Resolution: on entry the driver classifies the state as one of
+- **resume** — the latest cycle is mid-loop (some stage incomplete/stale) → continue it; or
+- **done** — the latest cycle is `status: pass` and the operator has no new idea → report DONE; or
+- **new cycle** — the latest cycle is `status: pass` **and** the operator brings a new idea in DISCUSS → run DISCUSS and overwrite `docs/handoff/kickoff.md` at KICKOFF.
+
+Operator intent is the disambiguator between *done* and *new cycle* (the disk
+cannot distinguish them). The driver MUST surface the detected state and its
+new-vs-resume interpretation and confirm before proceeding — it must not assume.
+This keeps the no-marker design (REQ-ORCH-014) intact: nothing new is persisted;
+the driver simply reasons explicitly about the completed-cycle case.
+
+### Orchestrator-Only Work (REQ-ORCH-030)
+
+Some work requires a capability a **leaf pipeline subagent does not have**:
+subagent **dispatch**. RS-006 Q1 established that a dispatched subagent's toolset
+contains no dispatch tool at all, so it cannot spawn its own subagents. Two kinds
+of work therefore MUST run at the orchestrator level, never inside a delegated
+pipeline dispatch:
+
+1. **Implement-stage fan-out execution** — provisioning worktrees and dispatching
+   one implement subagent per chunk-group is itself dispatch; the orchestrator
+   owns it (this is exactly why Design B, not the nested Design A, is the design —
+   see §Fan-out Design Resolution).
+2. **Spikes or tasks that measure or use dispatch** — e.g. a concurrency spike
+   that dispatches parallel probes. RS-006's dispatch-concurrency spike could not
+   be delegated to a leaf subagent; the orchestrator ran it directly.
+
+The driver MUST recognize such tasks (those whose execution requires dispatch) and
+perform them itself, rather than constructing a pipeline dispatch that would stall
+(a leaf subagent cannot proceed) or silently under-deliver. Ordinary stage work
+(invoking an `sdd-*` skill, editing files) remains delegable as normal.
 
 ### Sequential Execution and Implement-Stage Fan-out
 
@@ -457,11 +500,11 @@ Questions; RS-005 Q4), now resolved (see `docs/spikes/dispatch-concurrency.md`).
 ### Packaging
 
 The driver is a single skill at `skills/sdd-orchestrate/SKILL.md`, kept under the
-project's ~500-line guideline (REQ-ORCH-019). The kickoff-writer is not a separate
+project's ~1000-line guideline (REQ-ORCH-019). The kickoff-writer is not a separate
 skill — it is a contained, non-reusable sub-task of the driver. The two dispatch
 prompt templates (pipeline and review) live in
 `skills/sdd-orchestrate/references/dispatch-templates.md` to keep the body lean;
-moving the bulkiest component out is what makes the ~500-line target comfortable
+moving the bulkiest component out is what makes the ~1000-line target comfortable
 (RS-005 Q5; existing skills run 162–291 lines).
 
 ### User Documentation
@@ -556,7 +599,9 @@ convention so a new adopter can install the skills (REQ-ORCH-021).
 - [ ] Dispatch-concurrency is resolved by the RS-006 spike (`docs/spikes/dispatch-concurrency.md`, 2026-06-05): orchestrator-dispatched subagents were observed concurrent at medium confidence; design holds whether dispatches run concurrently or serialized and correctness is unaffected; only wall-clock speedup depends on it, and downstream prose attributes the speedup to the spike's observed (medium-confidence) result rather than asserting it as fact (REQ-ORCH-028)
 - [ ] Replan triggers surface to the operator as gate events, not silently absorbed (REQ-ORCH-017)
 - [ ] A reject verdict with no actionable findings pauses for an operator decision (REQ-ORCH-018)
-- [ ] Skill is a single `SKILL.md` under ~500 lines with templates in `references/` (REQ-ORCH-019)
+- [ ] Skill is a single `SKILL.md` under ~1000 lines with templates in `references/` (REQ-ORCH-019)
 - [ ] Operator guide `skills/sdd-orchestrate/USAGE.md` exists covering when-to-use, the four phases, a complete worked example, isolation, installation via `~/.claude/skills/` symlink, troubleshooting (write fallback), and v1 limitations (REQ-ORCH-020)
 - [ ] README introduces `sdd-orchestrate`, links the operator guide, and documents the `~/.claude/skills/` symlink install convention (REQ-ORCH-021)
+- [ ] On entry the driver classifies state as resume / done / new-cycle; when the prior cycle is `verification.md` status pass and the operator brings a new idea, it runs DISCUSS and overwrites `docs/handoff/kickoff.md` rather than reporting DONE; it surfaces the interpretation and confirms before proceeding (REQ-ORCH-029)
+- [ ] The driver performs dispatch-requiring work (implement-stage fan-out execution, parallel-dispatch spikes) at the orchestrator level and does not delegate it to a leaf pipeline subagent (which has no dispatch tool) (REQ-ORCH-030)
 - [ ] Markdown well-formed; frontmatter valid; kebab-case skill name (project quality checks)
