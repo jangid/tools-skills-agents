@@ -59,6 +59,21 @@ or prior review leaves no on-disk trace by design — it is **reproduced** by
 re-dispatching the review subagent against the current artifacts (reviews are
 read-only and idempotent).
 
+**New cycle vs. resume.** One state is ambiguous: when the prior cycle is
+**complete** (`docs/verification.md` with `status: pass`), the same on-disk state
+that means "DONE — nothing to resume" is also the starting point for the *next*
+feature. Classify entry as one of:
+
+- **resume** — the latest cycle is mid-loop (a stage incomplete/stale) → continue it;
+- **done** — the latest cycle is `status: pass` and the operator has no new idea → report DONE;
+- **new cycle** — the latest cycle is `status: pass` **and** the operator brings a new idea in DISCUSS → run DISCUSS and **overwrite** `docs/handoff/kickoff.md` at KICKOFF.
+
+The disk cannot distinguish *done* from *new cycle* — **operator intent** does.
+Do not silently report the prior DONE and stop when the operator is opening new
+work; surface your new-vs-resume interpretation and confirm. This adds no new
+marker (REQ-ORCH-014 stands) — it is just explicit reasoning about the
+completed-cycle case.
+
 ## The Four Phases
 
 ```
@@ -294,6 +309,26 @@ delivers wall-clock speedup, not merely worktree isolation (REQ-ORCH-028).
 **Correctness does not depend on it:** the design (per-worktree isolation +
 sequential conflict-aborting merge) is correct whether dispatches run concurrently or
 serialized; only the speedup depends on concurrency.
+
+## Orchestrator-Only Work
+
+Some work needs a capability a **leaf pipeline subagent does not have**: subagent
+**dispatch**. A dispatched subagent's toolset contains no dispatch tool at all
+(RS-006 Q1), so it cannot spawn its own subagents. You (the orchestrator) MUST
+perform dispatch-requiring work yourself — never hand it to a delegated pipeline
+dispatch, which would stall (the leaf subagent cannot proceed) or silently
+under-deliver. The two cases that arise:
+
+1. **Implement-stage fan-out execution** — provisioning worktrees and dispatching
+   one implement subagent per chunk-group is itself dispatch; that is exactly why
+   fan-out is orchestrator-owned (Design B, not the nested Design A).
+2. **A spike or task that measures or uses dispatch** — e.g. a concurrency probe
+   that dispatches parallel subagents. Run it directly; do not delegate it. (The
+   RS-006 dispatch-concurrency spike was run this way.)
+
+Ordinary stage work — invoking an `sdd-*` skill, reading/writing files — remains
+delegable to a pipeline subagent as normal. The test is simply: *does executing
+this task require dispatching a subagent?* If yes, the orchestrator does it.
 
 ## Isolation Discipline (normative)
 
