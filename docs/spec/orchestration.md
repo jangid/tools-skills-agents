@@ -1,6 +1,6 @@
 ---
 status: Approved
-last_updated: 2026-06-04
+last_updated: 2026-06-05
 requires:
   - REQ-ORCH-001
   - REQ-ORCH-002
@@ -427,28 +427,32 @@ conflict) bounds it and guarantees termination. REQ-ORCH-026 was reconciled to
 match this contract — it no longer says the redo may "re-use the subagent's
 returned output"; it now mandates re-derivation in a re-branched worktree.
 
-#### Dispatch Concurrency [high-uncertainty]
+#### Dispatch Concurrency
 
-**Unverified assumption (REQ-ORCH-028):** that the harness runs a batch of fan-out
-implement dispatches **truly concurrently** rather than serializing them. RS-006
-Q1 proved subagents cannot dispatch and RS-005 proved the orchestrator can
-dispatch subagents, but whether the orchestrator's multiple implement dispatches
-execute in parallel (vs. issued-together-but-serialized) was **not measured**.
+**Resolved by spike (REQ-ORCH-028).** Whether the harness runs a batch of fan-out
+implement dispatches **truly concurrently** rather than serializing them was the
+fan-out design's last open question. RS-006 ran the dispatch-concurrency spike on
+2026-06-05 (`docs/spikes/dispatch-concurrency.md`) and resolved it **favorably at
+medium confidence**: two orchestrator-dispatched probe subagents issued in a single
+message were **observed running concurrently** — alive across the same overlapping
+wall-clock window and ending within 0.1 s of each other, a pattern inconsistent with
+serialization. Confidence is **medium**, not high, because the spike's ~4s probe
+workload sits inside a ~426s agent lifetime, so the absolute timings are
+latency-dominated; the simultaneous end and shared lifetime remain strong evidence.
 
-- **Why it does not threaten correctness:** the fan-out design (per-worktree
+- **Why it never threatened correctness:** the fan-out design (per-worktree
   isolation + sequential conflict-aborting merge) is correct **either way**. Only
-  the **wall-clock speedup** is at stake — serialized dispatch yields correct
-  output with no time savings.
+  the **wall-clock speedup** was ever at stake — serialized dispatch would still
+  yield correct output, just with no time savings.
 - **When it matters:** only when ≥2 chunk-groups are concurrently runnable; with a
   single runnable group the question is moot.
-- **Spike to resolve:** measure whether a batch of orchestrator dispatches runs
-  concurrently before claiming a speedup guarantee. **Fallback if serialized:**
-  ship Design B as-is (still correct); document that fan-out provides isolation and
-  ordered integration but not necessarily parallel wall-clock speedup on this
-  harness.
+- **Outcome:** concurrency was observed, so fan-out delivers wall-clock speedup
+  where it holds; no speedup-guarantee caveat needs to block the feature. Because
+  confidence is medium, downstream prose attributes the speedup to the spike's
+  observed result rather than asserting it as established fact.
 
-This is the **one remaining uncertainty** in the fan-out design (RS-006 Open
-Questions; RS-005 Q4).
+This was the **one remaining uncertainty** in the fan-out design (RS-006 Open
+Questions; RS-005 Q4), now resolved (see `docs/spikes/dispatch-concurrency.md`).
 
 ### Packaging
 
@@ -549,7 +553,7 @@ convention so a new adopter can install the skills (REQ-ORCH-021).
 - [ ] The redo after `git merge --abort` is performed by re-deriving the chunk-group in a worktree re-branched from the updated `main` (re-running `sdd-implement`), not by replaying the stale patch (REQ-ORCH-026, Q-IMPL-1)
 - [ ] If a chunk-group still conflicts after re-derivation against updated `main`, the orchestrator treats it as a fan-out boundary error and falls back to running the affected chunk-groups sequentially, guaranteeing termination (REQ-ORCH-026)
 - [ ] Fan-out subagents commit with inline `git -c user.email=... -c user.name=...` identity flags; no subagent writes a shared `.git/config` (REQ-ORCH-027)
-- [ ] Dispatch-concurrency is marked high-uncertainty: design holds whether dispatches run concurrently or serialized; only wall-clock speedup is at stake; spike resolves before any speedup guarantee (REQ-ORCH-028)
+- [ ] Dispatch-concurrency is resolved by the RS-006 spike (`docs/spikes/dispatch-concurrency.md`, 2026-06-05): orchestrator-dispatched subagents were observed concurrent at medium confidence; design holds whether dispatches run concurrently or serialized and correctness is unaffected; only wall-clock speedup depends on it, and downstream prose attributes the speedup to the spike's observed (medium-confidence) result rather than asserting it as fact (REQ-ORCH-028)
 - [ ] Replan triggers surface to the operator as gate events, not silently absorbed (REQ-ORCH-017)
 - [ ] A reject verdict with no actionable findings pauses for an operator decision (REQ-ORCH-018)
 - [ ] Skill is a single `SKILL.md` under ~500 lines with templates in `references/` (REQ-ORCH-019)
