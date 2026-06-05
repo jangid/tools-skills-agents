@@ -10,6 +10,9 @@ scope: >
 prior_reports:
   - docs/verification-rs005.md (RS-005 sdd-orchestrate driver holistic report, 2026-06-04)
   - docs/verification-rs004.md (full v3 + sdd-review, 2026-05-25)
+addendum: >
+  Driver fixes (REQ-ORCH-029/030, 2026-06-05) verified below — small SKILL.md
+  prose additions from the RS-006 dogfooding findings.
 ---
 
 # Verification Report — Implement-Stage Fan-out (RS-006 / Design B)
@@ -119,3 +122,27 @@ file-and-line evidence. The active plan may now be archived to
 `docs/plan-history/` if desired. Optional highest-fidelity follow-up (operator's
 choice): a live DISCUSS→DONE run exercising a real ≥2-branch fan-out plan,
 deliberately deferred here as expensive/stateful per the plan's Risks.
+
+---
+
+## Addendum: Driver fixes (REQ-ORCH-029/030) — 2026-06-05
+
+Lightweight cycle codifying two driver-behavior gaps observed while dogfooding
+the RS-006 fan-out cycle. Deliverable: prose added to `skills/sdd-orchestrate/SKILL.md`.
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Driver classifies entry as resume/done/new-cycle; prior `verification.md` pass + new idea → DISCUSS and overwrite `kickoff.md`, not silent DONE; surfaces interpretation and confirms (REQ-ORCH-029) | pass | SKILL.md §Phase Detection "New cycle vs. resume" |
+| Dispatch-requiring work (fan-out execution, parallel-dispatch spikes) runs at orchestrator level, never delegated to a leaf subagent (no dispatch tool, RS-006 Q1) (REQ-ORCH-030) | pass | SKILL.md §Orchestrator-Only Work |
+
+**Gates:** SKILL.md 367 lines, frontmatter valid, fences balanced, kebab name. No
+other `sdd-*` skill modified by the driver. Traceability Implementation+Verified
+filled for REQ-ORCH-029/030.
+
+**Convention change (operator-requested, applied directly):** the spec/SKILL.md
+size guideline was relaxed from ~500 to ~1000 lines and reframed as a *soft review
+trigger* (prefer `references/` extraction / cohesion split over splitting to hit a
+number). Landed in `skills/sdd-specs/SKILL.md` (travels to adopters), this repo's
+`CLAUDE.md` (made unopinionated), and REQ-ORCH-019.
+
+**Status: pass.** Zero issues.
