@@ -1,6 +1,6 @@
 ---
 status: Approved
-last_updated: 2026-06-04
+last_updated: 2026-06-05
 requires:
   - REQ-ORCH-001
   - REQ-ORCH-002
@@ -23,6 +23,13 @@ requires:
   - REQ-ORCH-019
   - REQ-ORCH-020
   - REQ-ORCH-021
+  - REQ-ORCH-022
+  - REQ-ORCH-023
+  - REQ-ORCH-024
+  - REQ-ORCH-025
+  - REQ-ORCH-026
+  - REQ-ORCH-027
+  - REQ-ORCH-028
 ---
 
 # SDD Orchestration Driver
@@ -44,6 +51,14 @@ write artifacts (Q1), and a review subagent fed only artifact paths produces a
 correct verdict with audited zero leakage (Q2). This spec defines the driver's
 phases, its dispatch contracts, its gate protocol, and what it explicitly does
 not do. Design decisions D1–D7 from the dual-session design are settled inputs.
+
+[Updated 2026-06-04: the implement-stage fan-out feature is now an ACTIVE design,
+not deferred. RS-006 ran a live spike that ruled out nested fan-out (Design A) as
+infeasible and selected orchestrator-owned fan-out (Design B). The "Sequential
+Execution and Implement-Stage Fan-out" section below now specifies Design B —
+boundary rule, opt-in gate, worktree provisioning, sequential merge, and conflict
+handling — with dispatch-concurrency as the single remaining uncertainty
+(REQ-ORCH-016, REQ-ORCH-022..028; see RS-006).]
 
 ## Design
 
@@ -221,30 +236,223 @@ Therefore the driver introduces **no** dedicated loop-position marker file, and
 `docs/handoff/kickoff.md` carries **no** authoritative loop log. The artifacts
 are the single source of truth for resume.
 
-### Sequential Execution and Deferred Fan-out
+### Sequential Execution and Implement-Stage Fan-out
 
-For v1 every stage runs single-threaded in the main workspace (REQ-ORCH-015).
-Parallel implement-stage fan-out and worktree isolation are out of scope for v1.
+Sequential execution is the **default**: every stage runs single-threaded in the
+main workspace unless the operator explicitly opts into fan-out at the implement
+gate (REQ-ORCH-015). When fan-out is not selected, the implement stage runs
+single-threaded in the main workspace exactly like every other stage. Fan-out is
+**only** ever available at the implement stage; no other stage fans out.
 
-When fan-out is later introduced (REQ-ORCH-016, deferred), the settled rule is:
-fan out along the **independent branches of the plan's chunk dependency graph** —
-not per-milestone (too coarse; milestones are sequential) and not per-task (too
-fine). Use one worktree per concurrently-runnable chunk-group and merge branches
-**sequentially** back to `main` before the implement-stage review runs on the
-merged state. The orchestrator derives the parallel groups by reading the plan's
-dependency graph, without modifying `sdd-implement`. Fan-out applies only when
-the graph actually contains independent chunk branches; otherwise execution stays
-sequential.
+[Changed 2026-06-04: fan-out promoted from deferred to an ACTIVE design. RS-006
+settled the design selection — see "Fan-out Design Resolution" below — so this
+section now specifies the orchestrator-owned fan-out (Design B) as a buildable
+feature rather than a forward-pointer.]
 
-#### Subagent nesting [high-uncertainty]
-The deferred fan-out implies a pipeline subagent that itself spawns worktree
-subagents (subagent-spawning-subagent). RS-005 did not exercise this nesting.
-**Unverified assumption:** a dispatched subagent can itself dispatch subagents and
-merge their branches. **Spike to resolve:** a minimal nested-dispatch probe
-before the fan-out feature ships. **Fallback if false:** the orchestrator (not a
-pipeline subagent) owns the fan-out — it dispatches the parallel implement
-subagents directly and performs the merges itself, keeping nesting one level
-deep. This uncertainty does **not** affect v1, which is sequential (REQ-ORCH-015).
+#### Fan-out Design Resolution
+
+RS-006 ran a live spike to choose between two fan-out designs and settled it
+decisively:
+
+- **Design A (nested) — RULED OUT.** A pipeline implement subagent would own the
+  fan-out, spawning one sub-subagent per chunk-group (nesting two levels deep).
+  RS-006 Q1 proved this is **infeasible in this harness**: a dispatched subagent
+  has **no subagent-dispatch tool in its toolset** (only the todo-list `Task*`
+  tools exist), so a nested dispatch call is not even constructible. Nesting is
+  blocked by tool provisioning, not a runtime depth limit.
+- **Design B (orchestrator-owned, one level deep) — SELECTED.** The orchestrator
+  owns the fan-out directly: it dispatches the parallel implement subagents itself
+  and performs the merges itself. Each fan-out subagent is a **leaf** — it must
+  not (and cannot) dispatch sub-subagents (REQ-ORCH-022). RS-006 Q2/Q3 proved the
+  pieces Design B needs (worktree creation and sequential conflict-aborting merge)
+  all work and can be orchestrator-driven.
+
+This resolves the prior `[high-uncertainty]` subagent-nesting question: nesting is
+infeasible, Design B is the only viable design, and it is now the spec.
+
+#### Fan-out Boundary Rule
+
+Fan-out occurs along the **independent branches of the plan's chunk dependency
+graph** — not per-milestone (too coarse; milestones are sequential) and not
+per-task (too fine) (REQ-ORCH-016). The orchestrator derives the parallel groups
+by reading the plan's dependency graph itself, **without modifying
+`sdd-implement`** (REQ-ORCH-001, REQ-ORCH-016). Fan-out applies only when the
+graph actually contains ≥2 independent chunk branches; if the graph is a single
+chain, execution stays sequential even when the operator selected fan-out.
+
+**Precondition (cross-layer).** The orchestrator derives chunk independence from
+the plan's **chunk dependency declarations** in `docs/plan.md` — that is where
+chunk-level dependencies are expressed. The canonical form is the
+`**Depends on**: Chunk N` field defined in plan-management.md; in practice the
+live plan also expresses the same relation as chunk-level prose
+("Entry criteria: Chunk N complete"), which the orchestrator treats as the
+equivalent of that field. These are **chunk-level** declarations, distinct from
+the coarser milestone-level Entry/Exit criteria in milestone-plans.md, which must
+**not** be used to derive chunk fan-out. The orchestrator parses independence from
+the `**Depends on**` field (or its chunk-level prose equivalent). If the plan does
+**not** express parseable chunk-level dependencies in either form, fan-out
+**degrades to sequential** — the orchestrator never guesses an independence
+boundary. This couples the implement stage to the plan's structure: see
+`docs/spec/plan-management.md` for the `**Depends on**: Chunk N` field. (uses the
+existing `**Depends on**: Chunk N` field; reconfirm at the specs→plan boundary.)
+
+#### Fan-out Opt-in Gate
+
+Fan-out is **opt-in at the implement gate** (REQ-ORCH-024). The orchestrator must
+not enable it automatically. At the implement-stage gate the orchestrator presents
+fan-out as an explicit operator choice; absent an opt-in, the implement stage runs
+sequentially per REQ-ORCH-015. The orchestrator may surface how many independent
+chunk-groups the plan's graph yields so the operator can judge whether fan-out is
+worthwhile.
+
+When the plan's graph yields only a **single chain** (no independent branches),
+the orchestrator tells the operator **at the gate** that fan-out will degrade to
+sequential for this plan, so an opt-in that then runs sequentially is expected
+rather than surprising. The same notice applies when the plan does not express
+parseable chunk-level dependencies (see the Boundary Rule precondition above).
+
+#### Worktree Provisioning and Dispatch (Design B)
+
+When the operator opts in and the graph has independent branches, the orchestrator
+runs this sequence (REQ-ORCH-022, REQ-ORCH-023):
+
+1. **Derive groups.** Read the plan's chunk dependency graph; compute the set of
+   concurrently-runnable chunk-groups (the independent branches).
+2. **Provision worktrees.** For each group, the **orchestrator** (not the subagent)
+   provisions one git worktree on its own branch via `git worktree add -b
+   <branch> <path> <base>`. Worktree ownership is the orchestrator's, per the
+   deliberate narrowing in Q-REQ-G: a single owner keeps provisioning and teardown
+   symmetric and avoids orphaned subagent-created worktrees. (RS-006 Q2 showed both
+   orchestrator- and subagent-created worktrees work; this spec requires
+   orchestrator-provisioned.)
+3. **Dispatch one implement subagent per group.** Each dispatch is pinned to its
+   assigned worktree path/branch and carries the chunk-group's tasks. Each fan-out
+   subagent operates **only** within its assigned worktree/branch and is a leaf —
+   it runs `sdd-implement` on its chunk-group and must not fan out further
+   (REQ-ORCH-022, REQ-ORCH-023). The non-interactivity contract (REQ-ORCH-007) and
+   central ID assignment (REQ-ORCH-008) apply to these dispatches as to any
+   pipeline dispatch.
+4. **Subagent git identity.** Each fan-out subagent commits using inline
+   `git -c user.email=<id> -c user.name=<name> commit ...` identity flags rather
+   than writing a shared `.git/config` (REQ-ORCH-027). RS-006 Q2 observed that a
+   dispatched subagent's command sandbox blocks writes to the main repo's
+   `.git/config` ("Operation not permitted"); inline `-c` flags sidestep this and
+   let commits, merges, and branch operations succeed. The orchestrator must not
+   instruct subagents to write `.git/config`.
+5. **Await returns.** The orchestrator waits for all fan-out subagents to return
+   before beginning the merge sequence.
+
+#### Sequential Merge to Main
+
+After the fan-out subagents return, the orchestrator merges the worktree branches
+**sequentially** into `main`, completing all merges **before** the implement-stage
+review runs (REQ-ORCH-025). The review therefore operates on the **merged state**,
+never on individual unmerged branches. The merge loop, for each branch in turn:
+
+```
+git merge --no-edit <branch>
+  exit 0  → merged cleanly (fast-forward or auto-merge); continue to next branch
+  exit ≠0 → conflict; enter conflict handling (below)
+```
+
+Because merges are one-at-a-time, each branch's merge is either fully applied or
+fully unwound; partial-merge corruption across branches cannot occur.
+
+**Worktree teardown.** Once a worktree branch is successfully merged into `main`,
+the orchestrator **removes that worktree** (`git worktree remove <path>`) and
+**deletes its branch** (`git branch -d <branch>`), completing the lifecycle
+ownership that Q-REQ-G's rationale ("a single owner ... avoids orphaned
+worktrees") promised: the same owner that provisioned the worktree tears it down.
+Redo worktrees (`<branch>-redo`, per Merge-Conflict Handling) are torn down the
+same way after their merge. Teardown happens before the implement-stage review so
+the review sees a clean repository with only `main`.
+
+#### Merge-Conflict Handling
+
+On a non-zero `git merge` exit (REQ-ORCH-026):
+
+1. **(Optional, best-effort) auto-resolve.** The orchestrator MAY first attempt
+   automatic resolution of the conflict. This is explicitly best-effort and **not
+   guaranteed** — it must never be the only path. A conflict that auto-resolves
+   cleanly (no abort) is a normal success: the merge completes and the loop
+   continues to the next branch, exactly as for a clean `exit 0` merge.
+2. **Guaranteed fallback — abort and redo by re-derivation.** If auto-resolution
+   is not attempted or does not cleanly succeed, the orchestrator runs `git merge
+   --abort` (which cleanly restores the working tree to the last good merged
+   state) and then **redoes the offending chunk-group by re-derivation**, not by
+   replaying a stale patch. Concretely:
+   - Provision a **fresh worktree re-branched from the now-updated `main`** (which
+     already contains the earlier branches merged so far) via `git worktree add
+     -b <branch>-redo <path> main`.
+   - Re-dispatch an implement subagent (a leaf, per REQ-ORCH-022) to re-run
+     `sdd-implement` for that chunk-group **in the fresh worktree**. Because the
+     work is re-derived against updated `main`, the already-merged changes are
+     integrated by re-derivation rather than by replaying the original patch —
+     replaying the stale patch would reproduce the very same conflict.
+   - Re-attempt `git merge --no-edit <branch>-redo` for that chunk-group.
+
+   RS-006 proved only the `abort` mechanism end-to-end, not the redo; the
+   re-derivation contract above is the spec's design choice for how the redo is
+   performed (see Q-IMPL-1).
+3. **Convergence / guaranteed termination.** If a chunk-group **still** conflicts
+   after re-derivation against the updated `main`, that is proof the chunk-groups
+   were **not truly independent** — i.e. a fan-out boundary-selection error, since
+   genuinely independent branches cannot conflict after re-derivation against a
+   `main` that already contains the other branch. The orchestrator then **falls
+   back to running the remaining/affected chunk-groups sequentially** (one
+   implement run re-branched from `main`, merged, then the next), which cannot
+   conflict by construction. This guarantees termination: each round either merges
+   cleanly or proves non-independence and collapses to the sequential path, which
+   always terminates.
+4. **No corruption invariant.** The abort-and-redo path must **never corrupt or
+   unwind already-merged work.** Because merges are sequential and earlier merges
+   are already committed, a `git merge --abort` unwinds only the single failing
+   merge (RS-006 Q3 proved this end-to-end: clean tree restoration, no loss of
+   prior merges). The redo worktree is re-branched from that intact `main`, so the
+   already-merged branches are preserved and inherited, never replayed or undone.
+
+Conflict detection relies on the `git merge` exit code as the contract signal
+(RS-006 Q3 also confirmed `git status --porcelain` `AA` markers and `<<<<<<<`
+file markers as corroborating signals).
+
+**Q-IMPL-1 (redo mechanism — design decision):** The redo after `git merge
+--abort` is performed by **re-deriving** the chunk-group in a worktree re-branched
+from the updated `main`, not by replaying the failing subagent's original returned
+patch. Rationale: replaying the stale patch would reproduce the identical conflict
+(the patch was generated against the old base), whereas re-derivation lets the
+implement subagent integrate the already-merged changes. RS-006 only verified the
+`abort` step, so this redo contract is a spec-level design choice flagged here for
+implementation; the convergence rule (fall back to sequential on a repeat
+conflict) bounds it and guarantees termination. REQ-ORCH-026 was reconciled to
+match this contract — it no longer says the redo may "re-use the subagent's
+returned output"; it now mandates re-derivation in a re-branched worktree.
+
+#### Dispatch Concurrency
+
+**Resolved by spike (REQ-ORCH-028).** Whether the harness runs a batch of fan-out
+implement dispatches **truly concurrently** rather than serializing them was the
+fan-out design's last open question. RS-006 ran the dispatch-concurrency spike on
+2026-06-05 (`docs/spikes/dispatch-concurrency.md`) and resolved it **favorably at
+medium confidence**: two orchestrator-dispatched probe subagents issued in a single
+message were **observed running concurrently** — alive across the same overlapping
+wall-clock window and ending within 0.1 s of each other, a pattern inconsistent with
+serialization. Confidence is **medium**, not high, because the spike's ~4s probe
+workload sits inside a ~426s agent lifetime, so the absolute timings are
+latency-dominated; the simultaneous end and shared lifetime remain strong evidence.
+
+- **Why it never threatened correctness:** the fan-out design (per-worktree
+  isolation + sequential conflict-aborting merge) is correct **either way**. Only
+  the **wall-clock speedup** was ever at stake — serialized dispatch would still
+  yield correct output, just with no time savings.
+- **When it matters:** only when ≥2 chunk-groups are concurrently runnable; with a
+  single runnable group the question is moot.
+- **Outcome:** concurrency was observed, so fan-out delivers wall-clock speedup
+  where it holds; no speedup-guarantee caveat needs to block the feature. Because
+  confidence is medium, downstream prose attributes the speedup to the spike's
+  observed result rather than asserting it as established fact.
+
+This was the **one remaining uncertainty** in the fan-out design (RS-006 Open
+Questions; RS-005 Q4), now resolved (see `docs/spikes/dispatch-concurrency.md`).
 
 ### Packaging
 
@@ -288,6 +496,34 @@ convention so a new adopter can install the skills (REQ-ORCH-021).
   stage with proceed │ loop-back-to-fix │ stop options.
 - Confirm no `docs/reviews/` directory is created and `docs/handoff/kickoff.md`
   is git-tracked.
+- Opt into fan-out at the implement gate on a plan whose chunk graph has ≥2
+  independent branches; confirm the orchestrator provisions one worktree/branch
+  per group, dispatches one leaf implement subagent per group, and that no fan-out
+  subagent attempts a sub-dispatch.
+- Decline fan-out (or run a single-chain plan); confirm the implement stage runs
+  single-threaded in the main workspace.
+- Inspect a fan-out subagent's commits; confirm they used inline
+  `git -c user.email=... -c user.name=...` and that no shared `.git/config` was
+  written by a subagent.
+- After fan-out subagents return, confirm all branches are merged sequentially into
+  `main` and the implement-stage review runs on the merged state (not on an
+  unmerged branch).
+- After each branch merges, confirm the orchestrator removes the worktree
+  (`git worktree remove`) and deletes its branch, leaving no orphaned worktrees or
+  branches before the implement-stage review.
+- Force a merge conflict (overlapping files across two groups). Confirm that on a
+  clean best-effort auto-resolve the merge simply completes (no abort, PASS); and
+  that on a non-clean conflict the orchestrator runs `git merge --abort`, then
+  redoes the offending chunk-group **by re-running `sdd-implement` in a worktree
+  re-branched from the updated `main`** (not by replaying the old patch), and that
+  previously-merged branches remain intact.
+- Force a chunk-group to conflict **again** after re-derivation (genuinely
+  overlapping work mis-classified as independent); confirm the orchestrator falls
+  back to running the affected chunk-groups sequentially and that the run
+  terminates.
+- On a single-chain plan (or a plan without parseable chunk-level dependencies),
+  confirm the orchestrator tells the operator at the gate that fan-out will degrade
+  to sequential.
 
 ### Acceptance Criteria
 - [ ] Skill is a driver that dispatches `sdd-*` skills and modifies none of them (REQ-ORCH-001)
@@ -304,8 +540,20 @@ convention so a new adopter can install the skills (REQ-ORCH-021).
 - [ ] Fix loop re-dispatches the pipeline with only findings + artifact paths, then re-reviews (REQ-ORCH-012)
 - [ ] Review verdicts are never written to disk; no `docs/reviews/` directory (REQ-ORCH-013)
 - [ ] Resume derives loop position from existing phase detection; no marker file, no authoritative loop log (REQ-ORCH-014)
-- [ ] v1 runs all stages sequentially in the main workspace (REQ-ORCH-015)
-- [ ] Deferred fan-out rule documented: independent plan chunks, one worktree per group, sequential merge to main (REQ-ORCH-016)
+- [ ] Sequential execution is the default; non-opted-in implement runs single-threaded in the main workspace (REQ-ORCH-015)
+- [ ] Fan-out boundary is the plan's independent chunk-dependency branches (not per-milestone, not per-task); orchestrator derives groups by reading the graph without modifying `sdd-implement`; applies only when ≥2 independent branches exist (REQ-ORCH-016)
+- [ ] Orchestrator derives chunk independence from the plan's chunk dependency declarations in `docs/plan.md` — the `**Depends on**: Chunk N` field (or its chunk-level "Entry criteria: Chunk N complete" prose equivalent), not milestone-level Entry/Exit criteria; if the plan lacks parseable chunk-level dependencies, fan-out degrades to sequential and never guesses a boundary (REQ-ORCH-016; see `docs/spec/plan-management.md`)
+- [ ] Fan-out is orchestrator-owned, one level deep: orchestrator dispatches the parallel implement subagents itself and each fan-out subagent is a leaf that does not dispatch sub-subagents; Design A (nested) is ruled out infeasible (REQ-ORCH-022)
+- [ ] Orchestrator provisions one git worktree on its own branch per concurrently-runnable chunk-group and pins each implement subagent to its worktree/branch (REQ-ORCH-023)
+- [ ] Fan-out is opt-in at the implement gate and never enabled automatically; declining runs the stage sequentially (REQ-ORCH-024)
+- [ ] When the plan yields a single chain (or no parseable chunk dependencies), the orchestrator tells the operator at the gate that fan-out will degrade to sequential (REQ-ORCH-024)
+- [ ] After a worktree branch is merged to `main`, the orchestrator removes the worktree (`git worktree remove`) and deletes its branch, leaving no orphaned worktrees/branches (REQ-ORCH-023, Q-REQ-G)
+- [ ] After fan-out subagents return, worktree branches are merged sequentially into `main` and all merges complete before the implement-stage review runs on the merged state (REQ-ORCH-025)
+- [ ] On a conflict that is NOT cleanly auto-resolved, the orchestrator runs `git merge --abort` and redoes the offending chunk-group; best-effort auto-resolution is optional and may precede the fallback; a clean auto-resolve (no abort) counts as PASS; already-merged work is never corrupted (REQ-ORCH-026)
+- [ ] The redo after `git merge --abort` is performed by re-deriving the chunk-group in a worktree re-branched from the updated `main` (re-running `sdd-implement`), not by replaying the stale patch (REQ-ORCH-026, Q-IMPL-1)
+- [ ] If a chunk-group still conflicts after re-derivation against updated `main`, the orchestrator treats it as a fan-out boundary error and falls back to running the affected chunk-groups sequentially, guaranteeing termination (REQ-ORCH-026)
+- [ ] Fan-out subagents commit with inline `git -c user.email=... -c user.name=...` identity flags; no subagent writes a shared `.git/config` (REQ-ORCH-027)
+- [ ] Dispatch-concurrency is resolved by the RS-006 spike (`docs/spikes/dispatch-concurrency.md`, 2026-06-05): orchestrator-dispatched subagents were observed concurrent at medium confidence; design holds whether dispatches run concurrently or serialized and correctness is unaffected; only wall-clock speedup depends on it, and downstream prose attributes the speedup to the spike's observed (medium-confidence) result rather than asserting it as fact (REQ-ORCH-028)
 - [ ] Replan triggers surface to the operator as gate events, not silently absorbed (REQ-ORCH-017)
 - [ ] A reject verdict with no actionable findings pauses for an operator decision (REQ-ORCH-018)
 - [ ] Skill is a single `SKILL.md` under ~500 lines with templates in `references/` (REQ-ORCH-019)

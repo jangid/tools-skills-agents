@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-06-04
+last_updated: 2026-06-05
 ---
 
 # Traceability Matrix
@@ -101,7 +101,14 @@ last_updated: 2026-06-04
 | REQ-ORCH-013 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-014 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-015 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
-| REQ-ORCH-016 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
+| REQ-ORCH-016 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-022 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-023 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-024 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-025 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-026 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-027 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-028 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
 | REQ-ORCH-017 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-018 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
