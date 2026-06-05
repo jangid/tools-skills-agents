@@ -25,7 +25,7 @@ skills/<skill-name>/SKILL.md
 - `description` is a concise sentence used for skill discovery — be specific about when to use vs. when to skip
 - Body defines the skill's instructions, process, and rules
 - Skills describe workflows, not implementation code
-- Keep each SKILL.md under ~500 lines; split large skills into phases or sub-skills
+- Keep each SKILL.md cohesive; move bulky detail to a `references/` file (loaded on demand) rather than growing the body — size is a soft signal, not a hard limit
 
 ### Agents (`agents/`)
 
