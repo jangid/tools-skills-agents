@@ -1,6 +1,6 @@
 ---
 domain: ORCH
-last_updated: 2026-06-04
+last_updated: 2026-06-05
 status: Approved
 research_refs: [RS-005]
 ---
@@ -258,9 +258,12 @@ pipeline→review→gate to DONE; the isolation guarantees and why they matter;
 **installation** instructions, including linking the skill into the Claude skills
 directory (`~/.claude/skills/<name>` → repo `skills/<name>`) as the project does
 for every SDD skill; troubleshooting (including the blocked-subagent-write
-labeled-content fallback); and the v1 limitations (research-entry, sequential, no
-fan-out). It must live at a discoverable path under `skills/sdd-orchestrate/`.
-[Priority: must]
+labeled-content fallback); the execution model (sequential by default, with
+implement-stage fan-out available as an opt-in mode — including its single-chain
+degrade-to-sequential behavior); and the remaining v1 limitation
+(**research-entry-only**: no non-research / mid-pipeline entry). It must live at a
+discoverable path under `skills/sdd-orchestrate/`.
+[Priority: must] [Updated: 2026-06-05]
 
 ### REQ-ORCH-021: Project README introduces the driver and links the docs
 The project README must be updated to introduce `sdd-orchestrate` (and the SDD

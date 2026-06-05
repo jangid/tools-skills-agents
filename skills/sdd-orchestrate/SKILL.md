@@ -32,9 +32,10 @@ Isolation is **by construction**. Each pipeline stage and each review run as a
 has no shared window through which your reasoning could leak — a stronger
 guarantee than two human terminal sessions.
 
-**v1 scope**: research-entry and sequential. The kickoff is always a research
-kickoff and the loop starts at research. There is no mid-pipeline entry and no
-parallel implement-stage fan-out. (Both are documented as future work below.)
+**Scope**: research-entry; sequential by default. The kickoff is always a research
+kickoff and the loop starts at research — mid-pipeline entry remains out of scope.
+Implement-stage **fan-out is active** as an opt-in mode at the implement gate (see
+§Execution Model); every other stage is always sequential.
 
 ## Phase Detection
 
@@ -200,21 +201,99 @@ spec edits, Q-IMPL entries, replan triggers.
 
 ## Execution Model
 
-**v1 is sequential.** Every stage runs single-threaded in the main workspace.
-Worktrees are not used. Parallel implement-stage fan-out is **out of scope for
-v1**.
+**Sequential is the default.** Every stage runs single-threaded in the main
+workspace unless the operator explicitly opts into fan-out at the implement gate.
+Fan-out is **only** ever available at the implement stage; no other stage fans out.
 
-**Deferred fan-out (future).** When parallel implement-stage fan-out is later
-added, the settled rule is: fan out along the **independent branches of the
-plan's chunk dependency graph** — not per-milestone (too coarse; milestones are
-sequential) and not per-task (too fine). Use one worktree per concurrently-
-runnable chunk-group and merge branches **sequentially** back to `main` before
-the implement-stage review runs on the merged state. Derive the parallel groups
-by reading the plan's dependency graph, without modifying `sdd-implement`. Fan
-out only when the graph actually contains independent chunk branches; otherwise
-stay sequential. (Nested subagent dispatch — a pipeline subagent spawning
-worktree subagents — is unverified; a spike precedes this feature. Fallback: the
-orchestrator owns the fan-out directly, keeping nesting one level deep.)
+**Implement-stage fan-out (Design B — active, opt-in).** Fan-out is
+**orchestrator-owned and one level deep**: you derive independent chunk-groups from
+the plan, provision a worktree per group, dispatch one **leaf** implement subagent
+per group, then merge the branches sequentially into `main` before the
+implement-stage review. The full procedure (dispatch template + command sequence)
+lives in [`references/fan-out.md`](references/fan-out.md); the contract below is its
+summary.
+
+Design A (a pipeline subagent owning nested fan-out) is **ruled out infeasible** — a
+dispatched subagent has no subagent-dispatch tool (RS-006 Q1) — so Design B is the
+only viable design and the spec.
+
+### Boundary derivation
+
+Fan out along the **independent branches of the plan's chunk dependency graph** —
+not per-milestone (too coarse; milestones are sequential) and not per-task (too
+fine). Derive the groups by **reading `docs/plan.md`**, never by modifying
+`sdd-implement`: parse each chunk's `**Depends on**: Chunk N` field (canonical, per
+plan-management.md) or its chunk-level prose equivalent `Entry criteria: Chunk N
+complete`. Do **not** use milestone-level Entry/Exit criteria for this. Two chunks
+are independent when neither (transitively) depends on the other.
+
+**Degrade to sequential** (never guess a boundary) when the plan has no parseable
+chunk-level dependencies, or when the graph is a **single chain** (no ≥2 independent
+branches).
+
+### Opt-in gate
+
+Fan-out is **opt-in at the implement gate** and never automatic. At that gate,
+present fan-out as an explicit operator choice; you may surface how many independent
+chunk-groups the plan yields so the operator can judge whether it is worthwhile.
+Absent an opt-in, the implement stage runs sequentially.
+
+When the plan yields only a **single chain** (or has no parseable chunk-level
+dependencies), tell the operator **at the gate** that fan-out will degrade to
+sequential for this plan — so an opt-in that then runs sequentially is expected, not
+surprising.
+
+### Lifecycle (provision → dispatch → merge → teardown)
+
+When the operator opts in and the graph has ≥2 independent branches:
+
+1. **Provision** one worktree/branch per group yourself:
+   `git worktree add -b <branch> <path> <base>`. Worktree ownership is the
+   orchestrator's (Q-REQ-G) — a single owner keeps provisioning and teardown
+   symmetric and avoids orphaned worktrees.
+2. **Dispatch** one implement subagent per group, pinned to its worktree/branch,
+   carrying that group's chunks. Each is a **leaf** — it runs `sdd-implement` and
+   must not (and cannot) sub-dispatch (REQ-ORCH-022). The non-interactivity contract
+   and central ID assignment apply. **Issue all per-group dispatches in one batch**
+   so they run concurrently (see Concurrency note), then **await all returns** before
+   merging.
+3. **Subagent git identity:** instruct each subagent to commit with inline
+   `git -c user.email=<id> -c user.name=<name> commit ...` — never by writing
+   `.git/config`, which the subagent sandbox blocks (RS-006 Q2). Do not instruct a
+   subagent to write `.git/config`.
+4. **Sequential merge to main:** after all returns, merge branches one at a time
+   (`git merge --no-edit <branch>`), completing **all** merges **before** the
+   implement-stage review (the review sees the merged state, never an unmerged
+   branch). One-at-a-time merging means partial-merge corruption cannot occur.
+5. **Teardown:** after each clean merge, remove the worktree
+   (`git worktree remove <path>`) and delete its branch (`git branch -d <branch>`),
+   leaving only `main` for the review.
+
+### Conflict handling (redo by re-derivation)
+
+On a non-zero `git merge` exit: an **optional** best-effort auto-resolve may be tried
+first (a clean auto-resolve = PASS, no abort). Otherwise run `git merge --abort`,
+then **redo the chunk-group by re-derivation** — provision a fresh worktree
+re-branched from the updated `main` (`git worktree add -b <branch>-redo <path>
+main`) and re-dispatch a leaf implement subagent to re-run `sdd-implement` there.
+**Never replay the stale returned patch** (it would reproduce the same conflict);
+re-derivation integrates the already-merged changes. If the group **still** conflicts
+after re-derivation, that proves the groups were not truly independent (a boundary
+error) → **fall back to running the affected groups sequentially**, which cannot
+conflict by construction and guarantees termination. `git merge --abort` unwinds only
+the single failing merge — already-merged work is never corrupted. Full command
+sequence: [`references/fan-out.md`](references/fan-out.md) §3c (Q-IMPL-1).
+
+### Concurrency note
+
+Fan-out implement subagents dispatched in a single batch were **observed to run
+concurrently** on this harness — medium confidence, per the RS-006
+dispatch-concurrency spike (`docs/spikes/dispatch-concurrency.md`), whose ~4s probe
+workload inside a ~426s agent lifetime is latency-dominated. Where it holds, fan-out
+delivers wall-clock speedup, not merely worktree isolation (REQ-ORCH-028).
+**Correctness does not depend on it:** the design (per-worktree isolation +
+sequential conflict-aborting merge) is correct whether dispatches run concurrently or
+serialized; only the speedup depends on concurrency.
 
 ## Isolation Discipline (normative)
 
@@ -242,7 +321,9 @@ dispatch time rather than relying on operator vigilance.
 - **Reviews are ephemeral**: no `docs/reviews/`, no verdicts on disk.
 - **Artifacts are the source of truth for resume**: no loop-position marker, no
   authoritative loop log.
-- **v1 stays sequential**: no worktrees, no fan-out, no non-research entry.
+- **Sequential by default**: only the implement stage may fan out, only when the
+  operator opts in and the plan has ≥2 independent chunk branches; no non-research
+  entry.
 
 ## Transition
 

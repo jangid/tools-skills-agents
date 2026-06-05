@@ -233,29 +233,55 @@ research questions from the findings file's own frontmatter.)
 
 ---
 
-## 8. v1 limitations and roadmap
+## 8. Sequential default, fan-out, and v1 limitations
 
-### What v1 does *not* do
+### Sequential by default; implement-stage fan-out is opt-in
+Every stage runs **single-threaded in the main workspace by default**. The
+**implement stage** is the one exception: you can **opt into fan-out** at the
+implement gate to run independent chunk-groups in parallel.
+
+When you opt in, the orchestrator:
+- derives the independent chunk-groups from the plan's chunk dependency graph
+  (the `**Depends on**: Chunk N` field, or its `Entry criteria: Chunk N complete`
+  prose equivalent — not milestone-level Entry/Exit),
+- provisions one git worktree/branch per group and dispatches one **leaf**
+  implement subagent per group (each runs `sdd-implement` and cannot fan out
+  further),
+- then merges the branches **sequentially** back into `main` — completing all
+  merges **before** the implement-stage review runs on the merged state — tearing
+  down each worktree as it merges.
+
+Dispatched as a single batch, the per-group subagents run concurrently (measured in
+the RS-006 spike), so fan-out delivers a genuine wall-clock speedup on top of
+worktree isolation.
+
+**Single-chain degrade-to-sequential.** If the plan's chunk graph is a single
+chain (or has no parseable chunk-level dependencies), there is nothing to
+parallelize. The orchestrator tells you this **at the gate** and runs the implement
+stage sequentially even if you opted in — an expected outcome, not a failure.
+
+On a merge conflict, the orchestrator runs `git merge --abort` and **redoes** the
+offending group by re-running `sdd-implement` in a worktree re-branched from the
+updated `main` (best-effort auto-resolve may be tried first). If a group conflicts
+*again*, that proves the groups weren't truly independent, and the orchestrator
+falls back to running them sequentially — so the run always terminates and
+already-merged work is never corrupted.
+
+### What v1 still does *not* do
 - **Research-entry only** — a cycle always starts from a research kickoff. You
-  cannot yet start mid-pipeline with pre-existing requirements.
-- **Sequential** — every stage runs single-threaded in the main workspace. There
-  is no parallel implement-stage fan-out and no worktrees in v1.
+  cannot yet start mid-pipeline with pre-existing requirements (e.g. begin at specs
+  when requirements are already approved). This is the remaining genuine v1 limit.
 - **Reviews are ephemeral** — verdicts are shown inline and never written to
   disk; there is no `docs/reviews/`. Decisions live in the artifacts (commits,
   spec edits, Q-IMPL entries, replan triggers). *(This one is permanent, by
   design — not a future change.)*
 
 ### Deferred features (planned, not yet built)
-These are specified but intentionally out of v1 scope. They are listed here so you
-know what is coming and what each depends on.
-
 | Feature | What it will add | Requirement | Depends on |
 |---------|------------------|-------------|------------|
-| **Parallel implement fan-out** | When the implement stage has independent work, fan out along the **independent branches of the plan's chunk dependency graph** — one worktree per concurrently-runnable chunk-group — then merge branches **sequentially** back to `main` before the implement-stage review. Falls back to sequential when the graph has no independent branches. | REQ-ORCH-016 | the nesting spike below |
-| **Subagent-nesting spike** | Verify that a pipeline subagent can itself dispatch worktree subagents and merge their branches (subagent-spawning-subagent), unverified in RS-005. **Fallback if it can't:** the orchestrator owns the fan-out directly, keeping nesting one level deep. | — (open question) | — (do this first) |
 | **Non-research entry points** | Start the loop mid-pipeline when upstream artifacts already exist (e.g. requirements are approved and you want to begin at specs), instead of always emitting a research kickoff. | design Q4 | — |
 
-When any of these is built, it follows the same SDD cycle the driver itself runs:
+When this is built, it follows the same SDD cycle the driver itself runs:
 a research/spike first where there's uncertainty, then requirements → specs → plan
 → implement → verify, each gated.
 
@@ -266,6 +292,9 @@ a research/spike first where there's uncertainty, then requirements → specs �
 - [`SKILL.md`](SKILL.md) — the driver's operational instructions
 - [`references/dispatch-templates.md`](references/dispatch-templates.md) — the
   copy-ready pipeline and review dispatch prompts
+- [`references/fan-out.md`](references/fan-out.md) — the implement-stage fan-out
+  procedure (boundary derivation, per-group dispatch, sequential merge, teardown,
+  conflict redo-by-re-derivation)
 - `docs/spec/orchestration.md` — the design spec
 - `docs/research/RS-005-sdd-orchestrate-feasibility/findings.md` — the feasibility
   evidence behind the isolation and non-interactivity guarantees
