@@ -109,6 +109,8 @@ last_updated: 2026-06-05
 | REQ-ORCH-026 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
 | REQ-ORCH-027 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
 | REQ-ORCH-028 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md | pass |
+| REQ-ORCH-029 | orchestration.md | | skills/sdd-orchestrate/SKILL.md | pass |
+| REQ-ORCH-030 | orchestration.md | | skills/sdd-orchestrate/SKILL.md | pass |
 | REQ-ORCH-017 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-018 | orchestration.md | | skills/sdd-orchestrate/SKILL.md |  pass |
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |

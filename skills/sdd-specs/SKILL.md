@@ -127,7 +127,7 @@ After writing or updating each spec, update `docs/requirements/traceability.md`:
 
 - **Trace everything**: every spec must list which requirements it addresses in the `requires` frontmatter. If you're writing something no requirement covers, flag it to the user — don't invent requirements.
 - **One cohesive area per spec**: a spec should be readable in isolation. Cross-references to other specs are fine but shouldn't be required to understand the core design.
-- **Keep specs short**: ~500 lines max. If a spec is growing beyond that, split it.
+- **Keep specs cohesive**: ~1000 lines is a soft review trigger, not a hard cap. When a spec grows past it, prefer splitting by cohesive feature area, or moving bulky detail out — don't split just to hit a number. Line count is a proxy for cohesion and readability, not the goal.
 - **Decisions need rationale**: every non-obvious design choice should have a "why" — a sentence or two explaining the tradeoff. Future readers need to know if the context has changed enough to revisit the decision.
 - **Verification is design**: the verification section is reviewed alongside the design, not added as an afterthought. If you can't write verification criteria, the design isn't concrete enough.
 - **Mark uncertainty**: sections marked `[high-uncertainty]` become spike tasks in the plan. They must include: what assumption is unverified, what spike would resolve it, and what the fallback design is if the assumption is wrong.

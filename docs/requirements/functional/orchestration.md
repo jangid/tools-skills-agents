@@ -2,7 +2,7 @@
 domain: ORCH
 last_updated: 2026-06-05
 status: Approved
-research_refs: [RS-005]
+research_refs: [RS-005, RS-006]
 ---
 
 # Requirements: SDD Orchestration Driver
@@ -243,10 +243,10 @@ It must not auto-loop the pipeline in this case.
 
 ### REQ-ORCH-019: Single-skill packaging
 The driver must be a single skill at `skills/sdd-orchestrate/SKILL.md`, kept under
-the project's ~500-line guideline. The kickoff-writer must not be a separate
+the project's ~1000-line guideline. The kickoff-writer must not be a separate
 skill. The dispatch prompt templates (pipeline and review) may live in a
 `skills/sdd-orchestrate/references/` file to keep the body lean.
-[Priority: should]
+[Priority: should] [Updated: 2026-06-05]
 
 ### REQ-ORCH-020: Extensive operator user documentation
 The skill must ship with extensive end-user (operator) documentation, distinct
@@ -271,3 +271,27 @@ skill suite it drives) and link to the operator documentation (REQ-ORCH-020) and
 the skills directory. Installation guidance in the README must describe the
 `~/.claude/skills/` symlink convention so a new adopter can install the skills.
 [Priority: must]
+
+<!-- REQ-ORCH-029..030 capture driver-behavior gaps observed while dogfooding the
+     RS-006 fan-out cycle through sdd-orchestrate itself. (see RS-006) -->
+
+### REQ-ORCH-029: Distinguish a new cycle from a mid-loop resume
+On entry the driver must distinguish **resuming an in-progress cycle** from
+**starting a new cycle after a completed one**. When the on-disk artifacts of the
+prior cycle indicate DONE (e.g. `docs/verification.md` with `status: pass`) and
+the operator brings a new idea/feature in DISCUSS, the driver must treat this as a
+**new cycle** — run DISCUSS and overwrite `docs/handoff/kickoff.md` at KICKOFF —
+rather than reporting the prior cycle's DONE state and stopping. Operator intent
+disambiguates the two cases; the driver must surface the detected state and the
+new-vs-resume interpretation before proceeding. Derived from RS-006 dogfooding
+finding #1. [Priority: must]
+
+### REQ-ORCH-030: Orchestrator-only work is not delegated to a leaf subagent
+Work that requires orchestrator-level capabilities — specifically subagent
+**dispatch** — must be performed by the orchestrator itself, not handed to a leaf
+pipeline subagent. A dispatched subagent has no dispatch tool (RS-006 Q1), so it
+cannot execute implement-stage fan-out (which dispatches one subagent per
+chunk-group) or a spike that measures parallel dispatch. The driver must recognize
+such tasks and run them directly rather than delegating them into a pipeline
+dispatch that would stall or be unable to proceed. Derived from RS-006 dogfooding
+finding #4. [Priority: must]
