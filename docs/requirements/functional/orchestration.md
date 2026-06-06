@@ -1,6 +1,6 @@
 ---
 domain: ORCH
-last_updated: 2026-06-05
+last_updated: 2026-06-06
 status: Approved
 research_refs: [RS-005, RS-006]
 ---
@@ -18,9 +18,11 @@ construction. After every stage the operator gates on the review verdict
 (D1–D7) and RS-005 feasibility findings, which proved subagent skill-invocation
 and dispatch-time review isolation with live dispatches. (see RS-005)
 
-Scope note: the loop is **research-entry**, with **sequential execution as the
-default**. Mid-pipeline entry points remain deferred. Parallel implement-stage
-fan-out is **supported** as an opt-in mode (REQ-ORCH-016,
+Scope note: the loop is **research-entry by default**, with **sequential
+execution as the default**. **Non-research (mid-pipeline) entry is supported**
+(REQ-ORCH-031..033): when upstream artifacts already exist and are approved, the
+operator may start the loop at requirements/specs/plan/implement. Parallel
+implement-stage fan-out is **supported** as an opt-in mode (REQ-ORCH-016,
 REQ-ORCH-022..028, where 028 is the [needs-spike] dispatch-concurrency item),
 built as **Design B (orchestrator-owned fan-out, one level deep)** per the RS-006
 spike, which proved subagent dispatch cannot nest and that orchestrator-owned
@@ -57,11 +59,12 @@ other stage outputs are the normal SDD artifacts, which serve as the message bus
 between pipeline and review subagents.
 [Priority: must]
 
-### REQ-ORCH-005: Research-entry only (v1)
-For v1, the kickoff writer must emit a research kickoff, and the LOOP must begin
-at the research stage. Non-research entry points (starting the loop mid-pipeline
-when upstream artifacts already exist) are out of scope for v1.
-[Priority: must]
+### REQ-ORCH-005: Research is the default entry
+Research is the **default** entry: when no upstream SDD artifacts exist, the
+kickoff writer must emit a research kickoff and the LOOP must begin at the
+research stage. Non-research (mid-pipeline) entry is also supported when upstream
+artifacts already exist — see REQ-ORCH-031..033.
+[Priority: must] [Updated: 2026-06-06]
 
 ### REQ-ORCH-006: Two separate subagents per stage
 For each stage in [research, requirements, specs, plan, implement, verify], the
@@ -295,3 +298,36 @@ chunk-group) or a spike that measures parallel dispatch. The driver must recogni
 such tasks and run them directly rather than delegating them into a pipeline
 dispatch that would stall or be unable to proceed. Derived from RS-006 dogfooding
 finding #4. [Priority: must]
+
+<!-- REQ-ORCH-031..033 add non-research (mid-pipeline) entry — design Q4 from the
+     dual-session design, previously deferred. -->
+
+### REQ-ORCH-031: Non-research (mid-pipeline) entry is supported
+The driver must support starting the loop at a stage other than research when the
+relevant upstream artifacts already exist and are approved. The valid entry
+stages are **requirements, specs, plan, and implement** (research is the default;
+verify is not an entry point — verifying an existing project is just invoking
+`sdd-verify` directly, no loop needed). From the chosen entry stage, the LOOP
+proceeds normally (pipeline → review → gate per stage) to DONE. This is distinct
+from resume (REQ-ORCH-029): resume continues a cycle this driver started, whereas
+non-research entry begins a loop over upstream artifacts produced outside it.
+[Priority: must]
+
+### REQ-ORCH-032: Entry-stage detection, confirmation, and validation
+On a non-research entry the driver must **auto-detect** the proposed entry stage
+using the existing phase detection (the furthest-complete approved upstream
+artifact → the next stage), **present it to the operator, and confirm** before
+proceeding; the operator may override to an earlier stage. The driver must
+**validate** that the chosen entry stage's upstream artifacts exist and are
+approved/complete; if they are not, it must not start there — it must route to the
+earliest incomplete upstream stage and tell the operator. The driver must not
+guess an entry stage without operator confirmation.
+[Priority: must]
+
+### REQ-ORCH-033: Entry kickoff for non-research entry
+For a non-research entry, KICKOFF must still write `docs/handoff/kickoff.md`, but
+as an **entry kickoff** rather than a research kickoff: it states the scope of the
+change, the entry stage, and which upstream artifacts are assumed approved — not
+research questions. It remains git-tracked and the only new on-disk artifact type
+(REQ-ORCH-004 holds). DISCUSS still runs first to converge on the change scope.
+[Priority: must]
