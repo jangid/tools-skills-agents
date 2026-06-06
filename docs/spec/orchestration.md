@@ -1,6 +1,6 @@
 ---
 status: Approved
-last_updated: 2026-06-05
+last_updated: 2026-06-06
 requires:
   - REQ-ORCH-001
   - REQ-ORCH-002
@@ -32,6 +32,9 @@ requires:
   - REQ-ORCH-028
   - REQ-ORCH-029
   - REQ-ORCH-030
+  - REQ-ORCH-031
+  - REQ-ORCH-032
+  - REQ-ORCH-033
 ---
 
 # SDD Orchestration Driver
@@ -88,7 +91,8 @@ The driver runs four phases in order (REQ-ORCH-002):
 DISCUSS  — orchestrator + operator brainstorm the idea to shared understanding
            (scope + open questions); reuses the brainstorming process
    ↓
-KICKOFF  — orchestrator writes docs/handoff/kickoff.md (a research kickoff for v1)
+KICKOFF  — orchestrator writes docs/handoff/kickoff.md (research kickoff by
+           default; an entry kickoff for non-research mid-pipeline entry)
    ↓
 LOOP     — for each stage in [research, requirements, specs, plan, implement, verify]:
              1. PIPELINE subagent → invokes sdd-<stage>, writes the SDD artifact(s)
@@ -113,9 +117,43 @@ the driver introduces (REQ-ORCH-004). It is git-trackable. Every other stage
 output is a normal SDD artifact; those artifacts are the message bus between
 pipeline and review subagents (D5).
 
-For v1 the kickoff writer emits a **research kickoff**, and the LOOP begins at
-the research stage (REQ-ORCH-005). Non-research entry points (starting mid-
-pipeline when upstream artifacts already exist) are out of scope for v1.
+By **default** (no upstream SDD artifacts exist) the kickoff writer emits a
+**research kickoff** and the LOOP begins at the research stage (REQ-ORCH-005).
+When upstream artifacts already exist and are approved, the operator may instead
+start mid-pipeline — see §Entry Points.
+
+### Entry Points
+
+The driver supports **non-research (mid-pipeline) entry** (REQ-ORCH-031): starting
+the LOOP at **requirements, specs, plan, or implement** when the relevant upstream
+artifacts already exist and are approved. Research is the default; **verify is not
+an entry point** (verifying an existing project is just invoking `sdd-verify`
+directly — no loop needed).
+
+This is **distinct from resume** (REQ-ORCH-029): resume *continues a cycle this
+driver started* (its kickoff + partial artifacts are on disk); non-research entry
+*begins a fresh loop over upstream artifacts produced outside this driver* (e.g.
+the operator hand-wrote requirements, or ran `sdd-requirements` directly, and now
+wants the gated loop for the rest).
+
+**Detection, confirmation, validation (REQ-ORCH-032).** On entry the driver:
+1. **auto-detects** the proposed entry stage via the existing phase detection —
+   the furthest-complete *approved* upstream artifact → the next stage;
+2. **presents** that proposal to the operator and **confirms** before proceeding;
+   the operator may override to an *earlier* stage (never a later one whose
+   upstream is unmet);
+3. **validates** the chosen entry stage's upstream artifacts exist and are
+   approved/complete. If they are not, it must **not** start there — it routes to
+   the earliest incomplete upstream stage and tells the operator why.
+
+The driver never silently guesses an entry stage; confirmation is mandatory.
+
+**Entry kickoff (REQ-ORCH-033).** KICKOFF still writes `docs/handoff/kickoff.md`
+(REQ-ORCH-004 holds — it remains the only new artifact and is git-tracked), but as
+an **entry kickoff**: it records the *scope of the change*, the *entry stage*, and
+*which upstream artifacts are assumed approved* — not research questions. DISCUSS
+still runs first to converge on the change scope. From the entry stage onward the
+LOOP is identical to a research-entry cycle (pipeline → review → gate per stage).
 
 ### Per-Stage Dispatch Model
 
@@ -604,4 +642,8 @@ convention so a new adopter can install the skills (REQ-ORCH-021).
 - [ ] README introduces `sdd-orchestrate`, links the operator guide, and documents the `~/.claude/skills/` symlink install convention (REQ-ORCH-021)
 - [ ] On entry the driver classifies state as resume / done / new-cycle; when the prior cycle is `verification.md` status pass and the operator brings a new idea, it runs DISCUSS and overwrites `docs/handoff/kickoff.md` rather than reporting DONE; it surfaces the interpretation and confirms before proceeding (REQ-ORCH-029)
 - [ ] The driver performs dispatch-requiring work (implement-stage fan-out execution, parallel-dispatch spikes) at the orchestrator level and does not delegate it to a leaf pipeline subagent (which has no dispatch tool) (REQ-ORCH-030)
+- [ ] Research is the default entry (no upstream artifacts → research kickoff, loop starts at research) (REQ-ORCH-005)
+- [ ] Non-research entry is supported at requirements/specs/plan/implement when upstream is approved; verify is not an entry point; distinct from resume (REQ-ORCH-031)
+- [ ] On entry the driver auto-detects the proposed entry stage via phase detection, presents and confirms it (operator may override earlier), and validates the upstream is approved — routing to the earliest incomplete upstream if not; never guesses without confirmation (REQ-ORCH-032)
+- [ ] A non-research entry writes an entry kickoff to `docs/handoff/kickoff.md` (scope + entry stage + assumed-approved upstream, not research questions); DISCUSS still runs first; kickoff remains the only new artifact (REQ-ORCH-033, REQ-ORCH-004)
 - [ ] Markdown well-formed; frontmatter valid; kebab-case skill name (project quality checks)

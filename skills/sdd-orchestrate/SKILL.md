@@ -32,10 +32,11 @@ Isolation is **by construction**. Each pipeline stage and each review run as a
 has no shared window through which your reasoning could leak — a stronger
 guarantee than two human terminal sessions.
 
-**Scope**: research-entry; sequential by default. The kickoff is always a research
-kickoff and the loop starts at research — mid-pipeline entry remains out of scope.
-Implement-stage **fan-out is active** as an opt-in mode at the implement gate (see
-§Execution Model); every other stage is always sequential.
+**Scope**: research-entry **by default**, sequential by default. With no upstream
+artifacts the kickoff is a research kickoff and the loop starts at research; when
+approved upstream artifacts already exist, the operator may start **mid-pipeline**
+(see §Entry Points). Implement-stage **fan-out is active** as an opt-in mode at
+the implement gate (see §Execution Model); every other stage is always sequential.
 
 ## Phase Detection
 
@@ -74,6 +75,37 @@ work; surface your new-vs-resume interpretation and confirm. This adds no new
 marker (REQ-ORCH-014 stands) — it is just explicit reasoning about the
 completed-cycle case.
 
+## Entry Points
+
+Research is the **default** entry. But when approved upstream SDD artifacts
+already exist, the operator may start the loop **mid-pipeline** (REQ-ORCH-031) at
+**requirements, specs, plan, or implement**. Research is the default; **verify is
+not an entry point** (verifying an existing project is just invoking `sdd-verify`
+directly — no loop). 
+
+**Entry ≠ resume.** *Resume* continues a cycle **this driver** started (its
+kickoff + partial artifacts are on disk — see §Phase Detection). *Non-research
+entry* begins a fresh loop over artifacts produced **outside** this driver — e.g.
+the operator hand-wrote requirements or ran `sdd-requirements` directly and now
+wants the gated loop for the rest.
+
+**Detect → confirm → validate (REQ-ORCH-032).** On a mid-pipeline entry:
+1. **Auto-detect** the proposed entry stage with the same phase detection above —
+   the furthest-complete *approved* upstream artifact → the next stage.
+2. **Present and confirm** it with the operator before proceeding. The operator
+   may override to an *earlier* stage (never a later one whose upstream is unmet).
+3. **Validate** the chosen stage's upstream exists and is approved/complete. If
+   not, do **not** start there — route to the earliest incomplete upstream stage
+   and tell the operator why.
+
+Never silently guess an entry stage — confirmation is mandatory.
+
+**Entry kickoff (REQ-ORCH-033).** KICKOFF still writes `docs/handoff/kickoff.md`
+(it stays the only new artifact, git-tracked), but as an **entry kickoff**: it
+records the *scope of the change*, the *entry stage*, and *which upstream is
+assumed approved* — not research questions. DISCUSS still runs first. From the
+entry stage on, the LOOP is identical to a research-entry cycle.
+
 ## The Four Phases
 
 ```
@@ -110,11 +142,11 @@ Write the converged discussion into `docs/handoff/kickoff.md`. This is the
 output is a normal SDD artifact. It must be git-trackable (a real file under
 `docs/handoff/`, committed alongside the cycle's work).
 
-For v1 the kickoff is a **research kickoff**: it states the research questions,
-success criteria, a budget, and what is out of scope, and the LOOP begins at the
-research stage. Non-research entry points (starting mid-pipeline when upstream
-artifacts already exist) are **out of scope for v1** — do not emit a non-research
-kickoff or skip the research stage.
+**By default** the kickoff is a **research kickoff**: it states the research
+questions, success criteria, a budget, and what is out of scope, and the LOOP
+begins at the research stage. For a **non-research entry** (§Entry Points) write
+an **entry kickoff** instead — scope of the change, the entry stage, and which
+upstream is assumed approved — and begin the LOOP at that stage.
 
 The kickoff carries **no loop log**. It is written once at KICKOFF and is not the
 source of truth for resume — the SDD artifacts are (see Phase Detection).
