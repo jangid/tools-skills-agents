@@ -146,3 +146,26 @@ number). Landed in `skills/sdd-specs/SKILL.md` (travels to adopters), this repo'
 `CLAUDE.md` (made unopinionated), and REQ-ORCH-019.
 
 **Status: pass.** Zero issues.
+
+---
+
+## Addendum: Non-research entry (REQ-ORCH-031/032/033) — 2026-06-06
+
+Lightweight cycle adding the last deferred feature (design Q4): non-research
+mid-pipeline entry. Deliverable: prose in `skills/sdd-orchestrate/SKILL.md` +
+operator-doc reconciliation.
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Research is the default entry (no upstream → research kickoff at research) (REQ-ORCH-005) | pass | SKILL.md §What This Is scope, §KICKOFF, §Entry Points |
+| Non-research entry at requirements/specs/plan/implement when upstream approved; verify excluded; distinct from resume (REQ-ORCH-031) | pass | SKILL.md §Entry Points "Entry ≠ resume" |
+| Auto-detect → present+confirm (override earlier) → validate upstream; route to earliest incomplete if unmet; never guess (REQ-ORCH-032) | pass | SKILL.md §Entry Points "Detect → confirm → validate" |
+| Entry kickoff (scope + entry stage + assumed-approved upstream, not research questions); DISCUSS first; kickoff stays the only new artifact (REQ-ORCH-033, REQ-ORCH-004) | pass | SKILL.md §Entry Points "Entry kickoff", §KICKOFF |
+
+**Gates:** SKILL.md 399 lines (<~1000), frontmatter valid, fences balanced, kebab
+name. No other `sdd-*` skill modified. USAGE.md §8 reconciled (non-research entry
+now a supported feature; deferred-features list cleared); README.org needed no
+change. Traceability Implementation+Verified filled for REQ-ORCH-031/032/033.
+
+**Status: pass.** All originally-deferred sdd-orchestrate features (parallel
+fan-out, non-research entry) are now built.
