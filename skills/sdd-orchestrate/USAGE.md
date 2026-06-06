@@ -267,23 +267,29 @@ updated `main` (best-effort auto-resolve may be tried first). If a group conflic
 falls back to running them sequentially — so the run always terminates and
 already-merged work is never corrupted.
 
-### What v1 still does *not* do
-- **Research-entry only** — a cycle always starts from a research kickoff. You
-  cannot yet start mid-pipeline with pre-existing requirements (e.g. begin at specs
-  when requirements are already approved). This is the remaining genuine v1 limit.
-- **Reviews are ephemeral** — verdicts are shown inline and never written to
-  disk; there is no `docs/reviews/`. Decisions live in the artifacts (commits,
-  spec edits, Q-IMPL entries, replan triggers). *(This one is permanent, by
-  design — not a future change.)*
+### Starting mid-pipeline (non-research entry)
 
-### Deferred features (planned, not yet built)
-| Feature | What it will add | Requirement | Depends on |
-|---------|------------------|-------------|------------|
-| **Non-research entry points** | Start the loop mid-pipeline when upstream artifacts already exist (e.g. requirements are approved and you want to begin at specs), instead of always emitting a research kickoff. | design Q4 | — |
+Research is the **default** entry, but you don't have to start there. When approved
+upstream artifacts already exist, you can start the loop at **requirements, specs,
+plan, or implement** — e.g. you already have approved requirements and want the
+gated loop for specs onward. (Verify is not an entry point — to just verify an
+existing project, run `sdd-verify` directly.)
 
-When this is built, it follows the same SDD cycle the driver itself runs:
-a research/spike first where there's uncertainty, then requirements → specs → plan
-→ implement → verify, each gated.
+How it works: the driver **auto-detects** the furthest-complete approved artifact,
+**proposes** the entry stage, and **confirms** with you (you can override to an
+earlier stage); it **validates** the upstream is actually approved and otherwise
+routes you to the earliest incomplete stage. KICKOFF then writes an **entry
+kickoff** (scope + entry stage + assumed-approved upstream) instead of a research
+kickoff. This is different from *resume* (§3): resume continues a cycle this driver
+started; non-research entry begins a loop over artifacts you produced elsewhere.
+
+### By design (not limitations)
+- **Reviews are ephemeral** — verdicts are shown inline and never written to disk;
+  there is no `docs/reviews/`. Decisions live in the artifacts (commits, spec
+  edits, Q-IMPL entries, replan triggers). Permanent by design.
+
+All originally-deferred features — parallel implement-stage fan-out and
+non-research entry — are now built.
 
 ---
 
