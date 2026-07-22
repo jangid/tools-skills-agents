@@ -119,32 +119,32 @@ last_updated: 2026-07-21
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
 | REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
 | REQ-ORCH-021 | orchestration.md | | README.org | pass |
-| REQ-WS-001 | | | | |
-| REQ-WS-002 | | | | |
-| REQ-WS-003 | | | | |
-| REQ-WS-004 | | | | |
-| REQ-WS-005 | | | | |
-| REQ-WS-006 | | | | |
-| REQ-WS-007 | | | | |
-| REQ-WS-008 | | | | |
-| REQ-WS-009 | | | | |
-| REQ-WS-010 | | | | |
-| REQ-WS-011 | | | | |
-| REQ-WS-012 | | | | |
-| REQ-WS-013 | | | | |
-| REQ-WS-014 | | | | |
-| REQ-WS-015 | | | | |
-| REQ-WS-016 | | | | |
-| REQ-WS-017 | | | | |
-| REQ-WS-018 | | | | |
-| REQ-WS-019 | | | | |
-| REQ-WS-020 | | | | |
-| REQ-WS-021 | | | | |
-| REQ-WS-022 | | | | |
-| REQ-WS-023 | | | | |
-| REQ-WS-024 | | | | |
-| REQ-WS-025 | | | | |
-| REQ-WS-026 | | | | |
-| REQ-WS-027 | | | | |
-| REQ-WS-028 | | | | |
-| REQ-WS-029 | | | | |
+| REQ-WS-001 | ws-layout.md | | | |
+| REQ-WS-002 | ws-layout.md | | | |
+| REQ-WS-003 | ws-layout.md | | | |
+| REQ-WS-004 | ws-layout.md | | | |
+| REQ-WS-005 | ws-layout.md | | | |
+| REQ-WS-006 | ws-layout.md | | | |
+| REQ-WS-007 | ws-traceability.md | | | |
+| REQ-WS-008 | ws-traceability.md | | | |
+| REQ-WS-009 | ws-ids.md | | | |
+| REQ-WS-010 | ws-ids.md | | | |
+| REQ-WS-011 | ws-ids.md | | | |
+| REQ-WS-012 | ws-ids.md | | | |
+| REQ-WS-013 | ws-ids.md | | | |
+| REQ-WS-014 | ws-ids.md | | | |
+| REQ-WS-015 | ws-ids.md | | | |
+| REQ-WS-016 | ws-integration.md | | | |
+| REQ-WS-017 | ws-integration.md | | | |
+| REQ-WS-018 | ws-integration.md | | | |
+| REQ-WS-019 | ws-layout.md | | | |
+| REQ-WS-020 | ws-layout.md | | | |
+| REQ-WS-021 | ws-migration.md | | | |
+| REQ-WS-022 | ws-migration.md | | | |
+| REQ-WS-023 | ws-migration.md | | | |
+| REQ-WS-024 | ws-orchestration.md | | | |
+| REQ-WS-025 | ws-orchestration.md | | | |
+| REQ-WS-026 | ws-staleness.md | | | |
+| REQ-WS-027 | ws-staleness.md | | | |
+| REQ-WS-028 | ws-staleness.md | | | |
+| REQ-WS-029 | ws-orchestration.md | | | |
