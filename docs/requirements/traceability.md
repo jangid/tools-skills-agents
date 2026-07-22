@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-06-06
+last_updated: 2026-07-21
 ---
 
 # Traceability Matrix
@@ -119,3 +119,32 @@ last_updated: 2026-06-06
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
 | REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
 | REQ-ORCH-021 | orchestration.md | | README.org | pass |
+| REQ-WS-001 | | | | |
+| REQ-WS-002 | | | | |
+| REQ-WS-003 | | | | |
+| REQ-WS-004 | | | | |
+| REQ-WS-005 | | | | |
+| REQ-WS-006 | | | | |
+| REQ-WS-007 | | | | |
+| REQ-WS-008 | | | | |
+| REQ-WS-009 | | | | |
+| REQ-WS-010 | | | | |
+| REQ-WS-011 | | | | |
+| REQ-WS-012 | | | | |
+| REQ-WS-013 | | | | |
+| REQ-WS-014 | | | | |
+| REQ-WS-015 | | | | |
+| REQ-WS-016 | | | | |
+| REQ-WS-017 | | | | |
+| REQ-WS-018 | | | | |
+| REQ-WS-019 | | | | |
+| REQ-WS-020 | | | | |
+| REQ-WS-021 | | | | |
+| REQ-WS-022 | | | | |
+| REQ-WS-023 | | | | |
+| REQ-WS-024 | | | | |
+| REQ-WS-025 | | | | |
+| REQ-WS-026 | | | | |
+| REQ-WS-027 | | | | |
+| REQ-WS-028 | | | | |
+| REQ-WS-029 | | | | |
