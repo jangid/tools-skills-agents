@@ -16,6 +16,34 @@ You are guiding the user through requirements gathering for a Spec-Driven Develo
 
 Requirements gathering is always valid — the user may be starting a new cycle or updating existing requirements. Before starting, check project state:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and note any
+  **execution artifacts** (`plan.md`, `verification.md`, `kickoff.md`,
+  `plan-history/`) under `base` — never at flat `docs/`. Requirements are part of
+  the **shared corpus**: the requirements index, category files, and the
+  aggregated `traceability.md` stay at their top-level `docs/requirements/` paths
+  and are ADDED to (never forked per workstream); `docs/research/` and `docs/spec/`
+  are likewise shared.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — check for v1 vs v2 format below.
 2. **Format detection**: Check which format exists:
    - If `docs/requirements/index.md` exists → v2 format, proceed normally

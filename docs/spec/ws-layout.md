@@ -231,3 +231,26 @@ emits an explicit `overview.md`-update task.
       artifact for the corpus; no approver identity/quorum (REQ-WS-019)
 - [ ] Solo use runs in implicit `default` with no workstream naming required (REQ-WS-020)
 - [ ] Type checking / markdown well-formedness passes; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-008: Step-0 gate condition preserves marker-`3` behavior verbatim
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Phase Detection Is a Function of (repo, workstream) — the
+`detect_phase` pseudocode `if read(docs/.sdd-version) != "4": route to sdd-migrate`.
+**Decision**: The nine skills' step-0 gate is implemented as `if marker == "4":
+<workstream-aware v4 path>  else: <run the existing v3 detection UNCHANGED>` — the
+`else` arm does **not** unconditionally "route to sdd-migrate". `docs/.sdd-version`
+is the sole gate; a repo at marker `3` (the current live state of this repo) runs
+its existing detection exactly as before, which itself only suggests `sdd-migrate`
+when the marker is missing/v1 — never for a working v3 repo.
+**Rationale**: Taken literally, `!= "4" → route to sdd-migrate` would force every
+marker-`3` entry to redirect to migration, observably changing v3 solo behavior and
+violating the v3-solo-safety invariant (a marker-`3` repo must behave exactly as it
+does today). The pseudocode describes the v4-side contract; the transition window
+requires marker `3` to remain a fully working layout (REQ-WS-023: "with marker `3`,
+skills read flat paths and a v4-aware skill suggests migration" — the suggestion is
+*available*, not a forced redirect on every entry). The actual v3→v4 migration
+routing is added by `sdd-migrate` in a later chunk (`ws-migration.md`). Default
+carried: gate strictly on `marker == "4"`; leave all marker-`3` detection paths
+byte-unchanged.

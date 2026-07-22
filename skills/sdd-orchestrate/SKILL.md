@@ -44,6 +44,29 @@ The driver introduces **no loop-position marker**. On entry — including re-ent
 in a fresh session mid-loop — derive the current loop position from the existing
 SDD artifacts, reusing the stage skills' own phase detection:
 
+**Workstream & version gate (v4).** The driver accepts an optional `workstream`
+argument that defaults to `default`, threaded through to every dispatched stage
+skill. `docs/.sdd-version` is the **sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and derive loop position from the flat artifacts exactly as the table
+  below states — `docs/handoff/kickoff.md`, `docs/plan.md`, `docs/verification.md`.
+  Never read `docs/ws/`.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and read that
+  workstream's **execution artifacts** — `kickoff.md`, `plan.md`,
+  `verification.md`, `plan-history/` — from `base` (so the table below maps
+  `docs/handoff/kickoff.md` → `docs/ws/<ws>/kickoff.md`, `docs/plan.md` →
+  `docs/ws/<ws>/plan.md`, `docs/verification.md` → `docs/ws/<ws>/verification.md`),
+  never from flat `docs/`. The **shared corpus** stays at its top-level paths:
+  `docs/research/`, `docs/requirements/` (incl. aggregated `traceability.md`),
+  `docs/spec/`. Omitting the argument resolves the implicit `default` workstream,
+  so solo use needs no naming. Enumerating `docs/ws/<id>/` to present a workstream
+  picker is specified separately in `docs/spec/ws-orchestration.md`; this step-0
+  gate only establishes the workstream argument and marker-`4` execution-artifact
+  rooting. Full layout contract: `docs/spec/ws-layout.md`.
+
+
 | On disk | Loop position |
 |---------|---------------|
 | no `docs/handoff/kickoff.md` | before KICKOFF — run DISCUSS |

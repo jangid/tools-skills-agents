@@ -19,6 +19,33 @@ You are performing holistic verification of a completed implementation. Your job
 
 Before starting, check project state. **Compare dates** to detect stale artifacts:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/plan.md` → use `sdd-plan`
 2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` and specs against `docs/plan.md` modification date. If upstream artifacts are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
@@ -118,7 +145,13 @@ For CLI tools: run them. For servers: start them and make requests. For librarie
 
 ### Step 6: Write Verification Report
 
-Save to `docs/verification.md`:
+**Workstream scoping (marker `4`)**: under `docs/.sdd-version` == `4`, write the
+report to the active workstream's `docs/ws/<ws>/verification.md` (default
+`default`) — **never** the flat `docs/verification.md` and never another
+workstream's file. Under marker `3` (or earlier) save to `docs/verification.md`
+exactly as below, unchanged.
+
+Save to `docs/verification.md` (or `docs/ws/<ws>/verification.md` under marker `4`):
 
 ```markdown
 ---
@@ -185,7 +218,9 @@ Based on the report:
 
 - **All pass, no issues** → tell the user "verification complete, ready to ship". Note that the active plan can now be archived to `docs/plan-history/` if desired
 - **Minor issues only** → ask user: "fix now or ship and track as follow-up?"
-- **Critical issues** → recommend `sdd-replan` with the failure context
+- **Critical issues** → recommend `sdd-replan` with the failure context. Under
+  marker `4`, route **only** the active workstream `<ws>` into replan — never
+  another workstream's plan/verification
 
 ## Rules
 

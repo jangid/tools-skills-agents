@@ -46,6 +46,7 @@ plan carries **no spike** tasks — only `implement` and `verify`.
 ## Chunks
 
 ### Chunk 0: v4 layout foundation & phase-detection parameterization
+**Status**: CLOSED (2026-07-23) — tasks 1–5 done; all nine skill step-0 sections carry a marker-`4` workstream-aware branch, marker-`3` behavior retained byte-unchanged (see Q-IMPL-008 in `ws-layout.md`).
 **Depends on**: none (first chunk).
 **Goal**: Every `sdd-*` skill's step-0 is workstream-aware under marker `4`:
 it takes a workstream argument defaulting to `default`, roots execution-artifact
@@ -463,4 +464,7 @@ criteria across the whole skill set, from a user/operator perspective.
   without changing the plan's dependency graph.
 
 ## Completed
-- (none — new plan for the Multi-Workstream SDD v4 cycle, 2026-07-21)
+- Chunk 0 (v4 layout foundation & phase-detection parameterization): marker-`4`
+  workstream-aware step-0 threaded through all nine skills; shared-vs-owned +
+  approval invariants and ws-scoped plan-archive/verify-fail-route encoded;
+  marker-`3` v3 behavior retained unchanged (Q-IMPL-008). (2026-07-23, 5 tasks)

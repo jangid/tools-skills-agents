@@ -16,6 +16,29 @@ You are migrating a project's SDD artifacts from one structure version to anothe
 
 Before anything else, determine the current artifact version:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. `docs/.sdd-version` is the **sole** layout
+gate for every skill's step-0:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Run exactly the
+  version-routing table below; execution artifacts are the flat `docs/plan.md` /
+  `docs/verification.md` / `docs/plan-history/` (and flat `docs/handoff/`). Never
+  read or write `docs/ws/`.
+- **Marker is `4` (workstream-aware layout).** Per-workstream execution artifacts
+  are authoritative: resolve `ws` = the workstream argument (default `default`),
+  set `base = docs/ws/<ws>/`, and treat `plan.md`, `verification.md`, `kickoff.md`,
+  and `plan-history/` as living under `base` — never at flat `docs/`. The shared
+  corpus (`docs/research/`, `docs/requirements/` incl. aggregated
+  `traceability.md`, `docs/spec/`) stays at its top-level paths. A workstream never
+  gets a `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` dir. A v3-marked repo
+  never reads `docs/ws/`; a v4-marked repo never reads flat execution paths.
+
+The concrete v3→v4 migration routing (the `3`→`4` arm, copy-verify-flip-cleanup,
+and the `4` = "already at v4" exit) is specified in `docs/spec/ws-migration.md` and
+wired into the version-routing table separately — this step-0 gate only establishes
+the workstream argument and the marker-`4` layout semantics. Full layout contract:
+`docs/spec/ws-layout.md`.
+
 1. If no `docs/` directory exists at all, inform the user there is nothing to migrate and exit.
 2. Read `docs/.sdd-version`:
 

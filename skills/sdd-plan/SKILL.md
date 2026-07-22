@@ -15,6 +15,33 @@ You are creating an implementation plan from approved design specs. Your input i
 
 Before starting, check project state. **Compare `last_updated` dates** to detect stale downstream artifacts:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or any has `status: Draft` → use `sdd-specs`
@@ -123,13 +150,24 @@ For each spike task and any high-risk implement task, define the condition that 
 
 ### Step 7: Archive and Write the Plan
 
-**Archival**: If `docs/plan.md` already exists, archive it before writing the new plan:
+**Workstream scoping (marker `4`)**: under `docs/.sdd-version` == `4`, every path
+in this step is rooted at the active workstream's `base = docs/ws/<ws>/` (default
+`default`): the plan is `docs/ws/<ws>/plan.md` and archives go to
+`docs/ws/<ws>/plan-history/`. The rewrite/archive operates **only** within this
+workstream's own dir — it must never archive, overwrite, or route the plan or
+plan-history of any other workstream. Under marker `3` (or earlier) the paths are
+the flat `docs/plan.md` / `docs/plan-history/` exactly as written below, unchanged.
 
-1. Create `docs/plan-history/` directory if it doesn't exist
-2. Copy current `docs/plan.md` to `docs/plan-history/{date}-{reason}.md` (e.g., `2026-04-27-rewrite-after-spec-update.md`)
+**Archival**: If the plan (`docs/plan.md`, or `docs/ws/<ws>/plan.md` under marker
+`4`) already exists, archive it before writing the new plan:
+
+1. Create the `plan-history/` directory (`docs/plan-history/`, or
+   `docs/ws/<ws>/plan-history/` under marker `4`) if it doesn't exist
+2. Copy the current plan to `{plan-history}/{date}-{reason}.md` (e.g., `2026-04-27-rewrite-after-spec-update.md`)
 3. Then write the new plan
 
-Save the plan to `docs/plan.md` (single-milestone) or create the index + per-milestone files (multi-milestone).
+Save the plan to `docs/plan.md` (single-milestone; `docs/ws/<ws>/plan.md` under
+marker `4`) or create the index + per-milestone files (multi-milestone).
 
 **Single-milestone plan format (default):**
 

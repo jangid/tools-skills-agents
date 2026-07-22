@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-07-21
+last_updated: 2026-07-23
 ---
 
 # Traceability Matrix
@@ -119,12 +119,12 @@ last_updated: 2026-07-21
 | REQ-ORCH-019 | orchestration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/dispatch-templates.md |  pass |
 | REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
 | REQ-ORCH-021 | orchestration.md | | README.org | pass |
-| REQ-WS-001 | ws-layout.md | | | |
+| REQ-WS-001 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
 | REQ-WS-002 | ws-layout.md | | | |
-| REQ-WS-003 | ws-layout.md | | | |
-| REQ-WS-004 | ws-layout.md | | | |
-| REQ-WS-005 | ws-layout.md | | | |
-| REQ-WS-006 | ws-layout.md | | | |
+| REQ-WS-003 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
+| REQ-WS-004 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
+| REQ-WS-005 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
+| REQ-WS-006 | ws-layout.md | | skills/sdd-plan/SKILL.md, skills/sdd-verify/SKILL.md (ws-scoped rewrite/fail-route) | |
 | REQ-WS-007 | ws-traceability.md | | | |
 | REQ-WS-008 | ws-traceability.md | | | |
 | REQ-WS-009 | ws-ids.md | | | |
@@ -137,8 +137,8 @@ last_updated: 2026-07-21
 | REQ-WS-016 | ws-integration.md | | | |
 | REQ-WS-017 | ws-integration.md | | | |
 | REQ-WS-018 | ws-integration.md | | | |
-| REQ-WS-019 | ws-layout.md | | | |
-| REQ-WS-020 | ws-layout.md | | | |
+| REQ-WS-019 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: bare per-scope status) | |
+| REQ-WS-020 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: implicit default ws) | |
 | REQ-WS-021 | ws-migration.md | | | |
 | REQ-WS-022 | ws-migration.md | | | |
 | REQ-WS-023 | ws-migration.md | | | |
