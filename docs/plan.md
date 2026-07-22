@@ -1,87 +1,466 @@
-# Implementation Plan: sdd-orchestrate Non-Research Entry (REQ-ORCH-031..033)
+---
+last_updated: 2026-07-21
+status: Approved
+---
+
+# Implementation Plan: Multi-Workstream SDD (v4)
 
 ## Overview
 
-Add **non-research (mid-pipeline) entry** to the `sdd-orchestrate` driver — the
-last deferred feature (design Q4). When upstream SDD artifacts already exist and
-are approved, the operator may start the loop at requirements/specs/plan/implement
-instead of always starting at research. Deliverable is edits to
-`skills/sdd-orchestrate/SKILL.md` plus operator-doc reconciliation
-(`USAGE.md` / `README.org`); no other `sdd-*` skill is modified. Markdown
-authoring — verify tasks are acceptance-criteria inspection, not unit tests.
+Reshape the nine `sdd-*` skills so a team can run several SDD cycles concurrently
+in one repo — one branch/issue per **workstream** — without artifact collisions,
+false staleness, ID races, or cross-workstream phase confusion, while keeping
+requirements/specs/research/traceability a single shared corpus and keeping solo
+use ceremony-free. This is a **meta-feature**: the implementation edits the SDD
+skill definitions themselves (`skills/sdd-*/SKILL.md` and
+`skills/sdd-orchestrate/references/`), the canonical convention docs
+(`docs/spec/overview.md`, `CLAUDE.md`), and the migration logic
+(`skills/sdd-migrate/`). The structural core is the **v4 layout**: execution
+artifacts move under `docs/ws/<id>/` while the shared corpus stays at top level,
+and `docs/.sdd-version` = `4` is the sole atomic gate that flips every skill's
+step-0 to the per-workstream layout. Because the flip is atomic, v4 ships as one
+coherent delivery (single milestone) — you cannot ship "layout" without
+"migration". Chunks are ordered by dependency: the layout/phase-detection
+foundation (Chunk 0) precedes the ID, traceability, staleness, integration,
+migration, and orchestration work that all root on it, with documentation and
+holistic verification last.
+
+All four principal risk axes were de-risked by RS-007 (merge-safe shared writes,
+staleness generalization, v3→v4 migration safety, ID-format blast radius), so this
+plan carries **no spike** tasks — only `implement` and `verify`.
 
 ## Conventions
 
-- **Task types**: [implement] produces SKILL.md / doc prose, [verify] validates
-  against spec acceptance criteria. No [spike] — the design reuses existing phase
-  detection (RS-005 Q3) and adds no unverified mechanism.
-- **Chunk headers**: `### Chunk N: <name>`.
-- **Traceability**: each task names its REQ; after, update
-  `docs/requirements/traceability.md`.
+- **Task types**: `[implement]` edits SKILL.md / reference / convention-doc prose
+  (there is no compiled code here — the "code" is the skills' described
+  algorithms); `[verify]` validates behavior against a spec's verification criteria
+  (concurrency/merge checks, migration interruption, unchanged-parser checks) — it
+  goes beyond "markdown lints".
+- **Chunk headers**: `### Chunk N: <name>`; each chunk carries a `**Depends on**`
+  field naming the chunk(s) it requires (the orchestrator's fan-out boundary
+  derivation parses these — see `docs/spec/plan-management.md`).
+- **Traceability**: each task names the REQ-WS id(s) and spec section it implements.
+  The traceability Impl column is filled during implement, not here.
+- **Dates**: authored 2026-07-21.
 
 ## Chunks
 
-### Chunk 0: Entry-point behavior + doc reconciliation
-
-**Goal**: SKILL.md specifies non-research entry (detection/confirm/validate +
-entry kickoff), research stays the default, and the operator docs no longer call
-research-entry-only a limitation. No other skill touched.
-
+### Chunk 0: v4 layout foundation & phase-detection parameterization
+**Depends on**: none (first chunk).
+**Goal**: Every `sdd-*` skill's step-0 is workstream-aware under marker `4`:
+it takes a workstream argument defaulting to `default`, roots execution-artifact
+reads at `docs/ws/<ws>/`, and leaves the shared corpus at top level. After this
+chunk the layout contract and phase-detection function are defined for all skills;
+solo use still resolves `default` with no ceremony. Traces to `ws-layout.md`.
 **Tasks**:
-1. [implement] Add an **§Entry Points** section to SKILL.md: non-research entry at
-   requirements/specs/plan/implement; valid only when upstream is approved; verify
-   is not an entry point; **distinct from resume** (REQ-ORCH-029 continues *this
-   driver's* cycle; entry begins a loop over externally-produced artifacts).
-   Traces to spec §Entry Points. (REQ-ORCH-031)
-2. [implement] Specify **detection → confirm → validate** in SKILL.md: auto-detect
-   the proposed entry stage via existing phase detection, present + confirm
-   (operator may override earlier), validate upstream approved (else route to the
-   earliest incomplete upstream and explain); never guess without confirmation.
-   (REQ-ORCH-032)
-3. [implement] Specify the **entry kickoff** in SKILL.md §KICKOFF: for non-research
-   entry, `kickoff.md` records scope + entry stage + assumed-approved upstream (not
-   research questions); DISCUSS still runs first; kickoff stays the only new
-   artifact. Reframe §KICKOFF / §What This Is / Scope so research is the *default*
-   entry, not the only one (REQ-ORCH-005). (REQ-ORCH-033, REQ-ORCH-005)
-4. [implement] Reconcile operator docs: update `skills/sdd-orchestrate/USAGE.md`
-   (§v1 limitations — drop research-entry-only as a limit; document non-research
-   entry, detection/confirm/validate, entry kickoff) and `README.org` if it states
-   research-entry. (REQ-ORCH-031, REQ-ORCH-020/021)
-5. [verify] Walk the 4 new acceptance criteria (REQ-ORCH-005/031/032/033) against
-   SKILL.md; fill traceability Implementation + Verified for REQ-ORCH-031/032/033;
-   confirm REQ-ORCH-005's row stays accurate; confirm no other `sdd-*` skill
-   modified (REQ-ORCH-001); SKILL.md well-formed and within the ~1000-line
-   guideline.
+1. [implement] Add a v4 branch to the step-0 phase detection of **each** of the nine
+   skills (`sdd-research`, `sdd-requirements`, `sdd-specs`, `sdd-plan`,
+   `sdd-implement`, `sdd-verify`, `sdd-replan`, `sdd-migrate`, `sdd-orchestrate`):
+   accept a `workstream` arg (default `default`); when `docs/.sdd-version` == `4`,
+   resolve `base = docs/ws/<ws>/` and read `plan.md`/`verification.md`/`kickoff.md`
+   from there; keep the v3 branch (marker `3`) unchanged. — traces to
+   `ws-layout.md` §Phase Detection Is a Function of (repo, workstream) (REQ-WS-003),
+   §.sdd-version gate (REQ-WS-023 layout-read half).
+2. [implement] Encode the shared-vs-owned invariant in the affected skills: a
+   workstream owns only `kickoff.md`, `plan.md`, `plan-history/`, `verification.md`
+   (+ its `traceability.md`) under `docs/ws/<id>/`; requirements/specs/research/
+   aggregated-traceability stay shared at top level; **no** skill creates
+   `docs/ws/<id>/requirements/` or `docs/ws/<id>/spec/`, and no skill reads/writes
+   flat `docs/plan.md` / `docs/verification.md` under marker `4`. — traces to
+   `ws-layout.md` §v4 Directory Layout (REQ-WS-001), §Workstream = Execution Unit
+   (REQ-WS-004, REQ-WS-005), §A Workstream Owns Only Its Execution Artifacts
+   (REQ-WS-006).
+3. [implement] Scope `sdd-plan`'s plan rewrite/archive and `sdd-verify`'s fail-route
+   to the active workstream only: archive within `docs/ws/<id>/plan-history/`, write
+   only `docs/ws/<id>/verification.md`, route only `<id>` into replan — never another
+   workstream's artifacts. — traces to `ws-layout.md` §A Workstream Owns Only Its
+   Execution Artifacts (REQ-WS-006).
+4. [implement] Encode approval as a bare per-scope `status` flag: workstream-owned
+   `plan.md`/`verification.md` carry their own `status`; shared `requirements/*`,
+   `spec/*` carry one product-wide `status`; no approver identity/quorum; and the
+   implicit ceremony-free `default` workstream (never require naming a workstream;
+   default the arg everywhere; solo artifacts land under `docs/ws/default/`). —
+   traces to `ws-layout.md` §Approval Is a Per-Workstream Bare Status Flag
+   (REQ-WS-019), §Solo Use Runs in an Implicit `default` Workstream (REQ-WS-020),
+   and branch-per-issue isolation note (REQ-WS-002, boundary only; git mechanics in
+   Chunk 4).
+5. [verify] Confirm every skill's step-0 accepts a workstream arg defaulting to
+   `default` and roots execution reads at `docs/ws/<ws>/`; no skill reads/writes flat
+   `docs/plan.md`/`docs/verification.md` under marker `4`; no path creates a per-ws
+   `requirements/`/`spec/` dir. — traces to `ws-layout.md` §Verification/Automated.
+**Entry criteria**: none.
+**Exit criteria**: all nine step-0 sections carry a marker-`4` workstream-aware
+branch defaulting to `default`; shared-vs-owned and approval invariants documented;
+verify task passes.
 
-**Entry criteria**: Specs approved.
-**Exit criteria**: 4 criteria pass; traceability filled; SKILL.md kebab/
-frontmatter/fences valid; only `sdd-orchestrate` touched; docs reconciled.
+### Chunk 1: Workstream-prefixed IDs & merge-safe shared writes
+**Depends on**: Chunk 0.
+**Goal**: The four ID generators + the `sdd-review` convention string emit and
+accept ws-prefixed ids with per-workstream counters, and shared-table writes are
+merge-safe (sorted insertion / owned rows) — never tail-append. Parsers proven
+unaffected by RS-007 Q4 stay untouched. Traces to `ws-ids.md`.
+**Tasks**:
+1. [implement] Update the ID format + per-workstream counter in the four generators:
+   `sdd-research` (`RS-<WS>-NNN` dir scan), `sdd-requirements`
+   (`REQ-<DOMAIN>-<WS>-NNN`, max per domain+workstream), `sdd-implement`
+   (`Q-IMPL-<WS>-NNN`, per-workstream), and `sdd-migrate`'s RS/REQ allocation/remap
+   template (add the `<WS>` slot for NEW allocations only). Each parses `NNN` **after**
+   the `<WS>` token and scopes its max-scan per workstream, replacing the global
+   scan-and-increment. Add the v4 ID behavior as a **marker-`4` branch while
+   retaining the marker-`3` (v3) un-prefixed generation unchanged**: `docs/.sdd-version`
+   is the sole gate — a generator seeing marker `3` mints ids exactly as today (no
+   `<WS>` slot, global scan), marker `4` selects the ws-prefixed per-workstream path
+   (reconciling with the `ws-layout.md` step-0 contract, where marker != 4 routes to
+   the sdd-migrate / v3 path). — traces to `ws-ids.md` §Workstream-Prefixed ID Format
+   (REQ-WS-009), §Per-Workstream ID Counters (REQ-WS-011), §Exactly Four Generators
+   rows 1–4 (REQ-WS-012).
+2. [implement] Update `sdd-review`'s convention-validation string to assert
+   `REQ-<DOMAIN>-<WS>-NNN` / accept the optional `<WS>` segment instead of flagging
+   ws-prefixed ids. — traces to `ws-ids.md` §Exactly Four Generators row 5
+   (REQ-WS-012).
+3. [implement] Add an explicit "do NOT touch" note in the relevant skills naming the
+   parsers RS-007 Q4 proved unaffected (fan-out `Depends on: Chunk N`, traceability/
+   requirements row prefix-glob parsing, `sdd-review` Q-REQ/Q-SPEC/Q-IMPL content
+   checks, `### M\d+:` milestone regex) so no one "fixes" a provably-fine parser. —
+   traces to `ws-ids.md` §Exactly Four Generators (parsers-that-MUST-NOT-change,
+   REQ-WS-012).
+4. [implement] Encode the merge-safe shared-write model: new requirements append
+   under a claimed domain prefix (registry in `requirements/index.md`); new specs are
+   new files in `docs/spec/`; modifying an existing shared REQ/spec stays a human PR
+   conflict; **no raw EOF append** to any shared table. — traces to `ws-ids.md`
+   §Append Under a Claimed Prefix (REQ-WS-010), §Merge-Safe Shared Writes
+   (REQ-WS-013).
+5. [implement] Encode ID-sorted, one-row-per-line insertion for `requirements/
+   index.md` (Files table, Domain Prefixes table, new category-file rows) at the
+   correct sorted position, plus the distinct-domain-prefix precondition: distinct
+   prefixes → clean 3-way merge; same-domain concurrency is an accepted human PR
+   conflict the tooling must NOT auto-union (record the rejected `merge=union` driver
+   as an Open Question default). — traces to `ws-ids.md` §ID-Sorted Insertion
+   (REQ-WS-015), §Distinct-Domain-Prefix Precondition (REQ-WS-014).
+6. [verify] Confirm each generator parses `NNN` after `<WS>` and scopes per workstream
+   (per domain+workstream for requirements); `sdd-review` accepts the `<WS>` segment;
+   and the four proven-unaffected parsers operate unchanged against ws-prefixed ids;
+   no write path performs a raw EOF append to a shared table. — traces to
+   `ws-ids.md` §Verification/Automated + Manual (concurrent `RS-ISSUE42-001` /
+   `RS-ISSUE57-001` no-collision; distinct vs same-domain merge behavior).
+**Entry criteria**: Chunk 0 complete.
+**Exit criteria**: four generators + review string updated; merge-safe write rules
+encoded; unaffected parsers documented as untouched; verify task passes.
+
+### Chunk 2: Traceability restructuring — per-workstream files + derived aggregate
+**Depends on**: Chunk 1.
+**Goal**: Each workstream owns `docs/ws/<id>/traceability.md`; the shared
+`docs/requirements/traceability.md` becomes a deterministically regenerated
+aggregate (never hand-merged). Traces to `ws-traceability.md`.
+**Tasks**:
+1. [implement] Define the per-workstream traceability file shape
+   `docs/ws/<id>/traceability.md` (frontmatter `workstream:`/`last_updated:`; the
+   6-column matrix with the appended `Workstream` column) and the rule that a
+   workstream only ever edits its own rows — never another ws's file or the shared
+   aggregate directly. Rows may cover both new ws-prefixed REQs and re-used
+   pre-existing shared REQs. — traces to `ws-traceability.md` §Decision: Separate
+   Per-Workstream Files (REQ-WS-008), §Per-Workstream File Shape.
+2. [implement] Define the aggregation contract: `docs/requirements/traceability.md`
+   is **regenerated** (shipped legacy rows under blank/`default` workstream + concat
+   of all per-ws files, stable-sorted by requirement id, wholesale replacement),
+   never appended/hand-merged; confirm the appended trailing `Workstream` column does
+   not disturb the REQ-WS-012 unchanged-parser guarantee. — traces to
+   `ws-traceability.md` §Aggregation Contract (REQ-WS-008).
+3. [implement] Record that traceability is the load-bearing **recorded** join but the
+   staleness **computation** never reads it (the live plan-walk in Chunk 3 derives the
+   same set); no traceability schema column is added for staleness. — traces to
+   `ws-traceability.md` §Traceability Is the Recorded Join; Staleness Computes Live
+   (REQ-WS-007).
+4. [verify] Confirm tooling writes only `docs/ws/<id>/traceability.md`, never another
+   ws's file or the shared aggregate in place; regeneration is deterministic
+   (same inputs → byte-identical, sorted); two concurrent workstreams' additions
+   3-way-merge with no conflict. — traces to `ws-traceability.md`
+   §Verification/Automated + Manual.
+**Entry criteria**: Chunk 1 complete (ws-prefixed ids appear in rows; merge-safe
+model established).
+**Exit criteria**: per-ws file shape + aggregation contract encoded; recorded-join /
+compute-live boundary stated; verify task passes.
+
+### Chunk 3: Workstream-scoped staleness
+**Depends on**: Chunk 0.
+**Goal**: Staleness is scoped by workstream, computed live from the workstream's
+plan with no traceability read; the two skills that lacked a scoped branch gain one
+(or defer); requirements-corpus staleness stays shared. Traces to `ws-staleness.md`.
+**Tasks**:
+1. [implement] Generalize the milestone-scoped staleness traversal in `sdd-plan`,
+   `sdd-implement`, and `sdd-replan` to a **workstream** key: swap the plan path to
+   `docs/ws/<id>/plan.md` and the milestone key for a workstream key, keeping the
+   `task → spec requires: → requirement IDs → category-file dates` chain unchanged and
+   reading no traceability file; drop the v3 `sdd-implement` caveat about the plan
+   index (there is no plan index in v4). Add this generalized traversal as a
+   **marker-`4` branch while retaining the marker-`3` (v3) milestone-scoped traversal
+   unchanged**: `docs/.sdd-version` is the sole gate — a skill seeing marker `3`
+   computes staleness exactly as today (flat `docs/plan.md`, milestone key), marker `4`
+   selects the workstream-scoped path (reconciling with the `ws-layout.md` step-0
+   contract, where marker != 4 routes to the sdd-migrate / v3 path). — traces to `ws-staleness.md` §Generalize
+   Milestone-Scoped Staleness (REQ-WS-026) + per-skill step-0 notes.
+2. [implement] Add a **new** workstream-scoped staleness branch to `sdd-verify`:
+   compare `docs/ws/<id>/plan.md`/`verification.md` only against the shared specs/
+   requirements that workstream traces (same live plan-walk), never reporting
+   staleness from shared-input changes outside its traced set. Also re-point
+   `sdd-verify`'s regression-base note toward Chunk 4 (branch-point diff). — traces to
+   `ws-staleness.md` §New Per-Workstream Staleness Branches (REQ-WS-027, verify half).
+3. [implement] Update `sdd-specs` to stop treating the flat plan as a monolith: under
+   v4 specs are shared and plans are per-workstream, so `sdd-specs` checks only
+   requirements→spec staleness and **defers** plan staleness to `sdd-plan`'s per-ws
+   branch (adopted resolution). — traces to `ws-staleness.md` §New Per-Workstream
+   Staleness Branches (REQ-WS-027, specs half).
+4. [implement] Confirm the research→requirements staleness check (REQ-STALE-002) in
+   `sdd-requirements` stays on the shared corpus with **no** workstream key — only the
+   research ID pattern changes to `RS-<WS>-NNN`. — traces to `ws-staleness.md`
+   §Requirements-Corpus Staleness Stays Workstream-Independent (REQ-WS-028).
+5. [verify] Confirm plan/implement/replan/verify scope staleness to a workstream's
+   traced inputs (updating an untraced shared input does not flag; updating a traced
+   one does); `sdd-specs` no longer compares a global `docs/plan.md`; requirements
+   staleness fires independent of any workstream; no traceability-file read on any
+   staleness path. — traces to `ws-staleness.md` §Verification/Automated + Manual.
+**Entry criteria**: Chunk 0 complete.
+**Exit criteria**: three skills generalized, two gain new/deferred branches,
+requirements staleness confirmed shared; verify task passes.
+
+### Chunk 4: Git integration model — fan-out & verification re-anchor
+**Depends on**: Chunk 0.
+**Goal**: Integration is branch-per-workstream → PR to `main`; fan-out branches
+from and merges back into the workstream branch; `sdd-verify` diffs against the
+workstream branch point. Traces to `ws-integration.md`.
+**Tasks**:
+1. [implement] Encode branch-per-workstream → PR-to-`main` integration in the
+   relevant skills/docs: the workstream branch is the integration unit; a completed
+   workstream merges via PR; concurrent open PRs are supported; `main` is a shared
+   trunk, not a working surface. — traces to `ws-integration.md` §Integration Is
+   Branch-per-Workstream → PR to main (REQ-WS-016).
+2. [implement] Re-anchor implement-stage fan-out in
+   `skills/sdd-orchestrate/references/fan-out.md` (and any SKILL.md prose): worktrees
+   branch from the **workstream branch** (HEAD), merge back into it, `main` untouched
+   until the workstream PR; **remove** the `main`-ownership "conflict-after-
+   re-derivation = boundary error" inference; keep all other fan-out mechanics
+   (worktree provisioning, sequential merge-back, inline git identity, conflict
+   abort-and-redo) unchanged. Apply the workstream-branch re-anchor as a **marker-`4`
+   branch while retaining the marker-`3` (v3) `main`-anchored fan-out unchanged**:
+   `docs/.sdd-version` is the sole gate — under marker `3` fan-out behaves exactly as
+   today, marker `4` selects the workstream-branch path (reconciling with the
+   `ws-layout.md` step-0 contract, where marker != 4 routes to the sdd-migrate / v3
+   path). — traces to `ws-integration.md` §Fan-out Worktrees
+   Branch from the Workstream Branch (REQ-WS-017).
+3. [implement] Change `sdd-verify`'s regression base to the workstream branch point:
+   `regression_base(<id>) = merge-base(<id>, main)`; diff `<id>` HEAD vs that base,
+   not `main` HEAD, so verification reflects only this workstream's delta. Apply this
+   re-anchored base as a **marker-`4` branch while retaining the marker-`3` (v3)
+   `main`-HEAD regression base unchanged**: `docs/.sdd-version` is the sole gate — under
+   marker `3` `sdd-verify` diffs against `main` exactly as today, marker `4` selects the
+   `merge-base(<id>, main)` path (reconciling with the `ws-layout.md` step-0 contract,
+   where marker != 4 routes to the sdd-migrate / v3 path). — traces to
+   `ws-integration.md` §Verification Regression Base Is the Workstream Branch Point
+   (REQ-WS-018).
+4. [verify] Confirm fan-out branches worktrees from the workstream branch and merges
+   back into it with no `main`-ownership step and no boundary-error inference; and
+   `sdd-verify` computes regression base as `merge-base(<id>, main)` — a workstream's
+   verification is unaffected by unrelated workstreams merged to `main` meanwhile. —
+   traces to `ws-integration.md` §Verification/Automated + Manual.
+**Entry criteria**: Chunk 0 complete.
+**Exit criteria**: integration/fan-out/regression-base re-anchored onto the
+workstream branch; boundary-error inference removed; verify task passes.
+
+### Chunk 5: v3 → v4 migration & the `.sdd-version` gate
+**Depends on**: Chunk 1.
+**Goal**: `sdd-migrate` gains a copy-verify-flip-cleanup v3→v4 step; `.sdd-version`
+is the sole layout gate; kickoff is absorbed per-workstream. Traces to
+`ws-migration.md`.
+**Tasks**:
+1. [implement] Add the `3`→`4` arm to `sdd-migrate`'s version routing
+   (`migrate_v3_to_v4()`; `version == 4` → clean "already at v4" exit); compose it
+   after the existing v1→v2→v3 chain so the marker is written `4` last, once. —
+   traces to `ws-migration.md` §Version-Routing Extension, §.sdd-version Is the Sole
+   Layout Gate (REQ-WS-023 routing half).
+2. [implement] Specify the copy-verify-flip-cleanup step order: precondition marker
+   `3`; create `docs/ws/default/` + `plan-history/`; **copy** (not move)
+   `plan.md`/`verification.md`/`plan-history/*`/flat `handoff/kickoff.md` (if present)
+   into `docs/ws/default/` preserving `[x]`/`[ ]` and pass/fail verdicts verbatim;
+   **verify byte-identical**; leave the shared corpus in place; write `.sdd-version` =
+   `4` **last**; then idempotently delete the flat originals (and empty
+   `docs/handoff/`). — traces to `ws-migration.md` §v3→v4 Migration:
+   Copy-Verify-Flip-Cleanup (REQ-WS-021, REQ-WS-022).
+3. [implement] Encode the interrupted-migration invariant: interrupted **before** the
+   flip → working v3 repo (marker `3`, flat files intact), re-run restarts idempotent
+   copy-verify; interrupted **after** the flip → working v4 repo (marker `4`), re-run
+   re-does cleanup idempotently. — traces to `ws-migration.md` (REQ-WS-022).
+4. [implement] Encode the kickoff decision: `kickoff.md` lives at
+   `docs/ws/<id>/kickoff.md`; flat `docs/handoff/` is **not** retained in v4 (moved to
+   `docs/ws/default/kickoff.md` at migration); no skill reads `docs/handoff/` under
+   marker `4`. — traces to `ws-migration.md` §Decision: kickoff.md Absorbed
+   Per-Workstream (REQ-WS-021).
+5. [implement] Document the `.sdd-version` gate table in `sdd-migrate` (and cross-check
+   the Chunk 0 step-0 branches): marker `3` = flat authoritative, `4` = per-workstream
+   authoritative; a v3 skill never reads `docs/ws/`, a v4 skill never reads flat
+   execution paths; a v4-aware skill under marker `3` suggests `sdd-migrate`. — traces
+   to `ws-migration.md` §.sdd-version Is the Sole Layout Gate (REQ-WS-023).
+6. [verify] Run v3→v4 on a v3 fixture: confirm `docs/ws/default/` holds the former flat
+   artifacts, `.sdd-version` == `4`, no flat `plan.md`/`verification.md`/`handoff/`
+   remain, verdicts/status preserved verbatim; interrupt before flip → working v3 +
+   safe re-run; interrupt after flip → working v4 + idempotent cleanup. — traces to
+   `ws-migration.md` §Verification/Automated + Manual.
+**Entry criteria**: Chunk 1 complete (sdd-migrate ID-remap template already carries
+the `<WS>` slot).
+**Exit criteria**: v3→v4 step + gate table + interrupted invariants + kickoff
+absorption encoded; verify task passes.
+
+### Chunk 6: Orchestration entry — workstream picker & uniform research lifecycle
+**Depends on**: Chunk 5.
+**Goal**: `sdd-orchestrate` presents a workstream picker, every new workstream
+starts at research, and research early-exits fast when the shared corpus already
+covers the work. Traces to `ws-orchestration.md`.
+**Tasks**:
+1. [implement] Add the workstream picker at `sdd-orchestrate` entry: enumerate
+   `docs/ws/<id>/` directories, show each id + description (from
+   `docs/ws/<id>/kickoff.md`) + detected phase (per Chunk 0 detection); let the
+   operator select an existing workstream or create a new one; in a `default`-only
+   repo the picker degenerates to one (no naming ceremony). — traces to
+   `ws-orchestration.md` §Workstream Picker at Orchestration Entry (REQ-WS-029).
+2. [implement] Resolve done-vs-new-cycle ambiguity **per workstream**: a DONE
+   workstream offers "start a new cycle in this workstream"; a new idea creates a new
+   workstream id — not by appealing to a single global operator intent. — traces to
+   `ws-orchestration.md` §Workstream Picker (REQ-WS-029).
+3. [implement] Encode the uniform research-entry lifecycle: every new workstream
+   begins at research and seeds `docs/ws/<id>/kickoff.md`; the id is conventionally the
+   branch/issue key; no per-workstream mid-pipeline entry variant at creation. —
+   traces to `ws-orchestration.md` §Uniform Research-Entry Lifecycle (REQ-WS-024).
+4. [implement] Add the research early-exit path in `sdd-research`/`sdd-orchestrate`:
+   when the shared corpus already covers the workstream's needs, record a fast explicit
+   early-exit finding ("covered by shared corpus — no new spike") distinct from a full
+   spike, then advance the loop. — traces to `ws-orchestration.md` §Research Early-Exit
+   (REQ-WS-025).
+5. [verify] Confirm the picker lists existing workstreams with id/description/phase and
+   supports select-or-create (two workstreams at different phases both shown);
+   done-vs-new-cycle resolves within the selected workstream; new-workstream creation
+   positions the loop at research + seeds kickoff; research supports a recorded
+   early-exit; `default`-only repo imposes no ceremony. — traces to
+   `ws-orchestration.md` §Verification/Automated + Manual.
+**Entry criteria**: Chunk 5 complete (kickoff placement + phase detection finalized).
+**Exit criteria**: picker + per-ws done/new resolution + uniform research entry +
+early-exit encoded; verify task passes.
+
+### Chunk 7: Convention & documentation updates (overview.md + CLAUDE.md)
+**Depends on**: Chunks 3, 4, 6.
+**Goal**: The canonical convention docs describe v4; the mandatory deferred
+`overview.md` update is applied. Traces to `ws-migration.md` §Deferred work,
+`ws-layout.md` §Deferred work.
+**Tasks**:
+1. [implement] **(MANDATORY deferred task)** Update `docs/spec/overview.md` to v4:
+   §Version Marker — add `4` as a valid marker value (currently lists only `2`/`3`);
+   §ID Namespaces — add the `<WS>` workstream segment to the RS / REQ / Q-IMPL formats
+   (currently the un-prefixed v2 formats). — traces to `ws-migration.md` §Deferred
+   work and `ws-layout.md` §Deferred work (REQ-WS-023 §Version-Marker part, REQ-WS-009
+   §ID-namespace part).
+2. [implement] Update `CLAUDE.md` to document v4: the `docs/ws/<id>/` + shared-corpus
+   layout and workstream lifecycle (research-entry → PR-to-main); the updated
+   phase-detection and staleness tables ((repo, workstream) function; per-ws plan
+   path); the workstream-prefixed ID formats; and the updated commit/branch
+   conventions (branch-per-issue, PR-per-workstream, `docs/.sdd-version` = `4`). —
+   traces to `ws-layout.md`, `ws-ids.md`, `ws-integration.md`, `ws-staleness.md`,
+   `ws-migration.md` (documentation of the shipped v4 contract).
+3. [verify] Confirm `overview.md` §Version Marker lists `4` and §ID Namespaces shows
+   the `<WS>` segment for RS/REQ/Q-IMPL; `CLAUDE.md` describes the v4 layout,
+   lifecycle, phase-detection/staleness, and commit/branch conventions consistently
+   with the specs. — traces to `ws-migration.md` §Deferred work.
+**Entry criteria**: Chunk 6 complete (all v4 contracts final so docs describe the
+shipped state).
+**Exit criteria**: overview.md v4 update applied; CLAUDE.md documents v4; verify
+task passes.
+
+### Chunk 8: Holistic v4 verification
+**Depends on**: Chunks 2, 3, 4, 7.
+**Goal**: End-to-end confirmation that v4 behaves per every spec's acceptance
+criteria across the whole skill set, from a user/operator perspective.
+**Tasks**:
+1. [verify] Two-workstream isolation walkthrough: create `ISSUE-42` and `ISSUE-57`;
+   confirm each has independent `docs/ws/<id>/plan.md`; `requirements/`/`spec/` are
+   single shared trees; running `sdd-plan` (incl. rewrite/archive) in `ISSUE-42`
+   leaves `ISSUE-57`'s plan/plan-history/verification byte-unchanged and does not
+   route it to replan. — traces to `ws-layout.md` acceptance criteria (REQ-WS-001,
+   REQ-WS-006).
+2. [verify] Concurrency walkthrough: two workstreams allocate `RS-ISSUE42-001` /
+   `RS-ISSUE57-001` with no collision; add requirements under distinct prefixes
+   (clean 3-way merge) vs same domain (surfaced human PR conflict, not auto-unioned);
+   per-ws traceability files merge clean and the aggregate re-derives. — traces to
+   `ws-ids.md` / `ws-traceability.md` acceptance criteria (REQ-WS-009, 011, 013, 014,
+   008).
+3. [verify] Solo-parity walkthrough: run a full solo cycle without ever naming a
+   workstream; confirm all artifacts land under `docs/ws/default/`, the shared corpus
+   is used as-is, and the experience is ceremony-free. — traces to `ws-layout.md`
+   (REQ-WS-020) + `ws-orchestration.md` picker-degenerates-to-one (REQ-WS-029).
+4. [verify] Cross-skill consistency sweep: confirm all nine skills' step-0, the four
+   generators, the fan-out/verify integration, the migration gate, and the docs agree
+   on the v4 layout/marker with no residual flat-path reads under marker `4`. —
+   traces to `ws-layout.md`/`ws-migration.md` gate criteria (REQ-WS-003, REQ-WS-023).
+**Entry criteria**: Chunk 7 complete.
+**Exit criteria**: all spec acceptance criteria demonstrably met; ready for
+`sdd-verify` / operator sign-off.
 
 ## Replan Triggers
 
-- If validating "upstream is approved" needs the driver to reimplement a stage
-  skill's status/staleness check (rather than relay it) → revisit; the design
-  assumes the driver reads artifact frontmatter/phase detection, not new logic.
-- If distinguishing non-research *entry* from *resume* on disk proves impossible
-  without a new marker (contradicting REQ-ORCH-014) → escalate; the design relies
-  on operator intent + artifact provenance, not a marker.
-
-## Completed
-
-- RS-005 sdd-orchestrate driver: research → verify (2026-06-04)
-- RS-006 implement-stage fan-out (Design B), dogfooded end-to-end (2026-06-05)
-- Driver fixes REQ-ORCH-029/030 + ~1000 soft-limit convention (2026-06-05)
+- **Append-only merge proves unclean in a real `docs/ws/<id>/` layout** (contrary to
+  RS-007 Q1 / S8) — e.g. per-ws traceability files or sorted index insertion still
+  3-way-conflict in practice → revisit `ws-ids.md` / `ws-traceability.md` write model
+  (Chunks 1–2), potentially reconsidering the rejected `merge=union` driver.
+- **A skill's phase detection cannot be made workstream-parameterized without breaking
+  v3 solo use** (Chunk 0) — e.g. the `default` fallback changes solo behavior
+  observably → redesign the step-0 threading in `ws-layout.md`.
+- **The milestone→workstream staleness generalization does not hold verbatim** for one
+  of `sdd-plan`/`sdd-implement`/`sdd-replan` (contrary to RS-007 Q2) → treat that skill
+  as needing new logic like verify/specs (Chunk 3).
+- **v3→v4 copy-verify-flip-cleanup cannot preserve byte-identity or the interrupted
+  invariant** on a real v3 repo (contrary to RS-007 Q3) → revisit the migration step
+  order in `ws-migration.md` (Chunk 5).
+- **The ID-format change touches a parser beyond the four generators + review string**
+  (contrary to RS-007 Q4) — e.g. fan-out `Depends on: Chunk N` or a traceability parser
+  actually regresses → expand Chunk 1 scope and re-derive the blast radius.
+- **The workstream picker cannot resolve done-vs-new-cycle per workstream** without a
+  global-intent appeal (Chunk 6) → revisit `ws-orchestration.md` entry design.
 
 ## Risks
 
-- **Doc-only change, low risk**: adds prose to an existing skill; the mechanism
-  (phase detection) is already proven (RS-005 Q3). Main risk is clearly
-  distinguishing entry from resume for the reader — caught by task 1 wording and
-  the verify task.
+- **Breadth of edits**: v4 touches all nine skills at step-0 plus references and two
+  convention docs; a missed skill leaves a flat-path read under marker `4`. Mitigation:
+  Chunk 0 does the step-0 threading in one pass; Chunk 8's cross-skill consistency
+  sweep is a dedicated backstop.
+- **Meta-feature testability**: there is no compiled code — "verification" is prose
+  review + git merge/interruption walkthroughs on fixtures. Mitigation: verify tasks
+  are explicit and behavioral (concurrent merges, migration interruption), not
+  markdown lints.
+- **Atomic flip coupling**: because `.sdd-version` = `4` flips everything at once,
+  partial delivery is not shippable. Mitigation: single-milestone plan; the marker flip
+  (Chunk 5) lands only after layout/IDs/staleness/integration are in place.
+- **Same-domain concurrent requirement additions** remain a human PR conflict by design
+  (REQ-WS-014) — not a defect. Mitigation: documented as accepted degradation, surfaced
+  not auto-merged.
 
-## Archive
+## Open Questions / Assumptions
 
-Full plan history:
-- [2026-06-04-rs005-orchestrate-complete.md](plan-history/2026-06-04-rs005-orchestrate-complete.md)
-- [2026-06-05-fanout-complete.md](plan-history/2026-06-05-fanout-complete.md)
-- [2026-06-06-driver-fixes-complete.md](plan-history/2026-06-06-driver-fixes-complete.md)
+- **Operator approval pending (status: Draft).** This plan was authored by a
+  non-interactive pipeline subagent with no operator present. Per the sdd-plan Step 7/8
+  flow, operator sign-off at the orchestration gate is required before implementation;
+  `status` is left `Draft`. Default: proceed to the gate as-is.
+- **Single-milestone structure.** v4 ships as one atomic delivery (the `.sdd-version`
+  flip), so a single-milestone `docs/plan.md` with nine chunks was chosen over
+  per-milestone files despite nearing the ~10-chunk soft threshold. Default: keep
+  single-milestone; split into per-milestone files only if the operator wants staged
+  delivery (which the atomic flip discourages).
+- **`merge=union` `.gitattributes` driver (RS-007 Q1 / `ws-ids.md` Open Question).**
+  Default: **not adopted** — it interleaves rows out of sort order, breaking the
+  deterministic-sort invariant REQ-WS-015 relies on. Flagged for the operator to
+  optionally reconsider at approval; would only enter scope via the Chunk 1 replan
+  trigger.
+- **Verify-task depth.** Verify tasks assume walkthroughs on throwaway git fixtures
+  (as RS-007's Q1 spike did) rather than an automated harness, since the artifacts are
+  markdown skill definitions. Default: fixture-based behavioral walkthroughs.
+- **Chunk 0 breadth.** Threading step-0 through nine skills is one chunk for coherence;
+  if it proves larger than ~15h in practice it may be split per-skill at implement time
+  without changing the plan's dependency graph.
+
+## Completed
+- (none — new plan for the Multi-Workstream SDD v4 cycle, 2026-07-21)
