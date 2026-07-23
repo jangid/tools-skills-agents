@@ -162,7 +162,7 @@ When the project uses per-milestone plan files (`docs/plan-{id}.md`):
 2. Update both milestone plan files with the task movement
 3. Update the index table to reflect current status
 
-Single-file plans continue to use the existing archival pattern above. Per-milestone logic activates only when per-milestone files exist.
+Single-file plans continue to use the existing archival pattern above. Per-milestone logic activates only when per-milestone files exist. Under marker `4` the same logic runs within the workstream: index and milestone files at `docs/ws/<ws>/plan.md` / `docs/ws/<ws>/plan-{id}.md`, archives to `docs/ws/<ws>/plan-history/`.
 
 ### Step 5: Present and Confirm
 

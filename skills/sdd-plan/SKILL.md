@@ -122,6 +122,8 @@ When activating per-milestone structure:
 2. Create `docs/plan-{milestone-id}.md` for each active milestone
 3. Add `milestone:`, `last_updated:`, and `status: planned` frontmatter to each milestone plan
 
+**Marker `4`**: the same structure lives inside the workstream — `docs/ws/<ws>/plan.md` is the index and `docs/ws/<ws>/plan-{milestone-id}.md` the milestone plans, archiving to `docs/ws/<ws>/plan-history/`. Per-milestone activation is per-workstream; it never creates flat `docs/plan-*.md` files.
+
 Each delivery milestone should produce a **testable system** — not just a pile of code. Good milestones:
 
 - M1: Project skeleton — builds, lints, type-checks with zero functionality
