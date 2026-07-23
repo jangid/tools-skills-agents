@@ -107,6 +107,34 @@ the `default` workstream and are NOT remapped. See `docs/spec/ws-ids.md`.
 
 **Edge case**: If a directory exists but its `findings.md` is missing or has `status: Abandoned`, the number is still consumed — IDs are never reused (per workstream under marker `4`).
 
+### Research Early-Exit When the Shared Corpus Already Covers the Work (marker `4`)
+
+`docs/.sdd-version` is the sole gate. Under marker `3` or earlier this subsection does
+**not** apply — run the full spike (Steps 3–7) as always. Under marker `4`, because
+every new workstream begins at research for uniformity (REQ-WS-024,
+`sdd-orchestrate` §Workstream Picker), the research stage **should** early-exit fast
+(REQ-WS-025) when the shared corpus already covers this workstream's needs, so uniform
+research-entry imposes minimal overhead:
+
+1. **Judge coverage.** On entry at research for a workstream `ws`, check whether the
+   existing **shared** corpus — `docs/requirements/`, `docs/spec/`, prior
+   `docs/research/RS-*/findings.md` — already answers what this workstream needs. This
+   is a recorded judgment, not a staleness check (ongoing staleness of traced shared
+   inputs is handled separately and live — see `docs/spec/ws-staleness.md`).
+2. **If already covered → record a fast, explicit early-exit** instead of a full
+   spike. Assign the RS id per Step 2, then write
+   `docs/research/RS-<WS>-NNN-{topic}/findings.md` with frontmatter
+   `status: Complete` **and** `early_exit: true`, and a single finding
+   **"Covered by shared corpus — no new spike"** naming the shared REQ/SPEC/RS ids
+   that cover the work. **Skip Steps 3–4** (no Explore, no Prototype, no budget burn).
+   Update the research index (Step 6) with the early-exit summary, then advance the
+   loop (Step 7 → proceed to requirements/next stage). The early-exit is **recorded**
+   so the workstream's research state is auditable, and it is **distinct** from a full
+   spike (`early_exit: true` marks it).
+3. **If NOT covered → run the full spike** (Steps 3–7). The early-exit is a `should`,
+   not a `must`: a workstream is always free to run a real spike; the early-exit is
+   only the optimization that keeps the common "already covered" case near-zero-cost.
+
 ### Step 3: Explore
 
 For each research question:

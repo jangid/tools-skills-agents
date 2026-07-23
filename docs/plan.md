@@ -364,6 +364,23 @@ the `<WS>` slot).
 absorption encoded; verify task passes.
 
 ### Chunk 6: Orchestration entry — workstream picker & uniform research lifecycle
+**Status**: CLOSED (2026-07-23) — tasks 1–5 done. Under a marker-`4` branch,
+`skills/sdd-orchestrate/SKILL.md` gains a § Workstream Picker: enumerate `docs/ws/<id>/`,
+list each id + description (from `docs/ws/<id>/kickoff.md`) + detected phase (per the
+Chunk-0 §Phase Detection gate with `ws=<id>`), and select-existing-or-create-new;
+done-vs-new-cycle is resolved **per workstream** (DONE ws offers "start a new cycle in
+this workstream"; a new idea mints a new ws id) — the §New cycle vs. resume block gains a
+marker-`4` gate pointing at the picker instead of a single global operator intent. Every
+**new** workstream begins at **research** (uniform research-entry, no per-ws mid-pipeline
+variant) and seeds `docs/ws/<id>/kickoff.md`; §Entry Points is scoped to marker-`3`
+single-cycle; §KICKOFF gains the per-ws kickoff path gate.
+`skills/sdd-research/SKILL.md` gains a § Research Early-Exit (marker `4`): when the shared
+corpus already covers the workstream's needs, record a fast `early_exit: true` finding
+("covered by shared corpus — no new spike"), skip Explore/budget, update the index, and
+advance — distinct from a full spike, a `should`. Marker-`3` single-flat-cycle entry
+(flat `docs/handoff/kickoff.md`, global-intent done-vs-new-cycle, mid-pipeline entry)
+retained UNCHANGED (all changes are marker-`4`-gated additions). No replan trigger fired.
+See Q-IMPL-016..018 in `ws-orchestration.md`. Covers REQ-WS-024, REQ-WS-025, REQ-WS-029.
 **Depends on**: Chunk 5.
 **Goal**: `sdd-orchestrate` presents a workstream picker, every new workstream
 starts at research, and research early-exits fast when the shared corpus already
@@ -601,3 +618,25 @@ criteria across the whole skill set, from a user/operator perspective.
   a throwaway `$TMPDIR` git v3 fixture; THIS repo was NOT migrated (marker stays `3`,
   no `docs/ws/` here). No replan trigger fired (Q-IMPL-015). Covers REQ-WS-021,
   REQ-WS-022, REQ-WS-023. (2026-07-23, 6 tasks)
+- Chunk 6 (Orchestration entry — workstream picker & uniform research lifecycle):
+  under a marker-`4` branch, `skills/sdd-orchestrate/SKILL.md` gains § Workstream
+  Picker — at entry it enumerates `docs/ws/<id>/` and lists each workstream's id +
+  description (from `docs/ws/<id>/kickoff.md`) + detected phase (Chunk-0 §Phase
+  Detection with `ws=<id>`), then lets the operator select an existing workstream or
+  create a new one; a `default`-only repo degenerates to a picker of one (no naming
+  ceremony, REQ-WS-020). Done-vs-new-cycle is resolved **per workstream** (a DONE ws —
+  `docs/ws/<id>/verification.md` `status: pass` — offers "start a new cycle in this
+  workstream"; a new idea mints a new ws id), and the §New cycle vs. resume block gains
+  a marker-`4` gate replacing the single global-operator-intent appeal with the picker
+  (REQ-WS-029). Every **new** workstream begins at **research** (uniform research-entry,
+  no per-ws mid-pipeline entry variant at creation — §Entry Points scoped to marker-`3`
+  single-cycle) and seeds `docs/ws/<id>/kickoff.md` (§KICKOFF gains a per-ws kickoff
+  path gate) (REQ-WS-024). `skills/sdd-research/SKILL.md` gains § Research Early-Exit
+  (marker `4`): when the shared corpus already covers the workstream's needs, record a
+  fast `early_exit: true` finding ("covered by shared corpus — no new spike"), skip
+  Explore/budget (Steps 3–4), update the index, and advance the loop — recorded and
+  distinct from a full spike, a `should` not a `must` (REQ-WS-025). Marker-`3`
+  single-flat-cycle entry (flat `docs/handoff/kickoff.md`, global-intent
+  done-vs-new-cycle, mid-pipeline entry, full spike) retained byte-unchanged (all
+  changes marker-`4`-gated additions). No replan trigger fired (Q-IMPL-016, Q-IMPL-017,
+  Q-IMPL-018). Covers REQ-WS-024, REQ-WS-025, REQ-WS-029. (2026-07-23, 5 tasks)

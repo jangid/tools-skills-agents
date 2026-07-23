@@ -142,9 +142,9 @@ last_updated: 2026-07-23
 | REQ-WS-021 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: 3→4 routing arm + kickoff absorbed to docs/ws/default/kickoff.md, no flat docs/handoff/ in v4) | pass |
 | REQ-WS-022 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: copy-verify-flip-cleanup, marker written 4 last, interrupted-migration invariant, verdicts/status preserved verbatim) | pass |
 | REQ-WS-023 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: .sdd-version sole layout gate table + version-routing extension incl. version==4 no-op) | pass |
-| REQ-WS-024 | ws-orchestration.md | | | |
-| REQ-WS-025 | ws-orchestration.md | | | |
+| REQ-WS-024 | ws-orchestration.md | | skills/sdd-orchestrate/SKILL.md (§ Workstream Picker: uniform research-entry, new ws begins at research + seeds docs/ws/<id>/kickoff.md, no mid-pipeline entry variant; marker-4 gate) | |
+| REQ-WS-025 | ws-orchestration.md | | skills/sdd-research/SKILL.md (§ Research Early-Exit: recorded early_exit finding, skip Explore/budget), skills/sdd-orchestrate/SKILL.md (picker references early-exit; marker-4 gate) | |
 | REQ-WS-026 | ws-staleness.md | | skills/sdd-plan/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-replan/SKILL.md (milestone→workstream staleness generalized verbatim, compute-live, no traceability read, marker-4 gate) | |
 | REQ-WS-027 | ws-staleness.md | | skills/sdd-verify/SKILL.md (new ws-scoped branch), skills/sdd-specs/SKILL.md (defer plan staleness, no global plan compare, marker-4 gate) | |
 | REQ-WS-028 | ws-staleness.md | | skills/sdd-requirements/SKILL.md (research→requirements staleness stays shared/workstream-independent; RS-<WS>-NNN pattern only, marker-4 gate) | |
-| REQ-WS-029 | ws-orchestration.md | | | |
+| REQ-WS-029 | ws-orchestration.md | | skills/sdd-orchestrate/SKILL.md (§ Workstream Picker: enumerate docs/ws/<id>/, list id/description/detected-phase, select-or-create, default degenerates to one; per-workstream done-vs-new-cycle via marker-4 gate on § New cycle vs. resume) | |

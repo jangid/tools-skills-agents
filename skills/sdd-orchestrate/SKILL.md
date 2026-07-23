@@ -98,6 +98,94 @@ work; surface your new-vs-resume interpretation and confirm. This adds no new
 marker (REQ-ORCH-014 stands) — it is just explicit reasoning about the
 completed-cycle case.
 
+**Marker-`4` gate for done-vs-new-cycle.** `docs/.sdd-version` is the sole gate for
+how this ambiguity is resolved:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** The repo holds a single
+  flat cycle (`docs/handoff/kickoff.md`, `docs/plan.md`, `docs/verification.md`) and
+  the *done* vs *new cycle* choice is resolved by the **single global operator
+  intent** described just above — verbatim, unchanged.
+- **Marker is `4`: resolved PER WORKSTREAM via the picker (REQ-WS-029), not by a
+  global intent.** Phase is now a function of `(repo, workstream)`, so there is no
+  single repo-wide "done" state to appeal to — several workstreams may sit at
+  different phases at once. The **Workstream Picker** (§Workstream Picker) surfaces
+  each workstream with its detected phase and resolves *done vs new cycle* **within
+  the selected workstream's context**: selecting a workstream whose phase is DONE
+  (its `docs/ws/<id>/verification.md` is `status: pass`) offers "start a new cycle in
+  **this** workstream", while a genuinely new idea creates a **new** workstream id —
+  never by appealing to one global operator intent.
+
+## Workstream Picker
+
+`docs/.sdd-version` is the **sole** gate for whether the driver opens with a
+workstream picker:
+
+- **Marker is not `4` (v3 or earlier): NO picker — behavior UNCHANGED.** There is no
+  `docs/ws/` under marker `3`; the driver drives the single flat cycle exactly as
+  today: derive loop position from the flat artifacts (§Phase Detection table),
+  resolve done-vs-new-cycle by the single global operator intent (§New cycle vs.
+  resume), and use the one `docs/handoff/kickoff.md`. Skip this whole section.
+- **Marker is `4`: present a workstream picker at entry (REQ-WS-029).** Because phase
+  is a function of `(repo, workstream)`, the driver cannot infer a single active
+  cycle from the repo — several workstreams may be live at once — so it must ask which
+  workstream the operator is driving before entering the LOOP.
+
+### Present existing workstreams (marker `4`, REQ-WS-029)
+
+Enumerate the `docs/ws/<id>/` directories (each directory is one workstream) and, for
+**each**, show a row:
+
+| Field | Source |
+|-------|--------|
+| id | the `docs/ws/<id>/` directory name |
+| description | the description recorded in `docs/ws/<id>/kickoff.md` (kickoff is per-workstream, per `ws-migration.md`) |
+| detected phase | that workstream's phase, computed by the §Phase Detection gate with `ws = <id>` (`base = docs/ws/<id>/`) |
+
+Then let the operator **select an existing workstream or create a new one**. Two
+workstreams sitting at different phases (e.g. `ISSUE-42` at implement, `ISSUE-57` at
+plan) are **both** listed with their own phase, so the operator names the one they are
+driving rather than the driver guessing.
+
+**Solo degenerates to a picker of one (REQ-WS-020).** In a repo whose only workstream
+is `default` (the migrated/solo case), the picker collapses to that single workstream
+with **no naming ceremony** — it is a picker of one, not a prompt the solo operator
+must answer. Resolve `default` and proceed exactly as a solo v3 cycle would feel.
+
+### Resolve done-vs-new-cycle per workstream (REQ-WS-029)
+
+Disambiguation is **per workstream**, never by a single global operator intent
+(§New cycle vs. resume, marker-`4` gate):
+
+- **Select an existing workstream** → drive it from its detected phase. If that phase
+  is **DONE** (`docs/ws/<id>/verification.md` is `status: pass`), offer **"start a new
+  cycle in this workstream"** — resolved inside that workstream's context (a new cycle
+  overwrites `docs/ws/<id>/kickoff.md` at KICKOFF, as §KICKOFF describes), or report
+  DONE if the operator has no new idea for it.
+- **Create a new workstream** for a genuinely new idea → mint a **new workstream id**
+  (conventionally the branch/issue key, per `ws-integration.md`) and enter the uniform
+  research-entry lifecycle below. A new idea is a new id, not a "new cycle" appended to
+  someone else's workstream.
+
+### Uniform research-entry lifecycle for a new workstream (REQ-WS-024)
+
+Every **new** workstream begins at the **research stage**, regardless of how much
+shared corpus already exists — there is **no per-workstream mid-pipeline entry variant
+to select at creation** (mid-pipeline entry, §Entry Points, is a marker-`3`
+single-cycle concept; a marker-`4` new workstream always starts at research). Creating
+a new workstream:
+
+1. mints the workstream id and creates/uses its branch (`ws-integration.md`);
+2. **positions its loop at research** (§Phase Detection: `docs/ws/<id>/kickoff.md`
+   exists, no `docs/ws/<id>/research`-referenced findings yet → the research stage);
+3. seeds `docs/ws/<id>/kickoff.md` as a research kickoff (§KICKOFF).
+
+Uniformity keeps the lifecycle one predictable shape for every workstream. It stays
+cheap because the research stage **early-exits fast** when the shared corpus already
+covers the new workstream's needs: the research pipeline subagent records a fast,
+explicit early-exit ("covered by shared corpus — no new spike") rather than running a
+full spike, then the loop advances (REQ-WS-025 — see `sdd-research` §Research
+Early-Exit and `docs/spec/ws-orchestration.md`).
+
 ## Entry Points
 
 Research is the **default** entry. But when approved upstream SDD artifacts
@@ -105,6 +193,13 @@ already exist, the operator may start the loop **mid-pipeline** (REQ-ORCH-031) a
 **requirements, specs, plan, or implement**. Research is the default; **verify is
 not an entry point** (verifying an existing project is just invoking `sdd-verify`
 directly — no loop). 
+
+**Marker-`4` scope.** Non-research mid-pipeline entry described in this section is a
+**marker-`3` single-cycle** concept. Under marker `4` a **new** workstream always
+begins at research (uniform research-entry, §Workstream Picker → REQ-WS-024) — there
+is no per-workstream mid-pipeline entry variant to select at its creation; selecting
+an **existing** marker-`4` workstream simply resumes it from its detected phase via
+the picker, which is resume, not entry.
 
 **Entry ≠ resume.** *Resume* continues a cycle **this driver** started (its
 kickoff + partial artifacts are on disk — see §Phase Detection). *Non-research
@@ -160,10 +255,17 @@ out of scope, and the concrete questions worth researching.
 
 ## KICKOFF
 
-Write the converged discussion into `docs/handoff/kickoff.md`. This is the
+Write the converged discussion into the cycle's kickoff file. This is the
 **only** new on-disk artifact type the driver introduces; every other stage
-output is a normal SDD artifact. It must be git-trackable (a real file under
-`docs/handoff/`, committed alongside the cycle's work).
+output is a normal SDD artifact. It must be git-trackable (a real committed file).
+
+**Kickoff path — version gate.** `docs/.sdd-version` selects where the kickoff lives:
+- **Marker is not `4`:** the single flat `docs/handoff/kickoff.md` (unchanged).
+- **Marker is `4`:** the per-workstream `docs/ws/<id>/kickoff.md` for the workstream
+  selected/created at the picker (kickoff is absorbed per-workstream, `ws-migration.md`;
+  no flat `docs/handoff/` in v4). Its `description` is what the §Workstream Picker
+  reads back when listing workstreams. A **new cycle in a DONE workstream** overwrites
+  that workstream's `docs/ws/<id>/kickoff.md`; a **new workstream** seeds a fresh one.
 
 **By default** the kickoff is a **research kickoff**: it states the research
 questions, success criteria, a budget, and what is out of scope, and the LOOP

@@ -121,3 +121,49 @@ workstream traces is handled separately and live (`ws-staleness.md`).
 - [ ] Research early-exits fast with a recorded exit when the shared corpus already
       covers the work (REQ-WS-025)
 - [ ] Markdown well-formed; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-016: Picker & uniform-lifecycle changes are marker-`4`-gated
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Workstream Picker at Orchestration Entry; §Uniform Research-Entry Lifecycle
+**Decision**: The workstream picker, per-workstream done-vs-new-cycle resolution,
+uniform research-entry, and research early-exit are all added as **marker-`4`
+branches** in `skills/sdd-orchestrate/SKILL.md` / `skills/sdd-research/SKILL.md`, gated
+on `docs/.sdd-version` == `4`. Under marker `3` (or earlier) the driver's existing
+single-flat-cycle entry is retained **unchanged**: no `docs/ws/` enumeration, the single
+`docs/handoff/kickoff.md`, the single global-operator-intent done-vs-new-cycle logic
+(§New cycle vs. resume), and §Entry Points mid-pipeline entry all behave exactly as
+today. This spec describes the picker generically; the marker gate is the same
+sole-`.sdd-version`-gate discipline Chunks 0–5 used so the LIVE v3 repo's behavior is
+untouched.
+**Rationale**: There is no `docs/ws/` under marker `3`, so an ungated picker would break
+v3 solo use. The gate is consistent with `ws-layout.md` §.sdd-version gate (marker != 4
+routes to the sdd-migrate / v3 path).
+
+### Q-IMPL-017: Research early-exit recording shape
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Research Early-Exit — "records a fast, explicit early-exit (a recorded finding of 'covered by shared corpus — no new spike')"
+**Decision**: The early-exit reuses the normal RS artifact: assign the `RS-<WS>-NNN` id
+per Step 2, then write `docs/research/RS-<WS>-NNN-{topic}/findings.md` with frontmatter
+`status: Complete` **plus a distinguishing `early_exit: true` flag**, and a single
+finding "Covered by shared corpus — no new spike" naming the shared REQ/SPEC/RS ids that
+cover the work; Steps 3–4 (Explore, budget) are skipped, Step 6 (index) still runs. The
+`early_exit: true` flag is what makes it auditable and **distinct** from a full spike.
+**Rationale**: The spec fixes the recorded *content* but not the file shape; reusing the
+existing findings.md schema (rather than a new artifact type) keeps the research state in
+one place, and a single boolean flag is the minimal marker that distinguishes an
+early-exit from a full spike without a new parser. No new artifact type is introduced.
+
+### Q-IMPL-018: DONE signal & new-cycle overwrite for per-workstream done-vs-new-cycle
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Workstream Picker — "a DONE workstream offers 'start a new cycle in this workstream'"
+**Decision**: A workstream's **DONE** state for the picker is read from its own
+`docs/ws/<id>/verification.md` being `status: pass` (the marker-`4` per-ws execution
+artifact, per `ws-layout.md`), never from a repo-global `docs/verification.md`. "Start a
+new cycle in this workstream" **overwrites** that workstream's `docs/ws/<id>/kickoff.md`
+at KICKOFF (mirroring the marker-`3` §New cycle vs. resume overwrite semantics, scoped to
+the workstream); a genuinely new idea mints a **new** workstream id with a fresh kickoff.
+**Rationale**: Resolving DONE per workstream from the per-ws `verification.md` is exactly
+what makes done-vs-new-cycle a per-workstream decision rather than a global-intent appeal
+(REQ-WS-029); reusing the established overwrite semantics avoids inventing a new marker.
