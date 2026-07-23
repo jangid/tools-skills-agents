@@ -90,7 +90,7 @@ skill. `docs/.sdd-version` is the **sole** layout gate:
 | On disk | Loop position |
 |---------|---------------|
 | no `docs/handoff/kickoff.md` | before KICKOFF — run DISCUSS |
-| kickoff exists, no `docs/research/RS-*/findings.md` | at the research stage |
+| kickoff exists, its `research_id` spike has no Complete findings | at the research stage |
 | research done, requirements `Draft`/missing | at the requirements stage |
 | requirements `Approved`, specs missing/stale | at the specs stage |
 | specs `Approved`, no `docs/plan.md` (or stale) | at the plan stage |
@@ -204,9 +204,11 @@ a new workstream:
 1. mints the workstream id and creates/uses its branch (`ws-integration.md`);
 2. **positions its loop at research** (§Phase Detection: `docs/ws/<id>/kickoff.md`
    exists and research is **not yet complete for `<id>`** → the research stage).
-   Research is complete for workstream `<id>` when a shared
-   `docs/research/RS-<id>-*/findings.md` exists with `status: Complete` (an
-   explicit early-exit finding counts as Complete). Research findings are **shared**
+   Research is complete for this cycle when the kickoff's recorded `research_id`
+   spike (`docs/research/RS-<id>-NNN-*/findings.md`) exists with
+   `status: Complete` (an explicit early-exit finding counts as Complete) —
+   scoped to the kickoff's spike, not "any `RS-<id>-*`", so a prior cycle in the
+   same workstream never masks a new cycle's research stage. Research findings are **shared**
    — they live in the common `docs/research/` tree, ws-keyed **only** by the
    `RS-<WS>-` id prefix (there is **no** `docs/ws/<id>/research/` dir); the
    workstream owns `docs/ws/<id>/` kickoff, plan, and verification;
@@ -302,7 +304,13 @@ output is a normal SDD artifact. It must be git-trackable (a real committed file
 
 **By default** the kickoff is a **research kickoff**: it states the research
 questions, success criteria, a budget, and what is out of scope, and the LOOP
-begins at the research stage. For a **non-research entry** (§Entry Points) write
+begins at the research stage. Assign the cycle's research ID at KICKOFF — the
+next `RS-NNN` (marker `4`: `RS-<WS>-NNN`), allocated centrally per §Pipeline
+subagent dispatch — and record it in the kickoff frontmatter as `research_id:`.
+Phase detection checks **that spike's** findings, never "any `RS-*`", so a prior
+cycle's completed research can never mask the new cycle's research stage.
+(Kickoffs predating this field: fall back to comparing findings dates against
+the kickoff's write date.) For a **non-research entry** (§Entry Points) write
 an **entry kickoff** instead — scope of the change, the entry stage, and which
 upstream is assumed approved — and begin the LOOP at that stage.
 
