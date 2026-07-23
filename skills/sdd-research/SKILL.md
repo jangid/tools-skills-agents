@@ -43,7 +43,7 @@ bare `status` flag — owned `plan.md`/`verification.md` carry their own `status
 shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
 identity or quorum. Full contract: `docs/spec/ws-layout.md`.
 
-1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — suggest running `sdd-migrate` to upgrade to v2 artifact structure before proceeding. If present and contains `2`, use v2 paths below.
+1. **Version check**: Read `docs/.sdd-version`. If missing, suggest running `sdd-migrate` before proceeding — it migrates pre-versioning layouts and initializes greenfield projects. If present but below the latest supported version, note that `sdd-migrate` can upgrade (advisory, not blocking).
 2. If `docs/verification.md` exists with failures → mention it; user may want `sdd-replan` instead, but research is valid if they're exploring a new direction
 3. If downstream artifacts exist (`docs/requirements/index.md`, `docs/spec/`, `docs/plan.md`) → note them. These may become stale after new research — that's expected. Downstream phases will detect staleness and update them
 4. If existing `docs/research/RS-*` directories cover this topic → you may be extending prior research. Read their `findings.md` files first to avoid duplicating work. Check the `docs/research/index.md` table for a quick scan of existing spikes and their statuses
