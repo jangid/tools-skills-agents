@@ -397,6 +397,13 @@ operator and **wait** for an explicit decision. Never auto-advance.
 | **loop-back-to-fix** | Re-dispatch the pipeline subagent with **only** the review findings + the relevant artifact paths — not a re-litigation of the reviewer's reasoning — then re-run the review for this stage. |
 | **stop** | Halt the loop; leave artifacts as-is. |
 
+**Approve-with-fixes shortcut.** `sdd-review` defines *Approve with fixes* as
+"fix the named findings, then proceed without re-review". When that is the
+verdict and the operator chooses **loop-back-to-fix**, offer both readings at
+the gate: re-dispatch the pipeline with the findings and then either re-review
+(the default loop) or skip the re-review per the verdict's own definition — the
+operator picks. For *Reject* verdicts the re-review is never skipped.
+
 ### Edge cases routed through the gate
 
 - **Replan trigger**: if a pipeline subagent triggers a replan (stuck detection,
