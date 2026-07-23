@@ -416,6 +416,25 @@ covers the work. Traces to `ws-orchestration.md`.
 early-exit encoded; verify task passes.
 
 ### Chunk 7: Convention & documentation updates (overview.md + CLAUDE.md)
+**Status**: CLOSED (2026-07-23) — tasks 1–3 done. The MANDATORY deferred `overview.md`
+update is applied: §Version Marker now lists `4` as a valid value (+ sole-layout-gate
+note; directory-layout comment and the Manual/Acceptance-Criteria lines that said "`2`
+and `3`" updated to include `4`), and §ID Namespaces gains a `#### v4:
+Workstream-Prefixed IDs` block adding the `<WS>` segment to the RS / REQ / Q-IMPL
+formats (Q-IMPL row also added to the v2/v3 table) with the "applies under marker `4`;
+legacy bare ids = `default`, not remapped" note. `overview.md` `last_updated` bumped to
+2026-07-23; `status: Approved` retained (shipped-contract doc update within the cycle —
+no re-approval gate crossed). `CLAUDE.md` now documents v4: the `docs/ws/<id>/` +
+shared-corpus layout, the workstream lifecycle (picker → per-ws research→verify,
+per-ws done/new-cycle, research early-exit), phase = f(repo, workstream) with a
+marker-gated phase-detection table, workstream-scoped staleness, ws-prefixed IDs +
+merge-safe writes, branch-per-ws → PR-to-`main` integration + `merge-base` regression
+base, and the `.sdd-version` v3(flat)/v4(per-ws) gate with `sdd-migrate` handling
+v3→v4 — v3 compatibility preserved throughout (both markers documented; the flat
+phase-detection description this cycle relies on is retained). THIS repo's
+`.sdd-version` stays `3`; no `sdd-*` SKILL.md behavior changed (docs/convention only).
+No replan trigger fired. See Q-IMPL-019 in `ws-migration.md`. Covers REQ-WS-009
+(§ID-namespace doc half), REQ-WS-023 (§Version-Marker doc half).
 **Depends on**: Chunks 3, 4, 6.
 **Goal**: The canonical convention docs describe v4; the mandatory deferred
 `overview.md` update is applied. Traces to `ws-migration.md` §Deferred work,
@@ -640,3 +659,21 @@ criteria across the whole skill set, from a user/operator perspective.
   done-vs-new-cycle, mid-pipeline entry, full spike) retained byte-unchanged (all
   changes marker-`4`-gated additions). No replan trigger fired (Q-IMPL-016, Q-IMPL-017,
   Q-IMPL-018). Covers REQ-WS-024, REQ-WS-025, REQ-WS-029. (2026-07-23, 5 tasks)
+- Chunk 7 (Convention & documentation updates — overview.md + CLAUDE.md): the
+  MANDATORY deferred `docs/spec/overview.md` update is applied — §Version Marker adds
+  `4` as a valid value (+ sole-layout-gate note; the directory-layout comment and the
+  Manual/Acceptance-Criteria lines that read "`2` and `3`" now include `4`), and §ID
+  Namespaces gains a `#### v4: Workstream-Prefixed IDs` block adding the `<WS>` segment
+  to the RS / REQ / Q-IMPL formats (with per-workstream counter, "applies under marker
+  `4`", and "legacy bare ids = `default`, not remapped" notes); `last_updated` bumped to
+  2026-07-23, `status: Approved` retained. `CLAUDE.md` documents the v4 convention: the
+  `docs/ws/<id>/` + shared-corpus layout, the workstream lifecycle (picker → per-ws
+  research→verify, per-ws done/new-cycle, research early-exit), phase = f(repo,
+  workstream) via a marker-gated phase-detection table, workstream-scoped staleness,
+  ws-prefixed IDs + merge-safe shared writes, branch-per-ws → PR-to-`main` +
+  `merge-base(<id>, main)` regression base, and the `.sdd-version` v3(flat)/v4(per-ws)
+  gate with `sdd-migrate` doing v3→v4 — presented as the current convention while
+  retaining the v3 flat description this cycle depends on (both markers documented).
+  THIS repo stays at marker `3`; no `sdd-*` SKILL.md behavior changed. No replan
+  trigger fired (Q-IMPL-019). Covers REQ-WS-009 (§ID-namespace doc half), REQ-WS-023
+  (§Version-Marker doc half). (2026-07-23, 3 tasks)

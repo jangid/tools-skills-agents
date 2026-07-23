@@ -127,7 +127,7 @@ last_updated: 2026-07-23
 | REQ-WS-006 | ws-layout.md | | skills/sdd-plan/SKILL.md, skills/sdd-verify/SKILL.md (ws-scoped rewrite/fail-route) | |
 | REQ-WS-007 | ws-traceability.md | | skills/sdd-implement/SKILL.md (recorded-join vs compute-live boundary, marker-4 gate) | |
 | REQ-WS-008 | ws-traceability.md | | skills/sdd-implement/SKILL.md, skills/sdd-verify/SKILL.md, skills/sdd-specs/SKILL.md, skills/sdd-requirements/SKILL.md (per-ws traceability file + regenerated aggregate, marker-4 gate) | |
-| REQ-WS-009 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md (ws-prefixed ID format, marker-4 gate) | |
+| REQ-WS-009 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md (ws-prefixed ID format, marker-4 gate); docs/spec/overview.md §ID Namespaces (v4 ws-prefixed formats), CLAUDE.md §Multi-Workstream Layout (v4) | |
 | REQ-WS-010 | ws-ids.md | | skills/sdd-requirements/SKILL.md (claimed-prefix append), skills/sdd-specs/SKILL.md (new-specs-are-new-files) | |
 | REQ-WS-011 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md (per-workstream counters) | |
 | REQ-WS-012 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md, skills/sdd-review/SKILL.md (four generators + convention string); do-NOT-touch guards in skills/sdd-orchestrate/references/fan-out.md, skills/sdd-migrate/SKILL.md, skills/sdd-review/SKILL.md | |
@@ -141,7 +141,7 @@ last_updated: 2026-07-23
 | REQ-WS-020 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: implicit default ws) | |
 | REQ-WS-021 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: 3→4 routing arm + kickoff absorbed to docs/ws/default/kickoff.md, no flat docs/handoff/ in v4) | pass |
 | REQ-WS-022 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: copy-verify-flip-cleanup, marker written 4 last, interrupted-migration invariant, verdicts/status preserved verbatim) | pass |
-| REQ-WS-023 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: .sdd-version sole layout gate table + version-routing extension incl. version==4 no-op) | pass |
+| REQ-WS-023 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: .sdd-version sole layout gate table + version-routing extension incl. version==4 no-op); docs/spec/overview.md §Version Marker (marker 4 valid value + sole-layout-gate note), CLAUDE.md §Phase Detection + §Multi-Workstream Layout (v4) | pass |
 | REQ-WS-024 | ws-orchestration.md | | skills/sdd-orchestrate/SKILL.md (§ Workstream Picker: uniform research-entry, new ws begins at research + seeds docs/ws/<id>/kickoff.md, no mid-pipeline entry variant; marker-4 gate) | |
 | REQ-WS-025 | ws-orchestration.md | | skills/sdd-research/SKILL.md (§ Research Early-Exit: recorded early_exit finding, skip Explore/budget), skills/sdd-orchestrate/SKILL.md (picker references early-exit; marker-4 gate) | |
 | REQ-WS-026 | ws-staleness.md | | skills/sdd-plan/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-replan/SKILL.md (milestone→workstream staleness generalized verbatim, compute-live, no traceability read, marker-4 gate) | |
