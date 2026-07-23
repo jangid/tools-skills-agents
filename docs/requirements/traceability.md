@@ -134,9 +134,9 @@ last_updated: 2026-07-23
 | REQ-WS-013 | ws-ids.md | | skills/sdd-requirements/SKILL.md, skills/sdd-specs/SKILL.md (merge-safe shared writes, no EOF append) | |
 | REQ-WS-014 | ws-ids.md | | skills/sdd-requirements/SKILL.md (distinct-domain-prefix precondition) | |
 | REQ-WS-015 | ws-ids.md | | skills/sdd-requirements/SKILL.md (ID-sorted one-row-per-line index insertion) | |
-| REQ-WS-016 | ws-integration.md | | | |
-| REQ-WS-017 | ws-integration.md | | | |
-| REQ-WS-018 | ws-integration.md | | | |
+| REQ-WS-016 | ws-integration.md | | skills/sdd-orchestrate/SKILL.md, skills/sdd-orchestrate/references/fan-out.md (branch-per-ws → PR-to-main integration model, marker-4 gate) | |
+| REQ-WS-017 | ws-integration.md | | skills/sdd-orchestrate/references/fan-out.md, skills/sdd-orchestrate/SKILL.md (fan-out branches from/merges into workstream branch; main-ownership boundary-error inference removed, marker-4 gate) | |
+| REQ-WS-018 | ws-integration.md | | skills/sdd-verify/SKILL.md (regression base = merge-base(<ws>, main), marker-4 gate) | |
 | REQ-WS-019 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: bare per-scope status) | |
 | REQ-WS-020 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: implicit default ws) | |
 | REQ-WS-021 | ws-migration.md | | | |

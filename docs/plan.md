@@ -252,6 +252,18 @@ plan with no traceability read; the two skills that lacked a scoped branch gain 
 requirements staleness confirmed shared; verify task passes.
 
 ### Chunk 4: Git integration model — fan-out & verification re-anchor
+**Status**: CLOSED (2026-07-23) — tasks 1–4 done. Under a marker-`4` branch, integration
+is branch-per-workstream → PR to `main` (workstream branch is the integration unit,
+concurrent open PRs supported, `main` a shared trunk); implement-stage fan-out
+(`skills/sdd-orchestrate/references/fan-out.md` §0 + SKILL.md §Execution Model) branches
+worktrees from the **workstream branch** (HEAD), merges back into it, leaves `main`
+untouched until the workstream PR, and the `main`-ownership "conflict = boundary error"
+inference is **removed** (guaranteed-termination sequential fallback retained);
+`sdd-verify`'s regression base is re-anchored to `merge-base(<ws>, main)` and the Chunk-3
+"deferred to Chunk 4" forward pointer is now fully reconciled (no deferral framing left).
+Marker-`3` `main`-anchored fan-out and `main`-HEAD regression base retained byte-unchanged
+(gated additions only). The `**Depends on**: Chunk N` parser untouched. No replan trigger
+fired. See Q-IMPL-014 in `ws-integration.md`. Covers REQ-WS-016, REQ-WS-017, REQ-WS-018.
 **Depends on**: Chunk 0.
 **Goal**: Integration is branch-per-workstream → PR to `main`; fan-out branches
 from and merges back into the workstream branch; `sdd-verify` diffs against the
@@ -535,3 +547,21 @@ criteria across the whole skill set, from a user/operator perspective.
   no ws key; only research ID pattern → `RS-<WS>-NNN`). Marker-`3` milestone-scoped
   behavior retained unchanged; no replan trigger fired (Q-IMPL-013). Covers
   REQ-WS-026, REQ-WS-027, REQ-WS-028. (2026-07-23, 5 tasks)
+- Chunk 4 (Git integration model — fan-out & verification re-anchor): under a
+  marker-`4` branch, integration is branch-per-workstream → PR to `main` (the
+  workstream branch — not `main` — is the integration unit; concurrent open PRs
+  supported; `main` is a shared trunk, not a working surface — REQ-WS-016). Implement-stage
+  fan-out is re-anchored in `skills/sdd-orchestrate/references/fan-out.md` (new §0 gate +
+  §3a/§3b/§3c anchors) and `skills/sdd-orchestrate/SKILL.md` §Execution Model: worktrees
+  branch from the **workstream branch** (HEAD) and merge back into it, `main` untouched
+  until the workstream PR, and the `main`-ownership "conflict-after-re-derivation =
+  boundary error" inference is **removed** (the guaranteed-termination sequential fallback
+  is retained, just no longer labeled a boundary error) — all other fan-out mechanics
+  unchanged (REQ-WS-017). `sdd-verify` Step 5 regression base is re-anchored to
+  `regression_base(<ws>) = merge-base(<ws>, main)` (diff `<ws>` HEAD vs branch point, not
+  `main` HEAD), and the Chunk-3 forward pointer that deferred this contract "to Chunk 4"
+  is now fully reconciled — the deferral framing is gone (REQ-WS-018). Marker-`3`
+  `main`-anchored fan-out and `main`-HEAD regression base retained byte-unchanged (all
+  changes are marker-`4`-gated additions); the `**Depends on**: Chunk N` parser untouched.
+  No replan trigger fired (Q-IMPL-014). Covers REQ-WS-016, REQ-WS-017, REQ-WS-018.
+  (2026-07-23, 4 tasks)

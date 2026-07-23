@@ -155,7 +155,9 @@ For CLI tools: run them. For servers: start them and make requests. For librarie
 - Run the full test suite (not just new tests)
 - If there's a pre-existing test suite, confirm nothing regressed
 - Check git diff against the base branch — are there unintended changes?
-- **Regression base (marker `4`)**: under `docs/.sdd-version` == `4` the regression base is the **workstream branch point**, `merge-base(<ws>, main)` — diff `<ws>` HEAD against that base, not `main` HEAD, so verification reflects only this workstream's delta. The full re-anchored regression-base contract is specified in Chunk 4 / `docs/spec/ws-integration.md` (REQ-WS-018); under marker `3` diff against the base branch exactly as above, unchanged.
+- **Regression base (version gate — REQ-WS-018)**: `docs/.sdd-version` is the sole gate.
+  - **Marker is not `4` (v3 or earlier): UNCHANGED.** Diff against the base branch (`main` HEAD) exactly as the bullets above, and check `git diff` against it for unintended changes. The v3 path is untouched.
+  - **Marker is `4`:** the regression base is the **workstream branch point** — `regression_base(<ws>) = merge-base(<ws>, main)`, the commit where the workstream branched. Compute the regression diff as **`<ws>` HEAD vs `regression_base(<ws>)`**, **not** `main` HEAD. Diffing against current `main` would fold in unrelated concurrent workstreams' changes that merged to `main` after `<ws>` branched, producing **false regressions**; the branch point isolates this workstream's own delta regardless of what else landed on `main` meanwhile. So a workstream's verification is **independent of other workstreams merged to `main`** in the interim (e.g. merging an unrelated `ISSUE-57` to `main` does not affect `sdd-verify` for `ISSUE-42`). This is the integration model's branch-per-workstream → PR-to-`main` boundary (REQ-WS-016/017): `main` is a shared trunk that moves under the workstream, so the branch point — not `main` HEAD — is the stable regression anchor. Full contract: `docs/spec/ws-integration.md` §Verification Regression Base Is the Workstream Branch Point.
 
 ### Step 6: Write Verification Report
 

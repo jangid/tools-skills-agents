@@ -287,6 +287,26 @@ Design A (a pipeline subagent owning nested fan-out) is **ruled out infeasible**
 dispatched subagent has no subagent-dispatch tool (RS-006 Q1) — so Design B is the
 only viable design and the spec.
 
+### Integration anchor (version gate — marker-3 `main` vs marker-4 workstream branch)
+
+`docs/.sdd-version` is the **sole** gate for the fan-out integration anchor
+(`docs/spec/ws-integration.md`):
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Fan-out branches from
+  and merges into `main`; `sdd-verify` diffs against `main`; the §Conflict-handling
+  `main`-ownership boundary-error inference applies. The v3 path is untouched.
+- **Marker is `4`: integration is branch-per-workstream → PR to `main` (REQ-WS-016).**
+  The **workstream branch — not `main`** — is the integration unit for that
+  workstream's whole cycle: a completed workstream merges to `main` via **PR**, two
+  workstreams can hold **open PRs simultaneously**, and `main` is a shared trunk, not
+  a working surface. Consequently, implement-stage fan-out branches its worktrees from
+  the **workstream branch** (HEAD) and merges them **back into it**, leaving `main`
+  untouched until the workstream PR (REQ-WS-017); the `main`-ownership boundary-error
+  inference is **removed**; and `sdd-verify`'s regression base is the **workstream
+  branch point** `merge-base(<ws>, main)`, not `main` HEAD (REQ-WS-018). Full contract
+  and the exact command substitutions: [`references/fan-out.md`](references/fan-out.md)
+  §0.
+
 ### Boundary derivation
 
 Fan out along the **independent branches of the plan's chunk dependency graph** —
@@ -353,6 +373,15 @@ error) → **fall back to running the affected groups sequentially**, which cann
 conflict by construction and guarantees termination. `git merge --abort` unwinds only
 the single failing merge — already-merged work is never corrupted. Full command
 sequence: [`references/fan-out.md`](references/fan-out.md) §3c (Q-IMPL-1).
+
+**Marker-4 anchor (§Integration anchor):** under `docs/.sdd-version` == `4` the
+provision base, merge-back target, and redo re-branch are the **workstream branch**
+(not `main`), and the "**still conflicts → boundary error**" inference is **removed**
+(REQ-WS-017) — `main` may have moved under the workstream meanwhile, so a repeat
+conflict is not diagnostic of non-independence. The guaranteed-termination sequential
+fallback is retained (re-run affected groups one at a time off the updated workstream
+branch). Under marker `3` this paragraph applies against `main` exactly as written,
+unchanged. See [`references/fan-out.md`](references/fan-out.md) §0/§3c.
 
 ### Concurrency note
 
