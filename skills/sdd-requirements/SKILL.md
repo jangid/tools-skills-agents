@@ -136,21 +136,18 @@ Brief context for this domain — what it covers and why.
 
 ### REQ-AUTH-001: User login via OAuth2
 The system must authenticate users through OAuth2 providers.
-[Priority: must]
 
 ### REQ-AUTH-002: Session expiry
 User sessions should expire after 30 minutes of inactivity.
-[Priority: should]
 
 ### REQ-AUTH-003: Remember me option
 The system may offer a "remember me" checkbox extending sessions to 30 days.
-[Priority: may]
 ```
 
 **Conventions**:
 - `domain` in frontmatter is the uppercase prefix used in IDs for this file (2-8 chars)
 - Each requirement is an h3 heading: `### REQ-{DOMAIN}-{NNN}: {title}`
-- Priority (must/should/may) is stated in the requirement text
+- Priority is expressed solely by the requirement's modal verb — must (mandatory), should (preferred), may (optional); no separate `[Priority:]` tag
 - One requirement per heading — no bundling multiple behaviors
 - Requirements are testable statements — if you can't write a verification, rewrite
 
