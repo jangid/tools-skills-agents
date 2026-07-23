@@ -326,6 +326,7 @@ Required fields: question ID, tier, decision, and rationale (or impact for tier 
 
 - Global sequential across all specs in the project: `Q-IMPL-001`, `Q-IMPL-002`, ...
 - To find the next number, scan all spec files' `## Implementation Questions` sections and increment from the highest existing.
+- **Parallel-dispatch exception**: when running as a fan-out leaf with an assigned Q-IMPL number block in your dispatch, allocate from that block instead of scanning — parallel leaves scanning globally would mint colliding numbers. Gaps left by unused block numbers are permanent and acceptable.
 - Append-only: retired entries stay in their spec with a `[superseded by Q-IMPL-NNN]` status note, not deleted or renumbered.
 
 **Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole gate.

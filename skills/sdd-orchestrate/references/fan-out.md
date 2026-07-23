@@ -106,6 +106,8 @@ pipeline. Do NOT ask questions — you have no user to answer them.
 Working directory (absolute): {worktree_path}
 Stage skill to invoke: sdd-implement
 Assigned IDs (use these verbatim, do not scan/guess): {ids_if_any}
+Q-IMPL number block (allocate sequentially from the start of this block; do
+  NOT scan for the next number): {qimpl_block}
 Success criterion: the chunk-group's tasks are implemented and committed on
   branch {branch} within this worktree.
 Budget: {budget}
@@ -149,6 +151,12 @@ Do not perform any stage other than sdd-implement.
 - `{branch}` — this group's branch, created by the orchestrator in step 1 below.
 - `{chunk_group_tasks}` — the chunk(s)/tasks this leaf owns; nothing outside them.
 - `{ids_if_any}` — IDs the orchestrator assigned centrally (REQ-ORCH-008).
+- `{qimpl_block}` — a **disjoint** Q-IMPL number range per leaf (e.g. group 1:
+  `011–030`, group 2: `031–050`), allocated by the orchestrator above the current
+  scanned max. Q-IMPL entries arise dynamically mid-implementation, so they cannot
+  be pre-assigned individually — but two parallel leaves scanning globally would
+  mint the same next number. Unused block numbers stay unused forever (IDs are
+  append-only and never reused; gaps are fine).
 - `{git_email}` / `{git_name}` — identity for the inline `-c` flags (REQ-ORCH-027).
 - `{budget}` — explicit bound (REQ-ORCH-007).
 
