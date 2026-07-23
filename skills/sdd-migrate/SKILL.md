@@ -40,7 +40,7 @@ wired into the version-routing table via § v3 to v4 Migration below — this st
 gate only establishes the workstream argument and the marker-`4` layout semantics.
 Full layout contract: `docs/spec/ws-layout.md`.
 
-1. If no `docs/` directory exists at all, inform the user there is nothing to migrate and exit.
+1. **Greenfield check**: if there are no SDD artifacts to migrate — no `docs/` directory at all, or a `docs/` containing none of `requirements.md`, `requirements/`, `research/`, `spec/`, `plan.md` — there is nothing to *migrate*. Offer to **initialize** instead: create `docs/` (if absent) and write `docs/.sdd-version` containing `4` (the latest supported version), so other SDD skills stop detecting a pre-versioning layout and route correctly. Get confirmation, write the marker, report "initialized at v4 (greenfield — no artifacts migrated)", and exit. A "missing marker" therefore means *v1 legacy layout* only when legacy artifacts actually exist.
 2. Read `docs/.sdd-version`:
 
 | Disk state | Version | Action |
