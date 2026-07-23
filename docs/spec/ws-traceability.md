@@ -79,10 +79,11 @@ per-ws rows into one view needs a workstream axis so rows from different files s
 attributable. The shipped rows (no workstream) aggregate under a `default` / blank
 workstream value, preserving them unchanged.
 
-**Appending the trailing `Workstream` column does not disturb the REQ-WS-012
-unchanged-parsers guarantee**: traceability/requirements row parsing keys off the
-`Requirement` column (opaque-string / `REQ-*` prefix-glob, per `ws-ids.md`), which is
-unaffected by a column appended at the end of each row.
+**The `Workstream` column (the 3rd column) does not disturb the REQ-WS-012
+unchanged-parsers guarantee**: traceability/requirements row parsing keys off the first
+`Requirement` column (opaque-string / `REQ-*` prefix-glob, per `ws-ids.md`), so column
+position is irrelevant — the parser is unaffected regardless of where the `Workstream`
+column sits.
 
 ### Aggregation Contract
 

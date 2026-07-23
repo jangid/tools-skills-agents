@@ -176,7 +176,13 @@ a new workstream:
 
 1. mints the workstream id and creates/uses its branch (`ws-integration.md`);
 2. **positions its loop at research** (§Phase Detection: `docs/ws/<id>/kickoff.md`
-   exists, no `docs/ws/<id>/research`-referenced findings yet → the research stage);
+   exists and research is **not yet complete for `<id>`** → the research stage).
+   Research is complete for workstream `<id>` when a shared
+   `docs/research/RS-<id>-*/findings.md` exists with `status: Complete` (an
+   explicit early-exit finding counts as Complete). Research findings are **shared**
+   — they live in the common `docs/research/` tree, ws-keyed **only** by the
+   `RS-<WS>-` id prefix (there is **no** `docs/ws/<id>/research/` dir); the
+   workstream owns `docs/ws/<id>/` kickoff, plan, and verification;
 3. seeds `docs/ws/<id>/kickoff.md` as a research kickoff (§KICKOFF).
 
 Uniformity keeps the lifecycle one predictable shape for every workstream. It stays

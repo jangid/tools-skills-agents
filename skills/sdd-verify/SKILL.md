@@ -133,7 +133,7 @@ Under marker `3` or earlier, read and write the single shared
 the aggregate `docs/requirements/traceability.md` remains a convenient read-only
 **coverage view** for the checks above, but write the **Verified** column into the
 active workstream's OWN file `docs/ws/<ws>/traceability.md` (per-workstream-owned rows,
-6-column matrix with the appended `Workstream` column) — never another ws's file and
+6-column matrix with the `Workstream` column as the 3rd column) — never another ws's file and
 never the shared aggregate in place — then **regenerate** the shared aggregate wholesale
 (shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
 requirement id; never hand-merged). See `docs/spec/ws-traceability.md` (REQ-WS-007,

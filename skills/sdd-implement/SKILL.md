@@ -134,8 +134,8 @@ another workstream's file and never in the shared aggregate in place — then
 **regenerate** the shared aggregate (below). Full contract: `docs/spec/ws-traceability.md`.
 
 - **Per-workstream file shape (REQ-WS-008).** `docs/ws/<ws>/traceability.md` carries
-  frontmatter `workstream: <ws>` / `last_updated:` and the matrix with an appended
-  **Workstream** column — `| Requirement | Spec | Workstream | Test | Implementation | Verified |`.
+  frontmatter `workstream: <ws>` / `last_updated:` and the matrix with a
+  **Workstream** column as the **3rd column** — `| Requirement | Spec | Workstream | Test | Implementation | Verified |`.
   It holds **only** this workstream's rows: both new `REQ-<DOMAIN>-<WS>-NNN` requirements
   and pre-existing shared REQs this workstream re-uses. A workstream only ever edits its
   own rows — never another ws's file.
@@ -145,10 +145,10 @@ another workstream's file and never in the shared aggregate in place — then
   workstream) `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
   requirement id**. Same inputs → byte-identical output. Never append or hand-edit it, so
   two concurrent workstreams never conflict on it — each writes only its own per-ws file
-  and the aggregate re-derives on merge. The appended trailing **Workstream** column does
+  and the aggregate re-derives on merge. The **Workstream** column (the 3rd column) does
   **not** disturb the REQ-WS-012 unchanged-parser guarantee: traceability/requirements row
-  parsing keys off the `Requirement` column and is unaffected by a column appended at the
-  end of each row.
+  parsing keys off the first `Requirement` column, so column position is irrelevant — the
+  parser is unaffected regardless of where the `Workstream` column sits.
 - **Recorded join vs. compute-live staleness (REQ-WS-007).** The per-ws traceability
   files and the aggregate are the load-bearing **recorded** coverage/derivation join
   ONLY. Staleness is computed **live** from the workstream's plan

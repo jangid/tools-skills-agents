@@ -120,7 +120,7 @@ last_updated: 2026-07-23
 | REQ-ORCH-020 | orchestration.md | | skills/sdd-orchestrate/USAGE.md | pass |
 | REQ-ORCH-021 | orchestration.md | | README.org | pass |
 | REQ-WS-001 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | pass |
-| REQ-WS-002 | ws-layout.md | | | pass |
+| REQ-WS-002 | ws-layout.md | | CLAUDE.md (§Multi-Workstream Layout), docs/spec/ws-integration.md (branch-per-issue boundary) | pass |
 | REQ-WS-003 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | pass |
 | REQ-WS-004 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | pass |
 | REQ-WS-005 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | pass |
