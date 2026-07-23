@@ -127,13 +127,13 @@ last_updated: 2026-07-23
 | REQ-WS-006 | ws-layout.md | | skills/sdd-plan/SKILL.md, skills/sdd-verify/SKILL.md (ws-scoped rewrite/fail-route) | |
 | REQ-WS-007 | ws-traceability.md | | | |
 | REQ-WS-008 | ws-traceability.md | | | |
-| REQ-WS-009 | ws-ids.md | | | |
-| REQ-WS-010 | ws-ids.md | | | |
-| REQ-WS-011 | ws-ids.md | | | |
-| REQ-WS-012 | ws-ids.md | | | |
-| REQ-WS-013 | ws-ids.md | | | |
-| REQ-WS-014 | ws-ids.md | | | |
-| REQ-WS-015 | ws-ids.md | | | |
+| REQ-WS-009 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md (ws-prefixed ID format, marker-4 gate) | |
+| REQ-WS-010 | ws-ids.md | | skills/sdd-requirements/SKILL.md (claimed-prefix append), skills/sdd-specs/SKILL.md (new-specs-are-new-files) | |
+| REQ-WS-011 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md (per-workstream counters) | |
+| REQ-WS-012 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md, skills/sdd-review/SKILL.md (four generators + convention string); do-NOT-touch guards in skills/sdd-orchestrate/references/fan-out.md, skills/sdd-migrate/SKILL.md, skills/sdd-review/SKILL.md | |
+| REQ-WS-013 | ws-ids.md | | skills/sdd-requirements/SKILL.md, skills/sdd-specs/SKILL.md (merge-safe shared writes, no EOF append) | |
+| REQ-WS-014 | ws-ids.md | | skills/sdd-requirements/SKILL.md (distinct-domain-prefix precondition) | |
+| REQ-WS-015 | ws-ids.md | | skills/sdd-requirements/SKILL.md (ID-sorted one-row-per-line index insertion) | |
 | REQ-WS-016 | ws-integration.md | | | |
 | REQ-WS-017 | ws-integration.md | | | |
 | REQ-WS-018 | ws-integration.md | | | |

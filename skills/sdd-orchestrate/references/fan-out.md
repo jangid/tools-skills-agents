@@ -29,6 +29,13 @@ Derive the parallel groups by **reading `docs/plan.md`**, never by modifying
   treat as the equivalent of that field.
 - These are **chunk-level** declarations. Do **not** use the coarser
   milestone-level Entry/Exit criteria from milestone-plans to derive chunk fan-out.
+- **Do NOT touch (RS-007 Q4 — provably unaffected):** this `**Depends on**: Chunk N`
+  derivation parses chunk **ordinals** (`### Chunk N:` headers), a separate namespace
+  from RS / REQ / Q-IMPL artifact ids. The v4 workstream `<WS>` segment is inserted
+  only into artifact ids, which appear here (if at all) as inert prose — it never
+  enters a chunk ordinal. This parser is unaffected by the ws-prefixed ID format and
+  must stay exactly as written; do not add ws-awareness to it (`docs/spec/ws-ids.md`,
+  REQ-WS-012).
 - Two chunks are **independent** (concurrently runnable) when neither (transitively)
   depends on the other. A maximal set of mutually-independent chunks is a
   **chunk-group** that can run in its own worktree.

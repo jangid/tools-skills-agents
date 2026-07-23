@@ -95,6 +95,13 @@ branch defaulting to `default`; shared-vs-owned and approval invariants document
 verify task passes.
 
 ### Chunk 1: Workstream-prefixed IDs & merge-safe shared writes
+**Status**: CLOSED (2026-07-23) — tasks 1–6 done; the four generators + sdd-review
+convention string emit/accept ws-prefixed ids under a marker-`4` branch (marker-`3`
+generation retained byte-unchanged), merge-safe shared-write rules encoded in
+sdd-requirements/sdd-specs, and "do NOT touch" guards added to the four
+RS-007-Q4-unaffected parsers (fan-out `Depends on: Chunk N`, requirements/traceability
+row parsing, Q-REQ/Q-SPEC/Q-IMPL content checks, `### M\d+:` milestone regex). See
+Q-IMPL-009/010 in `ws-ids.md`.
 **Depends on**: Chunk 0.
 **Goal**: The four ID generators + the `sdd-review` convention string emit and
 accept ws-prefixed ids with per-workstream counters, and shared-table writes are
@@ -468,3 +475,13 @@ criteria across the whole skill set, from a user/operator perspective.
   workstream-aware step-0 threaded through all nine skills; shared-vs-owned +
   approval invariants and ws-scoped plan-archive/verify-fail-route encoded;
   marker-`3` v3 behavior retained unchanged (Q-IMPL-008). (2026-07-23, 5 tasks)
+- Chunk 1 (Workstream-prefixed IDs & merge-safe shared writes): four generators
+  (`sdd-research` `RS-<WS>-NNN`, `sdd-requirements` `REQ-<DOMAIN>-<WS>-NNN`,
+  `sdd-implement` `Q-IMPL-<WS>-NNN`, `sdd-migrate` `<WS>`-slot template) + the
+  `sdd-review` convention string emit/accept ws-prefixed ids with per-workstream
+  counters under a marker-`4` branch; merge-safe shared-write model (claimed-prefix
+  append, ID-sorted index insertion, new-specs-are-new-files, no-EOF-append,
+  distinct-prefix precondition) encoded in `sdd-requirements`/`sdd-specs`; "do NOT
+  touch" guards added to the four RS-007-Q4-unaffected parsers; marker-`3` v3
+  generation and write behavior retained unchanged (Q-IMPL-009, Q-IMPL-010). Covers
+  REQ-WS-009..015. (2026-07-23, 6 tasks)

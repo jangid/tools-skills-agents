@@ -203,3 +203,38 @@ deterministic sort (see Open Questions).
 - [ ] `requirements/index.md` additions use ID-sorted, one-row-per-line insertion
       (REQ-WS-015)
 - [ ] Markdown well-formed; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-009: Merge-safe write model is marker-`4`-gated (v3 append behavior retained)
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Merge-Safe Shared Writes, §ID-Sorted Insertion, §Append Under a
+Claimed Prefix (REQ-WS-010/013/015) — stated as the v4 contract without an explicit
+`.sdd-version` gate.
+**Decision**: The merge-safe shared-write rules (append-under-claimed-prefix,
+ID-sorted one-row-per-line insertion into `requirements/index.md`, new-specs-are-new-
+files, no-raw-EOF-append, distinct-prefix precondition) are encoded as a **marker-`4`
+branch** in `sdd-requirements` Step 5 and `sdd-specs` Step 2. Under marker `3` or
+earlier, the existing write behavior is left byte-unchanged (this repo is live at
+marker `3`).
+**Rationale**: The plan's v3-solo-safety invariant (constraint #1) requires every
+behavior change to be marker-`4`-gated with marker-`3` behavior retained. The spec's
+§Design is framed entirely for the v4 concurrent-workstream corpus; gating it on
+marker `4` preserves solo v3 behavior while making the merge-safe model active
+exactly where concurrency exists. Default carried: gate on `marker == "4"`.
+
+### Q-IMPL-010: Merge-safe write rules placed in sdd-requirements + sdd-specs
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Exactly Four Generators + One Convention String enumerates the
+five ID-format sites but does not pin which skill hosts the REQ-WS-010/013/015
+merge-safe *write* rules.
+**Decision**: The requirements-side rules (claimed-prefix append, ID-sorted index
+insertion, distinct-prefix precondition, no-EOF-append) are encoded in
+`sdd-requirements` Step 5 (the skill that maintains `requirements/index.md` and
+category files); the new-specs-are-new-files rule is encoded in `sdd-specs` Step 2
+(the skill that writes `docs/spec/`). No new skill and no generator beyond the four
+was altered for these write rules.
+**Rationale**: The write rules must live in the skills that perform the shared writes;
+`sdd-requirements` and `sdd-specs` are those skills. This keeps the ID-format change
+bounded to the four generators + review string (REQ-WS-012) while placing the
+merge-safe write policy at its natural point of enforcement.

@@ -168,6 +168,22 @@ Use `REQ-{DOMAIN}-{NNN}` format:
 - When creating a new category file, choose a domain prefix that doesn't collide with existing prefixes (check `index.md` Domain Prefixes table)
 - Never reuse IDs, even for removed requirements
 
+**Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole
+gate. When the marker is **not** `4` (v3 or earlier), allocate exactly as above —
+bare `REQ-{DOMAIN}-{NNN}`, highest-NNN scan within the domain, behavior UNCHANGED.
+When the marker is `4`, resolve `ws` (the workstream argument, default `default`)
+and allocate `REQ-{DOMAIN}-<WS>-{NNN}` with a **per-`domain+workstream` counter**:
+- `{NNN}` is parsed **after** the `<WS>` token and scanned for its max per
+  `domain+workstream` — not globally within the domain — so each workstream
+  advances an independent sequence under a shared domain (REQ-WS-009, REQ-WS-011)
+- `REQ-AUTH-ISSUE42-001` and `REQ-AUTH-ISSUE57-001` are both valid and collision-free
+- Legacy bare `REQ-{DOMAIN}-{NNN}` ids from a v3 corpus are treated as the `default`
+  workstream and are NOT remapped. See `docs/spec/ws-ids.md`.
+
+**Do NOT touch (RS-007 Q4 — provably unaffected):** requirements/traceability row
+parsing matches `REQ-*` by prefix-glob / opaque string and tolerates the inserted
+`<WS>` segment unchanged — do not add or "fix" any numeric-suffix parser.
+
 #### Index File Format
 
 `docs/requirements/index.md` is auto-maintained:
@@ -260,6 +276,34 @@ After every write to a category file, perform these maintenance steps:
    - Add rows for new requirements (all columns except Requirement are blank)
    - For removed requirements: delete from category file, mark `[Deprecated]` in the traceability Requirement column. Never reuse the ID
    - Bump `last_updated` to today
+
+**Merge-safe shared writes (marker `4` only).** `docs/.sdd-version` is the sole
+gate; under marker `3` or earlier this is unchanged. Under marker `4`,
+`requirements/`, `spec/`, `research/`, and the aggregated traceability are a single
+**shared** corpus that concurrent workstreams write, so every write must 3-way-merge
+cleanly (REQ-WS-010, REQ-WS-013, REQ-WS-015):
+
+- **New requirements append under a claimed domain prefix.** A workstream adds new
+  `REQ-{DOMAIN}-<WS>-{NNN}` ids under a domain prefix it has claimed in the Domain
+  Prefixes registry — it never rewrites an existing shared requirement body.
+  Modifying an existing shared requirement stays a **human PR conflict**, not
+  automated.
+- **ID-sorted, one-row-per-line insertion — never raw EOF append.** Additions to
+  `docs/requirements/index.md` (Files table, Domain Prefixes table) and new
+  requirement rows within a category file are inserted at their correct **sorted
+  position** by id/prefix key, one row per line — NOT appended at end-of-file
+  (append-to-EOF and insert-before-a-trailing-sentinel are the same git location for
+  both branches and always conflict; RS-007 Q1). Sorted insertion places concurrent
+  additions in distinct, non-adjacent regions.
+- **Distinct-domain-prefix precondition.** The clean-merge guarantee holds only when
+  each concurrent workstream owns a **distinct** claimed domain prefix, so its new
+  ids sort into a distinct region. **Same-domain** concurrent additions are an
+  accepted degradation to an ordinary human PR conflict — the tooling must **NOT**
+  auto-union them (a `merge=union` `.gitattributes` driver is deliberately **not
+  adopted**: it interleaves rows out of sort order, breaking REQ-WS-015's
+  deterministic sort). Default recorded, per the sdd-plan Open Question.
+
+See `docs/spec/ws-ids.md` for the full merge-safe write contract.
 
 ### Step 6: File Size Monitoring
 

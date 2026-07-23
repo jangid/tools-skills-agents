@@ -95,7 +95,12 @@ Each checklist checks both **content correctness** (is what's here right?) and *
 **Content correctness:**
 - Check that each requirement is testable (you could write a verification for it)
 - Check that priorities (must/should/may) are appropriate for the scope
-- Check that IDs follow the project's `REQ-{DOMAIN}-{NNN}` convention
+- Check that IDs follow the project's requirement-id convention. Under
+  `docs/.sdd-version` marker `3` or earlier this is `REQ-{DOMAIN}-{NNN}`; under
+  marker `4` it is `REQ-{DOMAIN}-<WS>-{NNN}` with an optional workstream segment
+  (`<WS>`) inserted before the `{NNN}` counter. **Accept** the `<WS>` segment — do
+  not flag ws-prefixed ids such as `REQ-AUTH-ISSUE42-001` as malformed (REQ-WS-012,
+  `docs/spec/ws-ids.md`). Legacy bare ids remain valid (the `default` workstream).
 - Check that Q-REQ decisions are documented with rationale
 
 **Scope completeness:**
@@ -134,7 +139,11 @@ Each checklist checks both **content correctness** (is what's here right?) and *
 **Content correctness:**
 - Check that the chunk close report accurately reflects implementation state
 - Check that traceability matrix columns are filled for covered requirements
-- Check that Q-IMPL entries match actual implementation decisions
+- Check that Q-IMPL entries match actual implementation decisions. **Do NOT touch
+  (RS-007 Q4 — provably unaffected):** the Q-REQ / Q-SPEC / Q-IMPL content checks
+  make no numeric-suffix assumption (Q-REQ/Q-SPEC already use letter suffixes like
+  `Q-REQ-G`) and match these ids as opaque strings — the v4 `<WS>` segment in
+  `Q-IMPL-<WS>-NNN` is tolerated unchanged; do not add a numeric-suffix parser here.
 
 **Scope completeness:**
 - Check that every task in the chunk is completed or explicitly deferred with rationale

@@ -98,6 +98,19 @@ Each step checks its own preconditions. If research is already migrated but requ
 
 If `RS-NNN-*` directories already exist alongside flat files, only migrate the flat files. Start numbering after the highest existing RS number. Existing directories are not touched.
 
+**Workstream-prefixed ID allocation (marker `4` only).** `docs/.sdd-version` is the
+sole gate. The v1→v2→v3 legacy migrations in this skill (research restructuring
+above and requirements remapping below) run while the marker is still below `4` and
+therefore mint and remap **bare** ids (`RS-NNN`, `REQ-{DOMAIN}-{NNN}`) exactly as
+described — behavior UNCHANGED. The general RS/REQ allocation/remap template carries
+a `<WS>` slot for **NEW allocations under marker `4` only**: a fresh id minted under
+marker `4` takes the workstream-prefixed form `RS-<WS>-NNN` /
+`REQ-{DOMAIN}-<WS>-NNN` with `NNN` parsed after the `<WS>` token and scanned per
+workstream (per `domain+workstream` for requirements), matching the four generators
+(`docs/spec/ws-ids.md`). The v3→v4 migration itself (added in a later chunk) does
+**NOT** remap the legacy corpus — pre-existing bare ids remain bare and are treated
+as the `default` workstream (see `ws-migration.md`, `ws-traceability.md`).
+
 ## Step 2: Requirements Migration
 
 ### Precondition
@@ -252,6 +265,12 @@ v2 projects that have not run v2→v3 migration continue to work:
 
 1. Read `docs/plan.md`.
 2. Scan for lines matching the regex `### M\d+:` (M followed by one or more digits, then a colon). This matches `### M1:`, `### M12:`, etc. It does NOT match `### Migration`, `### Models`, or other section headers starting with M.
+
+   **Do NOT touch (RS-007 Q4 — provably unaffected):** this `### M\d+:` milestone
+   regex matches milestone **header** ordinals, a separate namespace from RS / REQ /
+   Q-IMPL artifact ids. The workstream `<WS>` segment added in v4 never appears in a
+   milestone header, so this regex is unaffected and must stay exactly as written —
+   do not extend it for ws-prefixed ids.
 3. Present proposed renames to the operator, preserving original numbering:
    ```
    ### M1: Foundation    →  ### Chunk 1: Foundation

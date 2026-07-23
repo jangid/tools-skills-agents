@@ -81,7 +81,31 @@ Before starting exploration, assign an ID for this spike:
 
 The new spike directory will be: `docs/research/RS-NNN-{topic}/`
 
-**Edge case**: If a directory exists but its `findings.md` is missing or has `status: Abandoned`, the number is still consumed — IDs are never reused.
+**Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole
+gate. When the marker is **not** `4` (v3 or earlier), allocate exactly as in
+steps 1–4 above — bare `RS-NNN`, global scan, behavior UNCHANGED. When the marker
+is `4`, resolve `ws` (the workstream argument, default `default`) and allocate a
+workstream-prefixed id `RS-<WS>-NNN` with a **per-workstream counter**:
+
+1. Scan `docs/research/` for directories matching `RS-<ws>-NNN-*` (this workstream's
+   ids only — a different `<ws>` is a different, independent sequence)
+2. Extract the highest `NNN`, parsing the number **after** the `<ws>` token
+3. Increment by 1 and zero-pad to 3 digits (e.g., `RS-ISSUE42-002` if
+   `RS-ISSUE42-001` exists); if no `RS-<ws>-*` directories exist, start at
+   `RS-<ws>-001`
+4. The directory is `docs/research/RS-<WS>-NNN-{topic}/`; the frontmatter `id:` is
+   `RS-<WS>-NNN`
+
+Scoping the scan per workstream is what makes two workstreams concurrently allocate
+`RS-ISSUE42-001` and `RS-ISSUE57-001` with no coordination and no collision
+(REQ-WS-009, REQ-WS-011). Legacy bare `RS-NNN` ids from a v3 corpus are treated as
+the `default` workstream and are NOT remapped. See `docs/spec/ws-ids.md`.
+
+**Do NOT touch (RS-007 Q4 — provably unaffected):** cross-references that match
+`RS-*` by prefix-glob or as opaque strings (index rows, `research_refs:`, inline
+`(see RS-...)`) tolerate the inserted `<WS>` segment unchanged — do not "fix" them.
+
+**Edge case**: If a directory exists but its `findings.md` is missing or has `status: Abandoned`, the number is still consumed — IDs are never reused (per workstream under marker `4`).
 
 ### Step 3: Explore
 

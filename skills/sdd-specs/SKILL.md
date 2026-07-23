@@ -87,6 +87,15 @@ docs/spec/
 
 Get approval on the structure before writing. The user may merge or split areas.
 
+**Merge-safe shared writes (marker `4` only).** `docs/.sdd-version` is the sole gate;
+under marker `3` or earlier this is unchanged. Under marker `4`, `docs/spec/` is a
+single **shared** corpus that concurrent workstreams extend, so writes must
+3-way-merge cleanly (REQ-WS-010, REQ-WS-013): each new design lands as a **new file**
+in `docs/spec/` — never an in-place edit to an existing shared spec body. Modifying
+an existing shared spec remains a **human PR conflict** to resolve and is not
+automated. New files by distinct workstreams never share a git location, so they
+merge without conflict. See `docs/spec/ws-ids.md`.
+
 ### Step 3: Write Specs
 
 Start with `overview.md` — get it approved before writing other specs. The overview establishes architecture and principles that other specs depend on.
