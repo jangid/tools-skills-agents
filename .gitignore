@@ -31,3 +31,4 @@ venv/
 .idea/
 .vscode/
 *.code-workspace
+.superpowers/

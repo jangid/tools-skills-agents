@@ -4,7 +4,8 @@ description: >
   Reads approved design specs from docs/spec/ and creates a concrete
   implementation plan with ordered tasks, dependencies, and milestones.
   Tasks are typed (implement, spike, verify). Plan includes replan triggers.
-  Use after specs are approved and before writing code.
+  Use after specs are approved and before writing code. Skip while specs are
+  unapproved, or for single-task changes that need no ordered plan.
 ---
 
 # SDD: Implementation Planning
@@ -31,22 +32,17 @@ argument that defaults to `default`. Read `docs/.sdd-version` first — it is th
   `docs/research/`, `docs/requirements/` (index, category files, aggregated
   `traceability.md`), `docs/spec/`.
 
-Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
-`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
-never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
-specs, research and the aggregated traceability are shared — ADD to them, never
-fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
-Omitting the argument resolves the implicit `default` workstream, so solo use needs
-no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
-bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
-shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
-identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+Ownership, sharing, solo-`default`, and approval semantics under marker `4`
+follow the common v4 contract — see `docs/spec/ws-layout.md`. In short: a
+workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
+`traceability.md`; requirements/specs/research and the aggregated traceability
+are shared (ADD, never fork); omitting the argument resolves `default`.
 
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or any has `status: Draft` → use `sdd-specs`
 3. **Staleness check**: if `docs/plan.md` exists, check for upstream changes:
-   - **Single-milestone plan**: compare `docs/plan.md`'s modification date against `last_updated` in each `docs/spec/*.md` and `docs/requirements/index.md`. If any upstream artifact is newer, the plan is **stale**
+   - **Single-milestone plan**: compare `docs/plan.md`'s `last_updated` frontmatter against `last_updated` in each `docs/spec/*.md` and `docs/requirements/index.md`. If any upstream artifact is newer, the plan is **stale**. (Legacy plans without frontmatter: fall back to file modification date — unreliable after a fresh clone — and add the frontmatter while updating)
    - **Multi-milestone plan** (index + per-milestone files): apply milestone-scoped staleness — for each milestone plan file, compare its `last_updated` only against specs and requirement category files traced by that milestone's tasks (task → spec → `requires:` → requirement IDs → category file dates). A change to unrelated requirements does not make the milestone plan stale
    - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. Under marker `4` the milestone-scoped traversal **generalizes verbatim** by swapping two inputs and keeping the chain identical: plan path `docs/plan.md` → `docs/ws/<ws>/plan.md`, and the **milestone key → workstream key**. Compute the scoped set **live** from the workstream's plan — walk its tasks' `traces to` specs, collect each spec's `requires:` requirement IDs, and compare the plan's `last_updated` against those specs' `last_updated` and against the requirement category files those IDs belong to (task → spec `requires:` → requirement IDs → category-file dates). The multi-milestone branch generalizes verbatim; the single-plan branch becomes the `default` workstream case. This reads **no traceability file** and adds **no** traceability schema column — the scope is derived live (REQ-WS-026). A shared spec/requirement no task in `<ws>`'s plan traces does not make that plan stale. See `docs/spec/ws-staleness.md`.
    - Stale plans need updating. Proceed to rewrite/update regardless of task completion status
@@ -90,7 +86,7 @@ Break each spec into implementation units. An implementation unit is:
 Every task gets one of three types:
 
 - **`implement`** — produce working code + tests for a spec section
-- **`spike`** — time-boxed research to resolve a `[high-uncertainty]` section from specs. Produces findings, may cause replan. Budget: state explicitly (e.g., "30 min max")
+- **`spike`** — time-boxed research to resolve a `[high-uncertainty]` section from specs. Produces findings, may cause replan. Budget: state explicitly, in observable units (e.g., "2 approaches, ~15 tool calls")
 - **`verify`** — dedicated verification task (integration test, manual check, performance benchmark). Goes beyond "run pytest" — validates behavior from user perspective
 
 ### Step 4: Order by Dependencies
@@ -121,6 +117,8 @@ When activating per-milestone structure:
 1. Create `docs/plan.md` as the index (milestone table format — see Step 7)
 2. Create `docs/plan-{milestone-id}.md` for each active milestone
 3. Add `milestone:`, `last_updated:`, and `status: planned` frontmatter to each milestone plan
+
+**Marker `4`**: the same structure lives inside the workstream — `docs/ws/<ws>/plan.md` is the index and `docs/ws/<ws>/plan-{milestone-id}.md` the milestone plans, archiving to `docs/ws/<ws>/plan-history/`. Per-milestone activation is per-workstream; it never creates flat `docs/plan-*.md` files.
 
 Each delivery milestone should produce a **testable system** — not just a pile of code. Good milestones:
 
@@ -173,6 +171,11 @@ marker `4`) or create the index + per-milestone files (multi-milestone).
 **Single-milestone plan format (default):**
 
 ```markdown
+---
+last_updated: YYYY-MM-DD
+status: planned   # planned → active (first task starts) → complete
+---
+
 # Implementation Plan: [Project Name]
 
 ## Overview
@@ -186,14 +189,16 @@ One paragraph: what we're implementing and the approach.
 
 ### Chunk 0: [Name]
 **Goal**: What's testable after this chunk.
+**Depends on**: None.
 **Tasks**:
 1. [implement] [Task description] — traces to [spec.md]
-2. [spike] [Research question, budget: 30min] — traces to [spec.md §section]
+2. [spike] [Research question, budget: 2 approaches / ~15 tool calls] — traces to [spec.md §section]
 3. [verify] [What to validate] — traces to [spec.md acceptance criteria]
 **Entry criteria**: None (first chunk).
 **Exit criteria**: [conditions].
 
 ### Chunk 1: [Name]
+**Depends on**: Chunk 0.
 **Tasks**: ...
 **Entry criteria**: Chunk 0 complete.
 **Exit criteria**: ...
@@ -207,6 +212,8 @@ One paragraph: what we're implementing and the approach.
 ## Risks
 - [Risk]: [Impact and mitigation]
 ```
+
+(The `last_updated:` field is what every staleness check compares; bump it on every rewrite/update. `status:` follows the same lifecycle vocabulary as per-milestone plans.)
 
 **Multi-milestone index format** (`docs/plan.md` when per-milestone files exist):
 
@@ -242,6 +249,7 @@ Each `docs/plan-{id}.md` follows the single-milestone format above (with `### Ch
 - **Flag unknowns**: if a task depends on something you're not sure about, mark it as a risk
 - **Verify tasks are explicit**: don't rely on "tests pass" — include specific verification tasks for complex features
 - **Chunks not milestones for work units**: use `### Chunk N: <name>` headers for implementation work units (~5-15 hours each). Reserve "milestone" for delivery groupings (M1, M2, etc.) in multi-milestone projects
+- **Declare chunk dependencies**: every chunk carries a `**Depends on**: Chunk N` field (`None` for roots; comma-separate multiple). This is the canonical machine-readable signal implement-stage fan-out parses to find independent chunk-groups — `Entry criteria:` prose is a tolerated fallback, not the canonical form
 
 ### Step 8: Review
 

@@ -5,7 +5,8 @@ description: >
   Development (SDD). Produces structured requirements in docs/requirements/
   (split by domain) through iterative Q&A with the user. Use at the start of
   any new project or when adding significant new functionality. Can reference
-  prior research from docs/research/.
+  prior research from docs/research/. Skip for bug fixes and small tweaks that
+  don't change what the system should do.
 ---
 
 # SDD: Requirements Gathering
@@ -33,22 +34,17 @@ argument that defaults to `default`. Read `docs/.sdd-version` first — it is th
   and are ADDED to (never forked per workstream); `docs/research/` and `docs/spec/`
   are likewise shared.
 
-Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
-`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
-never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
-specs, research and the aggregated traceability are shared — ADD to them, never
-fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
-Omitting the argument resolves the implicit `default` workstream, so solo use needs
-no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
-bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
-shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
-identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+Ownership, sharing, solo-`default`, and approval semantics under marker `4`
+follow the common v4 contract — see `docs/spec/ws-layout.md`. In short: a
+workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
+`traceability.md`; requirements/specs/research and the aggregated traceability
+are shared (ADD, never fork); omitting the argument resolves `default`.
 
-1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — check for v1 vs v2 format below.
+1. **Version check**: Read `docs/.sdd-version`. If missing, suggest running `sdd-migrate` before proceeding — it migrates pre-versioning layouts and initializes greenfield projects. If present but below the latest supported version, note that `sdd-migrate` can upgrade (advisory, not blocking).
 2. **Format detection**: Check which format exists:
    - If `docs/requirements/index.md` exists → v2 format, proceed normally
    - If `docs/requirements.md` exists (v1 monolithic format) → suggest running `sdd-migrate` to convert to v2 structure before proceeding. Do not attempt to read/write the v1 format
-   - If neither exists → start fresh with v2 format
+   - If neither exists → start fresh with the current format
 3. If `docs/requirements/index.md` exists with `status: Draft` → resume requirements gathering
 4. If `docs/requirements/index.md` exists with `status: Approved` → inform the user. They can either:
    - Update the existing requirements (proceed here, downstream artifacts will become stale)
@@ -140,21 +136,18 @@ Brief context for this domain — what it covers and why.
 
 ### REQ-AUTH-001: User login via OAuth2
 The system must authenticate users through OAuth2 providers.
-[Priority: must]
 
 ### REQ-AUTH-002: Session expiry
 User sessions should expire after 30 minutes of inactivity.
-[Priority: should]
 
 ### REQ-AUTH-003: Remember me option
 The system may offer a "remember me" checkbox extending sessions to 30 days.
-[Priority: may]
 ```
 
 **Conventions**:
 - `domain` in frontmatter is the uppercase prefix used in IDs for this file (2-8 chars)
 - Each requirement is an h3 heading: `### REQ-{DOMAIN}-{NNN}: {title}`
-- Priority (must/should/may) is stated in the requirement text
+- Priority is expressed solely by the requirement's modal verb — must (mandatory), should (preferred), may (optional); no separate `[Priority:]` tag
 - One requirement per heading — no bundling multiple behaviors
 - Requirements are testable statements — if you can't write a verification, rewrite
 
@@ -163,7 +156,7 @@ The system may offer a "remember me" checkbox extending sessions to 30 days.
 Use `REQ-{DOMAIN}-{NNN}` format:
 - `{DOMAIN}` is an uppercase short name matching the file's `domain` frontmatter
 - `{NNN}` is a zero-padded 3-digit number, sequential within the domain
-- Scan the target file for the highest existing NNN and increment
+- Scan **all category files sharing the domain prefix** (a prefix can span multiple files after a split — check the Domain Prefixes table) for the highest existing NNN and increment
 - New files start at 001
 - IDs are globally unique — the domain prefix prevents collisions
 - When creating a new category file, choose a domain prefix that doesn't collide with existing prefixes (check `index.md` Domain Prefixes table)
@@ -288,7 +281,7 @@ After every write to a category file, perform these maintenance steps:
    `workstream: <ws>` / `last_updated:`; 6-column matrix with the `Workstream`
    column as the 3rd column), never another ws's file and never the shared aggregate in place. Then
    **regenerate** the shared `docs/requirements/traceability.md` wholesale (shipped legacy
-   rows under blank/`default` + concat of every `docs/ws/<id>/traceability.md`,
+   rows — rows predating the v4 migration, attributed to the blank/default workstream — + concat of every `docs/ws/<id>/traceability.md`,
    stable-sorted by requirement id; never appended/hand-merged). See
    `docs/spec/ws-traceability.md`.
 
@@ -325,7 +318,9 @@ See `docs/spec/ws-ids.md` for the full merge-safe write contract.
 After writing to any category file, check its line count. If the file exceeds 300 lines:
 - Inform the user: "{file} is at {N} lines — recommend splitting"
 - Propose a split (e.g., `auth.md` -> `auth-login.md` + `auth-permissions.md`)
-- If approved: create the new files, move requirements, assign new domain prefixes, update index.md
+- If approved: create the new files and move requirements **verbatim — IDs are permanent** (`REQ-AUTH-007` stays `REQ-AUTH-007`; never renumber or assign a new domain prefix on a split)
+- The split files **share the original domain prefix**: each keeps `domain: AUTH` in frontmatter, the Domain Prefixes table lists all files carrying the prefix, and the next-ID scan covers every file sharing the domain (see ID Assignment)
+- Update index.md: one Files-table row per new file; update the Domain Prefixes table row to list all the prefix's files
 
 ### Step 7: Review
 

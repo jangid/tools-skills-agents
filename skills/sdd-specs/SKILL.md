@@ -5,7 +5,8 @@ description: >
   files in docs/requirements/{category}/*.md, then produces feature design
   specs in docs/spec/. Each spec defines contracts, interfaces, and
   verification criteria — not implementation code. Use after requirements are
-  approved and before implementation begins.
+  approved and before implementation begins. Skip while requirements are still
+  Draft, or for changes too small to need a design spec.
 ---
 
 # SDD: Design Specs
@@ -32,16 +33,11 @@ argument that defaults to `default`. Read `docs/.sdd-version` first — it is th
   `docs/research/`, `docs/requirements/` (index, category files, aggregated
   `traceability.md`), `docs/spec/`.
 
-Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
-`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
-never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
-specs, research and the aggregated traceability are shared — ADD to them, never
-fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
-Omitting the argument resolves the implicit `default` workstream, so solo use needs
-no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
-bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
-shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
-identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+Ownership, sharing, solo-`default`, and approval semantics under marker `4`
+follow the common v4 contract — see `docs/spec/ws-layout.md`. In short: a
+workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
+`traceability.md`; requirements/specs/research and the aggregated traceability
+are shared (ADD, never fork); omitting the argument resolves `default`.
 
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements` first
@@ -167,7 +163,7 @@ traceability rows are per-workstream-owned (REQ-WS-008): fill the **Spec** colum
 active workstream's OWN file `docs/ws/<ws>/traceability.md` (6-column matrix with the
 `Workstream` column as the 3rd column) — never another ws's file and never the shared aggregate
 in place — then **regenerate** the shared `docs/requirements/traceability.md` wholesale
-(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+(shipped legacy rows — rows predating the v4 migration, attributed to the blank/default workstream — + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
 requirement id; never appended/hand-merged). See `docs/spec/ws-traceability.md`.
 
 ### Spec Rules
@@ -204,10 +200,12 @@ This validates that when one spec references a type defined in another spec, the
 
 **Process:**
 
-1. **Extract type definitions** from each spec's code blocks:
-   - Class declarations: `class Foo` or `class Foo(Base)`
-   - Enum declarations: `class Foo(Enum)` or `class Foo(StrEnum)`
-   - Type alias patterns: `Foo: TypeAlias = Bar` or `Foo = NewType("Foo", Bar)` only — bare `Foo = ...` is excluded to avoid noise on TypeVar/generic declarations
+1. **Extract type definitions** from each spec's code blocks, using the pattern set matching each block's language:
+   - Python: `class Foo` / `class Foo(Base)`; enums `class Foo(Enum)` / `class Foo(StrEnum)`; aliases `Foo: TypeAlias = Bar` / `Foo = NewType("Foo", Bar)` only — bare `Foo = ...` is excluded to avoid noise on TypeVar/generic declarations
+   - TypeScript: `interface Foo`, `class Foo`, `enum Foo`, `type Foo = ...`
+   - Rust: `struct Foo`, `enum Foo`, `trait Foo`, `type Foo = ...;`
+   - Move: `struct Foo` (incl. `public struct Foo`)
+   - If a spec's code blocks match **no** pattern for their language, report "no extractable type definitions in {spec}" as an explicit result — a silent no-op reads as a clean pass and hides the gap
 
 2. **Build a type-to-spec map**: `{TypeName: spec-file.md}` across all specs. Flag duplicates (same type defined in multiple specs) as findings.
 

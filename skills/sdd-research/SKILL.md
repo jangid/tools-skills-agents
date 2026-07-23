@@ -32,18 +32,13 @@ argument that defaults to `default`. Read `docs/.sdd-version` first — it is th
   `docs/spec/`. Research findings are shared-corpus artifacts written under
   `docs/research/`.
 
-Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
-`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
-never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
-specs, research and the aggregated traceability are shared — ADD to them, never
-fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
-Omitting the argument resolves the implicit `default` workstream, so solo use needs
-no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
-bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
-shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
-identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+Ownership, sharing, solo-`default`, and approval semantics under marker `4`
+follow the common v4 contract — see `docs/spec/ws-layout.md`. In short: a
+workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
+`traceability.md`; requirements/specs/research and the aggregated traceability
+are shared (ADD, never fork); omitting the argument resolves `default`.
 
-1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — suggest running `sdd-migrate` to upgrade to v2 artifact structure before proceeding. If present and contains `2`, use v2 paths below.
+1. **Version check**: Read `docs/.sdd-version`. If missing, suggest running `sdd-migrate` before proceeding — it migrates pre-versioning layouts and initializes greenfield projects. If present but below the latest supported version, note that `sdd-migrate` can upgrade (advisory, not blocking).
 2. If `docs/verification.md` exists with failures → mention it; user may want `sdd-replan` instead, but research is valid if they're exploring a new direction
 3. If downstream artifacts exist (`docs/requirements/index.md`, `docs/spec/`, `docs/plan.md`) → note them. These may become stale after new research — that's expected. Downstream phases will detect staleness and update them
 4. If existing `docs/research/RS-*` directories cover this topic → you may be extending prior research. Read their `findings.md` files first to avoid duplicating work. Check the `docs/research/index.md` table for a quick scan of existing spikes and their statuses
@@ -65,7 +60,7 @@ Tell the user what artifacts exist and confirm the research direction before pro
 Ask the user:
 - "What are we trying to learn?" — the specific question(s) this spike should answer
 - "What would success look like?" — how will we know when we have enough information
-- "What's the budget?" — suggest a scope limit (e.g., "explore 3 approaches, max 1 hour")
+- "What's the budget?" — suggest a scope limit in **observable units** an agent can actually track — N approaches, N documents/APIs tried, N prototype iterations (e.g., "explore 3 approaches, ~20 tool calls"); wall-clock time is a secondary hint at best
 
 If the user doesn't specify a budget, propose one based on the question complexity.
 

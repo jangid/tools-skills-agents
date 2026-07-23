@@ -59,7 +59,7 @@ Fan-out occurs along the **independent branches of the plan's chunk dependency
 graph** — not per-milestone (too coarse; milestones are sequential) and not
 per-task (too fine) (REQ-ORCH-016).
 
-Derive the parallel groups by **reading `docs/plan.md`**, never by modifying
+Derive the parallel groups by **reading `docs/plan.md`** (marker `4`: `docs/ws/<ws>/plan.md`), never by modifying
 `sdd-implement` (REQ-ORCH-001, REQ-ORCH-016):
 
 - The canonical signal is each chunk's `**Depends on**: Chunk N` field (defined in
@@ -106,6 +106,8 @@ pipeline. Do NOT ask questions — you have no user to answer them.
 Working directory (absolute): {worktree_path}
 Stage skill to invoke: sdd-implement
 Assigned IDs (use these verbatim, do not scan/guess): {ids_if_any}
+Q-IMPL number block (allocate sequentially from the start of this block; do
+  NOT scan for the next number): {qimpl_block}
 Success criterion: the chunk-group's tasks are implemented and committed on
   branch {branch} within this worktree.
 Budget: {budget}
@@ -115,6 +117,14 @@ Worktree pin (HARD boundary):
   - Operate ONLY within this worktree ({worktree_path}) and ONLY on its branch
     ({branch}). Do not touch the main workspace, other worktrees, or other
     branches.
+  - Do NOT edit the shared plan or traceability files (docs/plan.md /
+    docs/ws/<ws>/plan.md; docs/requirements/traceability.md /
+    docs/ws/<ws>/traceability.md): every fan-out leaf writes them, so any two
+    groups would conflict on merge regardless of code independence. Where
+    sdd-implement says to mark tasks [x] or fill traceability columns
+    (including chunk-close Check 2), instead RECORD the completed task list
+    and the column fills in your return; the orchestrator applies them once
+    after all merges (§3e).
 
 Leaf clause:
   - You are a LEAF subagent. Do NOT dispatch any sub-subagent and do NOT fan out
@@ -149,6 +159,12 @@ Do not perform any stage other than sdd-implement.
 - `{branch}` — this group's branch, created by the orchestrator in step 1 below.
 - `{chunk_group_tasks}` — the chunk(s)/tasks this leaf owns; nothing outside them.
 - `{ids_if_any}` — IDs the orchestrator assigned centrally (REQ-ORCH-008).
+- `{qimpl_block}` — a **disjoint** Q-IMPL number range per leaf (e.g. group 1:
+  `011–030`, group 2: `031–050`), allocated by the orchestrator above the current
+  scanned max. Q-IMPL entries arise dynamically mid-implementation, so they cannot
+  be pre-assigned individually — but two parallel leaves scanning globally would
+  mint the same next number. Unused block numbers stay unused forever (IDs are
+  append-only and never reused; gaps are fine).
 - `{git_email}` / `{git_name}` — identity for the inline `-c` flags (REQ-ORCH-027).
 - `{budget}` — explicit bound (REQ-ORCH-007).
 
@@ -240,7 +256,10 @@ On a non-zero `git merge` exit:
    after re-derivation against the updated `main`, that proves the groups were **not
    truly independent** — a fan-out boundary-selection error (genuinely independent
    branches cannot conflict after re-derivation against a `main` already containing
-   the other branch). **Fall back to running the affected chunk-groups sequentially**
+   the other branch — and with the shared
+   plan/traceability writes excluded from leaves per §2, a conflict genuinely
+   indicates overlapping *code* changes, not bookkeeping collisions).
+   **Fall back to running the affected chunk-groups sequentially**
    (one implement run re-branched from `main`, merged, then the next), which cannot
    conflict by construction. This guarantees termination: each round either merges
    cleanly or proves non-independence and collapses to the always-terminating
@@ -280,6 +299,24 @@ git branch -d <branch>
 Redo worktrees (`<branch>-redo`) are torn down the same way after their merge. All
 teardown happens **before** the implement-stage review.
 
+### 3e. Post-merge bookkeeping (orchestrator-owned)
+
+After all merges and teardowns, before the implement-stage review, the
+orchestrator applies the shared-doc updates the leaves were barred from making
+(§2 worktree pin):
+
+1. Mark each returned completed task `[x]` in the plan (`docs/plan.md`, or
+   `docs/ws/<ws>/plan.md` under marker `4`) and bump its `last_updated`.
+2. Apply the returned traceability Test/Implementation fills per the active
+   marker's contract (marker `3`: the single shared
+   `docs/requirements/traceability.md`; marker `4`: the workstream's own
+   `docs/ws/<ws>/traceability.md`, then regenerate the shared aggregate).
+3. Re-run any chunk-close Check 2 that a leaf deferred, now that the columns
+   are filled.
+
+Only then dispatch the implement-stage review, which sees the fully merged,
+fully book-kept state.
+
 ---
 
 ## 4. Invariants checklist
@@ -290,9 +327,14 @@ teardown happens **before** the implement-stage review.
 - [ ] Each fan-out subagent is a leaf (no sub-dispatch), pinned to its worktree.
 - [ ] Subagents commit with inline `git -c user.email=… -c user.name=…` (no
       `.git/config` write).
-- [ ] All subagents return before any merge; merges are sequential into `main`,
-      completed before the implement-stage review.
+- [ ] All subagents return before any merge; merges are sequential into `main`
+      (marker `4`: the workstream branch — §0), completed before the
+      implement-stage review.
 - [ ] Conflicts: optional auto-resolve → else `git merge --abort` → redo by
-      re-derivation in a worktree re-branched from updated `main` → sequential
-      fallback on repeat conflict (guaranteed termination); never corrupt merged work.
+      re-derivation in a worktree re-branched from updated `main` (marker `4`:
+      the workstream branch — §0) → sequential fallback on repeat conflict
+      (guaranteed termination); never corrupt merged work.
+- [ ] Leaves never edit the shared plan/traceability files; the orchestrator
+      applies returned completions and fills after all merges (§3e), before the
+      review.
 - [ ] Each merged worktree/branch is torn down before review.

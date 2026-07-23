@@ -4,7 +4,7 @@ description: >
   Executes implementation from an approved plan and design specs. Works through
   tasks in order, uses TDD inner loop, detects stuck states, and executes spike
   tasks. Triggers replan when assumptions break. Use after the implementation
-  plan is approved.
+  plan is approved. Do not use without an approved plan — run sdd-plan first.
 ---
 
 # SDD: Implementation
@@ -31,16 +31,11 @@ argument that defaults to `default`. Read `docs/.sdd-version` first — it is th
   `docs/research/`, `docs/requirements/` (index, category files, aggregated
   `traceability.md`), `docs/spec/`.
 
-Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
-`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
-never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
-specs, research and the aggregated traceability are shared — ADD to them, never
-fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
-Omitting the argument resolves the implicit `default` workstream, so solo use needs
-no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
-bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
-shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
-identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+Ownership, sharing, solo-`default`, and approval semantics under marker `4`
+follow the common v4 contract — see `docs/spec/ws-layout.md`. In short: a
+workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
+`traceability.md`; requirements/specs/research and the aggregated traceability
+are shared (ADD, never fork); omitting the argument resolves `default`.
 
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
@@ -49,7 +44,7 @@ identity or quorum. Full contract: `docs/spec/ws-layout.md`.
 4. **Staleness check**: compare `last_updated` dates to detect upstream changes:
    - **Single-milestone plan**: compare `docs/requirements/index.md`'s `last_updated` against specs, and specs against `docs/plan.md`'s `last_updated`. If anything upstream is newer → use `sdd-plan`
    - **Multi-milestone plan** (index + per-milestone files): apply milestone-scoped staleness — compare the active milestone plan's `last_updated` only against specs and requirement category files traced by that milestone's tasks (task → spec → `requires:` → requirement IDs → category file dates). Unrelated requirement changes don't trigger staleness. The index-level `docs/plan.md` is not subject to this check
-   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. Under marker `4` the milestone-scoped traversal **generalizes verbatim** by swapping two inputs and keeping the chain identical: plan path `docs/plan.md` → `docs/ws/<ws>/plan.md`, and the **milestone key → workstream key**. Compute the scoped set **live** from the workstream's plan — walk its tasks' `traces to` specs, collect each spec's `requires:` requirement IDs, and compare the plan's `last_updated` against those specs' `last_updated` and the requirement category files those IDs belong to (task → spec `requires:` → requirement IDs → category-file dates). The v3 caveat "the index-level `docs/plan.md` is not subject to this check" is **dropped** — there is no plan index in v4; workstreams are selected via the `sdd-orchestrate` picker (`docs/spec/ws-orchestration.md`), not a `plan.md` table. This reads **no traceability file** and adds **no** traceability schema column — the scope is derived live (REQ-WS-026). A shared spec/requirement no task in `<ws>`'s plan traces does not trigger staleness. See `docs/spec/ws-staleness.md`
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. Under marker `4` the milestone-scoped traversal **generalizes verbatim** by swapping two inputs and keeping the chain identical: plan path `docs/plan.md` → `docs/ws/<ws>/plan.md`, and the **milestone key → workstream key**. Compute the scoped set **live** from the workstream's plan — walk its tasks' `traces to` specs, collect each spec's `requires:` requirement IDs, and compare the plan's `last_updated` against those specs' `last_updated` and the requirement category files those IDs belong to (task → spec `requires:` → requirement IDs → category-file dates). The v3 caveat generalizes rather than drops: when the workstream uses per-milestone files, the index-level `docs/ws/<ws>/plan.md` is not subject to this check. (Workstream *selection* happens via the `sdd-orchestrate` picker — `docs/spec/ws-orchestration.md` — never via a repo-global plan index.) This reads **no traceability file** and adds **no** traceability schema column — the scope is derived live (REQ-WS-026). A shared spec/requirement no task in `<ws>`'s plan traces does not trigger staleness. See `docs/spec/ws-staleness.md`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 4) → you're in the right place, resume
 
@@ -70,9 +65,10 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 
 0. **Read `CLAUDE.md` first (if present).** Project conventions in `CLAUDE.md` take precedence over generic patterns when choosing libraries, coding patterns, or project structure. The file may not exist — that's normal — but when it does, its conventions override defaults you might otherwise apply.
 1. Read `docs/plan.md` — identify the current chunk and next task
-2. Read the relevant spec sections for the current task
-3. Read `docs/requirements/{category}/*.md` for requirement context when needed
-4. Identify which chunk you're starting from (ask if unclear)
+2. If the plan's frontmatter `status:` is `planned`, set it to `active` now (applies to single-milestone plans and the active milestone plan alike)
+3. Read the relevant spec sections for the current task
+4. Read `docs/requirements/{category}/*.md` for requirement context when needed
+5. Identify which chunk you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
@@ -91,7 +87,7 @@ For each task, follow the process based on its type:
 
 #### [spike] tasks — Time-Boxed Research
 
-1. **Note the budget** from the plan (e.g., "30 min max")
+1. **Note the budget** from the plan (e.g., "2 approaches, ~15 tool calls")
 2. **Explore** the unknown: read docs, try APIs, prototype in a scratch branch
 3. **Read prior research** from `docs/research/RS-*/findings.md` to avoid duplicating work
 4. **Document findings** — write to `docs/research/RS-NNN-{topic}/findings.md` and update `docs/research/index.md`
@@ -101,8 +97,8 @@ For each task, follow the process based on its type:
 
 **Spike code separation:**
 
-- Spike findings (decisions, learnings, recommendations) go to `docs/spikes/{topic}.md`.
-- Throwaway spike code (proofs of concept, exploratory scripts) goes to `scripts/spike_*` with a docstring noting it is throwaway.
+- Spike findings (decisions, learnings, recommendations) go to `docs/research/RS-NNN-{topic}/findings.md` — the same destination as step 4 above and as `sdd-research` spikes. Do not create a separate `docs/spikes/` tree.
+- Throwaway spike code (proofs of concept, exploratory scripts) goes to `docs/research/RS-NNN-{topic}/prototype/` with a docstring noting it is throwaway (per `sdd-research` §Step 5 supporting files).
 - Production code for the same functionality must be written fresh against the spec, not adapted from spike code. Spike code is optimized for speed of learning; adapting it imports shortcuts and assumptions the spec's design may have deliberately avoided.
 
 #### [verify] tasks — Beyond Unit Tests
@@ -141,8 +137,7 @@ another workstream's file and never in the shared aggregate in place — then
   own rows — never another ws's file.
 - **Aggregate is regenerated, never hand-merged (REQ-WS-008).**
   `docs/requirements/traceability.md` is a **derived** aggregate. After updating the
-  per-ws file, rebuild the aggregate **wholesale**: shipped legacy rows (blank/`default`
-  workstream) `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
+  per-ws file, rebuild the aggregate **wholesale**: shipped legacy rows — rows predating the v4 migration, attributed to the blank/default workstream — `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
   requirement id**. Same inputs → byte-identical output. Never append or hand-edit it, so
   two concurrent workstreams never conflict on it — each writes only its own per-ws file
   and the aggregate re-derives on merge. The **Workstream** column (the 3rd column) does
@@ -192,6 +187,8 @@ For each spec referenced by the chunk's tasks, extract from code blocks:
 - (a) Class names — `class Foo` or `class Foo(Base)` declarations
 - (b) Field names — `field_name: Type` lines within class bodies
 - (c) Enum value lists — `VALUE = "literal"` lines in enum classes
+
+(a)–(c) show the Python forms; for TypeScript, Rust, or Move use the equivalent declarations (`interface`/`struct`/`trait`/`enum`, their field declarations, and enum variants). If a spec's code blocks match no pattern for their language, report "no extractable types" as a finding-free but explicit result — never silently pass.
 
 Grep the implementation tree for matching definitions. Report as findings:
 - Class in spec but not impl
@@ -267,7 +264,8 @@ When the plan is complete:
 1. Run the full verification suite one final time
 2. Walk through every spec's acceptance criteria — confirm each one passes
 3. List any spec gaps that were discovered and how they were resolved (Q-IMPL entries)
-4. Recommend invoking `sdd-verify` for holistic validation
+4. Set the plan's frontmatter `status:` to `complete`
+5. Recommend invoking `sdd-verify` for holistic validation
 
 ## Rules
 
@@ -326,6 +324,7 @@ Required fields: question ID, tier, decision, and rationale (or impact for tier 
 
 - Global sequential across all specs in the project: `Q-IMPL-001`, `Q-IMPL-002`, ...
 - To find the next number, scan all spec files' `## Implementation Questions` sections and increment from the highest existing.
+- **Parallel-dispatch exception**: when running as a fan-out leaf with an assigned Q-IMPL number block in your dispatch, allocate from that block instead of scanning — parallel leaves scanning globally would mint colliding numbers. Gaps left by unused block numbers are permanent and acceptable.
 - Append-only: retired entries stay in their spec with a `[superseded by Q-IMPL-NNN]` status note, not deleted or renumbered.
 
 **Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole gate.

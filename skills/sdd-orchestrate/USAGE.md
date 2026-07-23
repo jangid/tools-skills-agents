@@ -97,7 +97,8 @@ is done.
 Once you've converged, the orchestrator runs the rest **autonomously**, pausing
 only at the gates:
 
-1. It writes `docs/handoff/kickoff.md` (KICKOFF).
+1. It writes the kickoff (KICKOFF): `docs/handoff/kickoff.md` under marker `3`,
+   or `docs/ws/<id>/kickoff.md` for the selected workstream under marker `4`.
 2. For each stage (research → requirements → specs → plan → implement → verify) it
    dispatches the **pipeline** subagent, then the **review** subagent, handling
    skill invocation, ID assignment, paths, and isolation for you.
@@ -154,7 +155,8 @@ scope and the open questions worth researching. It reuses the brainstorming
 process — expect to be asked clarifying questions. Nothing is written yet.
 
 ### KICKOFF
-The orchestrator writes `docs/handoff/kickoff.md` — a **research kickoff** stating
+The orchestrator writes the kickoff (`docs/handoff/kickoff.md`; marker `4`:
+`docs/ws/<id>/kickoff.md`) — a **research kickoff** stating
 the questions, success criteria, a budget, and what's out of scope. This is the
 only new artifact type the driver introduces, and it's committed with the cycle.
 
@@ -172,7 +174,34 @@ For each stage in order, three things happen:
 
 ### DONE
 Reached when the verify stage passes review **and** you approve. Commit the
-cycle's artifacts (including `docs/handoff/kickoff.md`).
+cycle's artifacts (including the kickoff — `docs/handoff/kickoff.md`, or
+`docs/ws/<id>/kickoff.md` under marker `4`).
+
+---
+
+## 4b. Workstreams (marker `4`)
+
+If `docs/.sdd-version` reads `4`, the driver opens with a **workstream picker**:
+it lists every `docs/ws/<id>/` workstream with its description and detected
+phase, and you select one or create a new one. Several workstreams can be live
+at once, each at its own phase, each on its own git branch, integrating via a
+PR to `main` when complete.
+
+- **Solo use stays ceremony-free** — a repo whose only workstream is `default`
+  collapses to a picker of one; you never name anything.
+- **New workstreams always start at research** — cheap when the shared corpus
+  already covers the need, because research records a fast "covered by shared
+  corpus" early-exit and moves on.
+- **Execution artifacts move; the corpus doesn't** — kickoff/plan/verification
+  live under `docs/ws/<id>/`; requirements, specs, and research stay shared at
+  top level.
+- **Fan-out and verification re-anchor** — implement-stage fan-out branches from
+  and merges back into the *workstream branch* (`main` is untouched until the
+  PR), and `sdd-verify` diffs against the workstream's branch point, not `main`
+  HEAD.
+
+Under marker `3` none of this appears — the driver runs the single flat cycle
+exactly as described above.
 
 ---
 
@@ -211,8 +240,10 @@ path(s), and (for non-research stages) the upstream artifact path. It never
 receives your conversation, the pipeline subagent's reasoning, kickoff prose, or
 drafts. Because a freshly dispatched subagent starts with an empty context
 window, there is *nothing to leak through* — a stronger guarantee than two human
-terminals. This is what lets the review catch framing/scope problems an
-in-session check would rationalize away.
+terminals. (Caveat: the subagent still reads repo-level context like `CLAUDE.md`;
+what's excluded is the working session's reasoning, not repo docs.) This is what
+lets the review catch framing/scope problems an in-session check would
+rationalize away.
 
 (The research stage is special: the review dispatch omits the kickoff path,
 because `sdd-review` forbids kickoff prompts as input. The reviewer reads the
@@ -233,7 +264,7 @@ research questions from the findings file's own frontmatter.)
 
 ---
 
-## 8. Sequential default, fan-out, and v1 limitations
+## 8. Sequential default and fan-out
 
 ### Sequential by default; implement-stage fan-out is opt-in
 Every stage runs **single-threaded in the main workspace by default**. The
@@ -247,9 +278,11 @@ When you opt in, the orchestrator:
 - provisions one git worktree/branch per group and dispatches one **leaf**
   implement subagent per group (each runs `sdd-implement` and cannot fan out
   further),
-- then merges the branches **sequentially** back into `main` — completing all
-  merges **before** the implement-stage review runs on the merged state — tearing
-  down each worktree as it merges.
+- then merges the branches **sequentially** back into the integration anchor —
+  `main` under marker `3`, the **workstream branch** under marker `4` (`main`
+  stays untouched until the workstream PR) — completing all merges **before**
+  the implement-stage review runs on the merged state, tearing down each
+  worktree as it merges.
 
 Dispatched as a single batch, the per-group subagents run concurrently (measured in
 the RS-006 spike), so fan-out delivers a genuine wall-clock speedup on top of
@@ -262,7 +295,8 @@ stage sequentially even if you opted in — an expected outcome, not a failure.
 
 On a merge conflict, the orchestrator runs `git merge --abort` and **redoes** the
 offending group by re-running `sdd-implement` in a worktree re-branched from the
-updated `main` (best-effort auto-resolve may be tried first). If a group conflicts
+updated integration anchor (`main`, or the workstream branch under marker `4`;
+best-effort auto-resolve may be tried first). If a group conflicts
 *again*, that proves the groups weren't truly independent, and the orchestrator
 falls back to running them sequentially — so the run always terminates and
 already-merged work is never corrupted.

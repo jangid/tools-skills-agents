@@ -30,7 +30,9 @@ isolated dispatches, and mediating operator gates.
 Isolation is **by construction**. Each pipeline stage and each review run as a
 **separate subagent** with a fresh context window. A freshly dispatched subagent
 has no shared window through which your reasoning could leak — a stronger
-guarantee than two human terminal sessions.
+guarantee than two human terminal sessions. (Honest caveat: a fresh subagent
+still inherits repo-level context — `CLAUDE.md`, project memory. The guarantee
+covers the working session's reasoning and drafts, not repo documentation.)
 
 **Scope**: research-entry **by default**, sequential by default. With no upstream
 artifacts the kickoff is a research kickoff and the loop starts at research; when
@@ -90,13 +92,20 @@ skill. `docs/.sdd-version` is the **sole** layout gate:
 | On disk | Loop position |
 |---------|---------------|
 | no `docs/handoff/kickoff.md` | before KICKOFF — run DISCUSS |
-| kickoff exists, no `docs/research/RS-*/findings.md` | at the research stage |
+| kickoff exists, its `research_id` spike has no Complete findings | at the research stage |
 | research done, requirements `Draft`/missing | at the requirements stage |
 | requirements `Approved`, specs missing/stale | at the specs stage |
 | specs `Approved`, no `docs/plan.md` (or stale) | at the plan stage |
 | plan has incomplete tasks | at the implement stage |
 | plan complete, no/failing `docs/verification.md` | at the verify stage |
 | `docs/verification.md` status pass | at DONE (pending operator approval) |
+
+**Entry kickoffs shift the table's origin.** If the kickoff on disk is an
+**entry kickoff** (§Entry Points — it records an entry stage and which upstream
+is assumed approved), the stages before its entry stage are *intentionally
+absent*: do not derive "at the research stage" from missing research artifacts.
+Read the kickoff's recorded entry stage and derive loop position from that stage
+onward only.
 
 Tell the operator the detected position and confirm before proceeding. A pending
 or prior review leaves no on-disk trace by design — it is **reproduced** by
@@ -197,9 +206,11 @@ a new workstream:
 1. mints the workstream id and creates/uses its branch (`ws-integration.md`);
 2. **positions its loop at research** (§Phase Detection: `docs/ws/<id>/kickoff.md`
    exists and research is **not yet complete for `<id>`** → the research stage).
-   Research is complete for workstream `<id>` when a shared
-   `docs/research/RS-<id>-*/findings.md` exists with `status: Complete` (an
-   explicit early-exit finding counts as Complete). Research findings are **shared**
+   Research is complete for this cycle when the kickoff's recorded `research_id`
+   spike (`docs/research/RS-<id>-NNN-*/findings.md`) exists with
+   `status: Complete` (an explicit early-exit finding counts as Complete) —
+   scoped to the kickoff's spike, not "any `RS-<id>-*`", so a prior cycle in the
+   same workstream never masks a new cycle's research stage. Research findings are **shared**
    — they live in the common `docs/research/` tree, ws-keyed **only** by the
    `RS-<WS>-` id prefix (there is **no** `docs/ws/<id>/research/` dir); the
    workstream owns `docs/ws/<id>/` kickoff, plan, and verification;
@@ -271,9 +282,10 @@ DONE     — the verify stage passes review AND the operator approves
 ## DISCUSS
 
 Before writing any kickoff, reach a shared understanding of the idea with the
-operator. **Reuse the brainstorming process** (invoke the brainstorming skill):
-explore intent, surface scope boundaries, and capture the open questions the
-research stage should answer. Do not jump straight to a kickoff or to
+operator. **Reuse the brainstorming process** — invoke a brainstorming skill if
+one is available in the session; otherwise run the equivalent inline:
+explore intent, challenge assumptions, surface scope boundaries, and capture the
+open questions the research stage should answer. Do not jump straight to a kickoff or to
 implementation — converge first.
 
 Exit DISCUSS when the operator and you agree on: what the idea is, what is in and
@@ -295,7 +307,13 @@ output is a normal SDD artifact. It must be git-trackable (a real committed file
 
 **By default** the kickoff is a **research kickoff**: it states the research
 questions, success criteria, a budget, and what is out of scope, and the LOOP
-begins at the research stage. For a **non-research entry** (§Entry Points) write
+begins at the research stage. Assign the cycle's research ID at KICKOFF — the
+next `RS-NNN` (marker `4`: `RS-<WS>-NNN`), allocated centrally per §Pipeline
+subagent dispatch — and record it in the kickoff frontmatter as `research_id:`.
+Phase detection checks **that spike's** findings, never "any `RS-*`", so a prior
+cycle's completed research can never mask the new cycle's research stage.
+(Kickoffs predating this field: fall back to comparing findings dates against
+the kickoff's write date.) For a **non-research entry** (§Entry Points) write
 an **entry kickoff** instead — scope of the change, the entry stage, and which
 upstream is assumed approved — and begin the LOOP at that stage.
 
@@ -348,7 +366,10 @@ isolation does not depend on operator vigilance. The template is in
 
 **The review dispatch MUST carry ONLY:**
 - the repository root,
-- the deliverable artifact path(s),
+- the deliverable artifact path(s) — for the **implement stage**, where there is
+  no single artifact file, this means the plan path plus the source/test files
+  changed during the stage (e.g. `git diff --name-only` against the
+  stage-start commit),
 - the upstream artifact path — **except for the research stage** (see below),
 - the instruction to invoke `sdd-review`.
 
@@ -378,6 +399,13 @@ operator and **wait** for an explicit decision. Never auto-advance.
 | **proceed** | Advance to the next stage. |
 | **loop-back-to-fix** | Re-dispatch the pipeline subagent with **only** the review findings + the relevant artifact paths — not a re-litigation of the reviewer's reasoning — then re-run the review for this stage. |
 | **stop** | Halt the loop; leave artifacts as-is. |
+
+**Approve-with-fixes shortcut.** `sdd-review` defines *Approve with fixes* as
+"fix the named findings, then proceed without re-review". When that is the
+verdict and the operator chooses **loop-back-to-fix**, offer both readings at
+the gate: re-dispatch the pipeline with the findings and then either re-review
+(the default loop) or skip the re-review per the verdict's own definition — the
+operator picks. For *Reject* verdicts the re-review is never skipped.
 
 ### Edge cases routed through the gate
 
