@@ -327,11 +327,13 @@ fully book-kept state.
 - [ ] Each fan-out subagent is a leaf (no sub-dispatch), pinned to its worktree.
 - [ ] Subagents commit with inline `git -c user.email=… -c user.name=…` (no
       `.git/config` write).
-- [ ] All subagents return before any merge; merges are sequential into `main`,
-      completed before the implement-stage review.
+- [ ] All subagents return before any merge; merges are sequential into `main`
+      (marker `4`: the workstream branch — §0), completed before the
+      implement-stage review.
 - [ ] Conflicts: optional auto-resolve → else `git merge --abort` → redo by
-      re-derivation in a worktree re-branched from updated `main` → sequential
-      fallback on repeat conflict (guaranteed termination); never corrupt merged work.
+      re-derivation in a worktree re-branched from updated `main` (marker `4`:
+      the workstream branch — §0) → sequential fallback on repeat conflict
+      (guaranteed termination); never corrupt merged work.
 - [ ] Leaves never edit the shared plan/traceability files; the orchestrator
       applies returned completions and fills after all merges (§3e), before the
       review.
