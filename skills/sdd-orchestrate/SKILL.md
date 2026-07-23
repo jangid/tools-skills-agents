@@ -30,7 +30,9 @@ isolated dispatches, and mediating operator gates.
 Isolation is **by construction**. Each pipeline stage and each review run as a
 **separate subagent** with a fresh context window. A freshly dispatched subagent
 has no shared window through which your reasoning could leak — a stronger
-guarantee than two human terminal sessions.
+guarantee than two human terminal sessions. (Honest caveat: a fresh subagent
+still inherits repo-level context — `CLAUDE.md`, project memory. The guarantee
+covers the working session's reasoning and drafts, not repo documentation.)
 
 **Scope**: research-entry **by default**, sequential by default. With no upstream
 artifacts the kickoff is a research kickoff and the loop starts at research; when

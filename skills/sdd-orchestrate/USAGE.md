@@ -239,8 +239,10 @@ path(s), and (for non-research stages) the upstream artifact path. It never
 receives your conversation, the pipeline subagent's reasoning, kickoff prose, or
 drafts. Because a freshly dispatched subagent starts with an empty context
 window, there is *nothing to leak through* — a stronger guarantee than two human
-terminals. This is what lets the review catch framing/scope problems an
-in-session check would rationalize away.
+terminals. (Caveat: the subagent still reads repo-level context like `CLAUDE.md`;
+what's excluded is the working session's reasoning, not repo docs.) This is what
+lets the review catch framing/scope problems an in-session check would
+rationalize away.
 
 (The research stage is special: the review dispatch omits the kickoff path,
 because `sdd-review` forbids kickoff prompts as input. The reviewer reads the
