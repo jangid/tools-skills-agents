@@ -191,6 +191,7 @@ One paragraph: what we're implementing and the approach.
 
 ### Chunk 0: [Name]
 **Goal**: What's testable after this chunk.
+**Depends on**: None.
 **Tasks**:
 1. [implement] [Task description] — traces to [spec.md]
 2. [spike] [Research question, budget: 30min] — traces to [spec.md §section]
@@ -199,6 +200,7 @@ One paragraph: what we're implementing and the approach.
 **Exit criteria**: [conditions].
 
 ### Chunk 1: [Name]
+**Depends on**: Chunk 0.
 **Tasks**: ...
 **Entry criteria**: Chunk 0 complete.
 **Exit criteria**: ...
@@ -249,6 +251,7 @@ Each `docs/plan-{id}.md` follows the single-milestone format above (with `### Ch
 - **Flag unknowns**: if a task depends on something you're not sure about, mark it as a risk
 - **Verify tasks are explicit**: don't rely on "tests pass" — include specific verification tasks for complex features
 - **Chunks not milestones for work units**: use `### Chunk N: <name>` headers for implementation work units (~5-15 hours each). Reserve "milestone" for delivery groupings (M1, M2, etc.) in multi-milestone projects
+- **Declare chunk dependencies**: every chunk carries a `**Depends on**: Chunk N` field (`None` for roots; comma-separate multiple). This is the canonical machine-readable signal implement-stage fan-out parses to find independent chunk-groups — `Entry criteria:` prose is a tolerated fallback, not the canonical form
 
 ### Step 8: Review
 
