@@ -163,7 +163,7 @@ The system may offer a "remember me" checkbox extending sessions to 30 days.
 Use `REQ-{DOMAIN}-{NNN}` format:
 - `{DOMAIN}` is an uppercase short name matching the file's `domain` frontmatter
 - `{NNN}` is a zero-padded 3-digit number, sequential within the domain
-- Scan the target file for the highest existing NNN and increment
+- Scan **all category files sharing the domain prefix** (a prefix can span multiple files after a split — check the Domain Prefixes table) for the highest existing NNN and increment
 - New files start at 001
 - IDs are globally unique — the domain prefix prevents collisions
 - When creating a new category file, choose a domain prefix that doesn't collide with existing prefixes (check `index.md` Domain Prefixes table)
@@ -325,7 +325,9 @@ See `docs/spec/ws-ids.md` for the full merge-safe write contract.
 After writing to any category file, check its line count. If the file exceeds 300 lines:
 - Inform the user: "{file} is at {N} lines — recommend splitting"
 - Propose a split (e.g., `auth.md` -> `auth-login.md` + `auth-permissions.md`)
-- If approved: create the new files, move requirements, assign new domain prefixes, update index.md
+- If approved: create the new files and move requirements **verbatim — IDs are permanent** (`REQ-AUTH-007` stays `REQ-AUTH-007`; never renumber or assign a new domain prefix on a split)
+- The split files **share the original domain prefix**: each keeps `domain: AUTH` in frontmatter, the Domain Prefixes table lists all files carrying the prefix, and the next-ID scan covers every file sharing the domain (see ID Assignment)
+- Update index.md: one Files-table row per new file; update the Domain Prefixes table row to list all the prefix's files
 
 ### Step 7: Review
 
