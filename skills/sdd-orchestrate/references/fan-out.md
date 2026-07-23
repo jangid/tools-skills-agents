@@ -117,6 +117,14 @@ Worktree pin (HARD boundary):
   - Operate ONLY within this worktree ({worktree_path}) and ONLY on its branch
     ({branch}). Do not touch the main workspace, other worktrees, or other
     branches.
+  - Do NOT edit the shared plan or traceability files (docs/plan.md /
+    docs/ws/<ws>/plan.md; docs/requirements/traceability.md /
+    docs/ws/<ws>/traceability.md): every fan-out leaf writes them, so any two
+    groups would conflict on merge regardless of code independence. Where
+    sdd-implement says to mark tasks [x] or fill traceability columns
+    (including chunk-close Check 2), instead RECORD the completed task list
+    and the column fills in your return; the orchestrator applies them once
+    after all merges (§3e).
 
 Leaf clause:
   - You are a LEAF subagent. Do NOT dispatch any sub-subagent and do NOT fan out
@@ -248,7 +256,10 @@ On a non-zero `git merge` exit:
    after re-derivation against the updated `main`, that proves the groups were **not
    truly independent** — a fan-out boundary-selection error (genuinely independent
    branches cannot conflict after re-derivation against a `main` already containing
-   the other branch). **Fall back to running the affected chunk-groups sequentially**
+   the other branch — and with the shared
+   plan/traceability writes excluded from leaves per §2, a conflict genuinely
+   indicates overlapping *code* changes, not bookkeeping collisions).
+   **Fall back to running the affected chunk-groups sequentially**
    (one implement run re-branched from `main`, merged, then the next), which cannot
    conflict by construction. This guarantees termination: each round either merges
    cleanly or proves non-independence and collapses to the always-terminating
@@ -288,6 +299,24 @@ git branch -d <branch>
 Redo worktrees (`<branch>-redo`) are torn down the same way after their merge. All
 teardown happens **before** the implement-stage review.
 
+### 3e. Post-merge bookkeeping (orchestrator-owned)
+
+After all merges and teardowns, before the implement-stage review, the
+orchestrator applies the shared-doc updates the leaves were barred from making
+(§2 worktree pin):
+
+1. Mark each returned completed task `[x]` in the plan (`docs/plan.md`, or
+   `docs/ws/<ws>/plan.md` under marker `4`) and bump its `last_updated`.
+2. Apply the returned traceability Test/Implementation fills per the active
+   marker's contract (marker `3`: the single shared
+   `docs/requirements/traceability.md`; marker `4`: the workstream's own
+   `docs/ws/<ws>/traceability.md`, then regenerate the shared aggregate).
+3. Re-run any chunk-close Check 2 that a leaf deferred, now that the columns
+   are filled.
+
+Only then dispatch the implement-stage review, which sees the fully merged,
+fully book-kept state.
+
 ---
 
 ## 4. Invariants checklist
@@ -303,4 +332,7 @@ teardown happens **before** the implement-stage review.
 - [ ] Conflicts: optional auto-resolve → else `git merge --abort` → redo by
       re-derivation in a worktree re-branched from updated `main` → sequential
       fallback on repeat conflict (guaranteed termination); never corrupt merged work.
+- [ ] Leaves never edit the shared plan/traceability files; the orchestrator
+      applies returned completions and fills after all merges (§3e), before the
+      review.
 - [ ] Each merged worktree/branch is torn down before review.
