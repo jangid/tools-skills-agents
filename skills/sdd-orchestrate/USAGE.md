@@ -174,7 +174,8 @@ For each stage in order, three things happen:
 
 ### DONE
 Reached when the verify stage passes review **and** you approve. Commit the
-cycle's artifacts (including `docs/handoff/kickoff.md`).
+cycle's artifacts (including the kickoff — `docs/handoff/kickoff.md`, or
+`docs/ws/<id>/kickoff.md` under marker `4`).
 
 ---
 

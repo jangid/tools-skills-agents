@@ -65,8 +65,9 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 
 0. **Read `CLAUDE.md` first (if present).** Project conventions in `CLAUDE.md` take precedence over generic patterns when choosing libraries, coding patterns, or project structure. The file may not exist — that's normal — but when it does, its conventions override defaults you might otherwise apply.
 1. Read `docs/plan.md` — identify the current chunk and next task
-2. Read the relevant spec sections for the current task
-3. Read `docs/requirements/{category}/*.md` for requirement context when needed
+2. If the plan's frontmatter `status:` is `planned`, set it to `active` now (applies to single-milestone plans and the active milestone plan alike)
+3. Read the relevant spec sections for the current task
+4. Read `docs/requirements/{category}/*.md` for requirement context when needed
 4. Identify which chunk you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
@@ -263,7 +264,8 @@ When the plan is complete:
 1. Run the full verification suite one final time
 2. Walk through every spec's acceptance criteria — confirm each one passes
 3. List any spec gaps that were discovered and how they were resolved (Q-IMPL entries)
-4. Recommend invoking `sdd-verify` for holistic validation
+4. Set the plan's frontmatter `status:` to `complete`
+5. Recommend invoking `sdd-verify` for holistic validation
 
 ## Rules
 

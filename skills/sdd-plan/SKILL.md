@@ -192,7 +192,7 @@ One paragraph: what we're implementing and the approach.
 **Depends on**: None.
 **Tasks**:
 1. [implement] [Task description] — traces to [spec.md]
-2. [spike] [Research question, budget: 30min] — traces to [spec.md §section]
+2. [spike] [Research question, budget: 2 approaches / ~15 tool calls] — traces to [spec.md §section]
 3. [verify] [What to validate] — traces to [spec.md acceptance criteria]
 **Entry criteria**: None (first chunk).
 **Exit criteria**: [conditions].

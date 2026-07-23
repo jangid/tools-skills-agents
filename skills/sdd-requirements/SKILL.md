@@ -40,11 +40,11 @@ workstream owns only its `docs/ws/<ws>/` execution artifacts and per-ws
 `traceability.md`; requirements/specs/research and the aggregated traceability
 are shared (ADD, never fork); omitting the argument resolves `default`.
 
-1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — check for v1 vs v2 format below.
+1. **Version check**: Read `docs/.sdd-version`. If missing, suggest running `sdd-migrate` before proceeding — it migrates pre-versioning layouts and initializes greenfield projects. If present but below the latest supported version, note that `sdd-migrate` can upgrade (advisory, not blocking).
 2. **Format detection**: Check which format exists:
    - If `docs/requirements/index.md` exists → v2 format, proceed normally
    - If `docs/requirements.md` exists (v1 monolithic format) → suggest running `sdd-migrate` to convert to v2 structure before proceeding. Do not attempt to read/write the v1 format
-   - If neither exists → start fresh with v2 format
+   - If neither exists → start fresh with the current format
 3. If `docs/requirements/index.md` exists with `status: Draft` → resume requirements gathering
 4. If `docs/requirements/index.md` exists with `status: Approved` → inform the user. They can either:
    - Update the existing requirements (proceed here, downstream artifacts will become stale)

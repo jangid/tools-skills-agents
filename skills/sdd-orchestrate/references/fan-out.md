@@ -59,7 +59,7 @@ Fan-out occurs along the **independent branches of the plan's chunk dependency
 graph** — not per-milestone (too coarse; milestones are sequential) and not
 per-task (too fine) (REQ-ORCH-016).
 
-Derive the parallel groups by **reading `docs/plan.md`**, never by modifying
+Derive the parallel groups by **reading `docs/plan.md`** (marker `4`: `docs/ws/<ws>/plan.md`), never by modifying
 `sdd-implement` (REQ-ORCH-001, REQ-ORCH-016):
 
 - The canonical signal is each chunk's `**Depends on**: Chunk N` field (defined in
