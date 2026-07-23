@@ -88,6 +88,10 @@ Deliverable to review: {deliverable_path}
                           # reads the research questions from the deliverable's
                           # own frontmatter.
 
+You are non-interactive — do NOT ask questions; you have no operator to answer
+them. Where sdd-review Step 2 says to request inputs from the operator, use the
+paths above instead and read everything else from the repository.
+
 Invoke the sdd-review skill and follow it to produce a tiered verdict on the
 deliverable. Obtain any context you need by reading files from the repository
 yourself — none is provided in this prompt by design.
