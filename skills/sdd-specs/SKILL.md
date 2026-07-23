@@ -5,7 +5,8 @@ description: >
   files in docs/requirements/{category}/*.md, then produces feature design
   specs in docs/spec/. Each spec defines contracts, interfaces, and
   verification criteria — not implementation code. Use after requirements are
-  approved and before implementation begins.
+  approved and before implementation begins. Skip while requirements are still
+  Draft, or for changes too small to need a design spec.
 ---
 
 # SDD: Design Specs

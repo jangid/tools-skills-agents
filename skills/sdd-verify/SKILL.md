@@ -3,7 +3,8 @@ name: sdd-verify
 description: >
   Holistic validation after implementation — goes beyond "tests pass" to verify
   quality gates, acceptance criteria, user-perspective behavior, and regressions.
-  Produces docs/verification.md. Use after all plan tasks are complete. Triggers
+  Produces docs/verification.md. Use after all plan tasks are complete. Skip while
+  tasks remain incomplete; not a substitute for per-task testing. Triggers
   sdd-replan if critical failures are found.
 ---
 

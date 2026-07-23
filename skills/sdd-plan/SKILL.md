@@ -4,7 +4,8 @@ description: >
   Reads approved design specs from docs/spec/ and creates a concrete
   implementation plan with ordered tasks, dependencies, and milestones.
   Tasks are typed (implement, spike, verify). Plan includes replan triggers.
-  Use after specs are approved and before writing code.
+  Use after specs are approved and before writing code. Skip while specs are
+  unapproved, or for single-task changes that need no ordered plan.
 ---
 
 # SDD: Implementation Planning

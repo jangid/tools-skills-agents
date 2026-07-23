@@ -5,7 +5,8 @@ description: >
   by stuck detection, spike findings that invalidate the plan, verification
   failures, or user-requested scope changes. Reads current state, identifies
   what changed, and produces a revised plan. Use when the current plan is no
-  longer valid.
+  longer valid. Skip for routine progress — invoke only when a replan trigger
+  actually fires.
 ---
 
 # SDD: Replan

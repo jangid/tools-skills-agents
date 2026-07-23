@@ -4,7 +4,7 @@ description: >
   Executes implementation from an approved plan and design specs. Works through
   tasks in order, uses TDD inner loop, detects stuck states, and executes spike
   tasks. Triggers replan when assumptions break. Use after the implementation
-  plan is approved.
+  plan is approved. Do not use without an approved plan — run sdd-plan first.
 ---
 
 # SDD: Implementation

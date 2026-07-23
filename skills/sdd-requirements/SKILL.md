@@ -5,7 +5,8 @@ description: >
   Development (SDD). Produces structured requirements in docs/requirements/
   (split by domain) through iterative Q&A with the user. Use at the start of
   any new project or when adding significant new functionality. Can reference
-  prior research from docs/research/.
+  prior research from docs/research/. Skip for bug fixes and small tweaks that
+  don't change what the system should do.
 ---
 
 # SDD: Requirements Gathering
