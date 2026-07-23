@@ -171,7 +171,7 @@ as the `default` workstream (see `ws-migration.md`, `ws-traceability.md`).
 
 #### Index and Traceability
 
-13. Create `docs/requirements/index.md` with `version: 2.0` in frontmatter, listing all requirement files and their categories.
+13. Create `docs/requirements/index.md` with `version: 1.0` in frontmatter, listing all requirement files and their categories. (The index `version:` tracks requirements-*content* revisions and is bumped by `sdd-requirements`; the artifact-*format* version is tracked solely by `docs/.sdd-version`.)
 14. Create `docs/requirements/traceability.md` seeded from spec `requires` fields (if specs exist). Format: table mapping requirement IDs to spec files.
 
 #### Verification and Cleanup
