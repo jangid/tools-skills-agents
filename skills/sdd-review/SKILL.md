@@ -86,7 +86,7 @@ Each checklist checks both **content correctness** (is what's here right?) and *
 - Check that the recommendation is concrete and actionable
 
 **Scope completeness:**
-- Check that every research question stated in the kickoff has a finding (even if "inconclusive")
+- Check that every research question stated in the deliverable's own `questions:` frontmatter has a finding (even if "inconclusive") — the kickoff is a prohibited input (Step 2); the findings file's frontmatter is the authoritative question list
 - Check that out-of-scope observations are captured for future cycles
 - Check that budget and scope boundaries are documented
 
