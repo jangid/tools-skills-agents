@@ -68,7 +68,7 @@ Tell the user which phase you detected. If resuming, identify the next incomplet
 2. If the plan's frontmatter `status:` is `planned`, set it to `active` now (applies to single-milestone plans and the active milestone plan alike)
 3. Read the relevant spec sections for the current task
 4. Read `docs/requirements/{category}/*.md` for requirement context when needed
-4. Identify which chunk you're starting from (ask if unclear)
+5. Identify which chunk you're starting from (ask if unclear)
 
 ### Step 2: Work Through Tasks
 
