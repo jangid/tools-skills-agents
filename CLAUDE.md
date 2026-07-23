@@ -75,6 +75,8 @@ Standalone scripts or utilities. Use the appropriate language for the task. Each
 - Skill and agent names use kebab-case
 - No orphaned files — every skill directory has a SKILL.md, every agent file has frontmatter
 - Descriptions must be actionable: state when to use AND when not to use
+- Run `tools/sdd-skill-lint.py` after editing any skill — it enforces the checks
+  above plus cross-skill contract markers and known drift phrases (exit 0 = clean)
 
 ## Spec-Driven Development (SDD)
 
