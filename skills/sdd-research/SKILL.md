@@ -60,7 +60,7 @@ Tell the user what artifacts exist and confirm the research direction before pro
 Ask the user:
 - "What are we trying to learn?" — the specific question(s) this spike should answer
 - "What would success look like?" — how will we know when we have enough information
-- "What's the budget?" — suggest a scope limit (e.g., "explore 3 approaches, max 1 hour")
+- "What's the budget?" — suggest a scope limit in **observable units** an agent can actually track — N approaches, N documents/APIs tried, N prototype iterations (e.g., "explore 3 approaches, ~20 tool calls"); wall-clock time is a secondary hint at best
 
 If the user doesn't specify a budget, propose one based on the question complexity.
 

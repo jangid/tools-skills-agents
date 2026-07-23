@@ -86,7 +86,7 @@ For each task, follow the process based on its type:
 
 #### [spike] tasks — Time-Boxed Research
 
-1. **Note the budget** from the plan (e.g., "30 min max")
+1. **Note the budget** from the plan (e.g., "2 approaches, ~15 tool calls")
 2. **Explore** the unknown: read docs, try APIs, prototype in a scratch branch
 3. **Read prior research** from `docs/research/RS-*/findings.md` to avoid duplicating work
 4. **Document findings** — write to `docs/research/RS-NNN-{topic}/findings.md` and update `docs/research/index.md`

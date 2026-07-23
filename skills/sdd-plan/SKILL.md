@@ -86,7 +86,7 @@ Break each spec into implementation units. An implementation unit is:
 Every task gets one of three types:
 
 - **`implement`** — produce working code + tests for a spec section
-- **`spike`** — time-boxed research to resolve a `[high-uncertainty]` section from specs. Produces findings, may cause replan. Budget: state explicitly (e.g., "30 min max")
+- **`spike`** — time-boxed research to resolve a `[high-uncertainty]` section from specs. Produces findings, may cause replan. Budget: state explicitly, in observable units (e.g., "2 approaches, ~15 tool calls")
 - **`verify`** — dedicated verification task (integration test, manual check, performance benchmark). Goes beyond "run pytest" — validates behavior from user perspective
 
 ### Step 4: Order by Dependencies
