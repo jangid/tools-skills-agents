@@ -280,9 +280,10 @@ DONE     — the verify stage passes review AND the operator approves
 ## DISCUSS
 
 Before writing any kickoff, reach a shared understanding of the idea with the
-operator. **Reuse the brainstorming process** (invoke the brainstorming skill):
-explore intent, surface scope boundaries, and capture the open questions the
-research stage should answer. Do not jump straight to a kickoff or to
+operator. **Reuse the brainstorming process** — invoke a brainstorming skill if
+one is available in the session; otherwise run the equivalent inline:
+explore intent, challenge assumptions, surface scope boundaries, and capture the
+open questions the research stage should answer. Do not jump straight to a kickoff or to
 implementation — converge first.
 
 Exit DISCUSS when the operator and you agree on: what the idea is, what is in and
