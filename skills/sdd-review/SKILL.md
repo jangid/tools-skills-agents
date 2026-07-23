@@ -22,9 +22,9 @@ Identify the phase from the artifacts the operator provides. Detection is input-
 | `docs/research/RS-*/findings.md` | Research | §Research |
 | `docs/requirements/**/*.md` | Requirements | §Requirements |
 | `docs/spec/*.md` | Specs | §Specs |
-| `docs/plan.md` (or `docs/plan-*.md`) | Plan | §Plan |
-| `skills/*/SKILL.md` + chunk context | Implementation | §Implementation |
-| `docs/verification.md` | Verification | §Verification |
+| `docs/plan.md` / `docs/plan-*.md` (marker `4`: `docs/ws/<id>/plan.md`) | Plan | §Plan |
+| changed source/test files (the implementation diff) + plan/chunk context | Implementation | §Implementation |
+| `docs/verification.md` (marker `4`: `docs/ws/<id>/verification.md`) | Verification | §Verification |
 
 If the input doesn't match a pattern, ask the operator which phase applies.
 

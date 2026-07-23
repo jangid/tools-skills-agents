@@ -363,7 +363,10 @@ isolation does not depend on operator vigilance. The template is in
 
 **The review dispatch MUST carry ONLY:**
 - the repository root,
-- the deliverable artifact path(s),
+- the deliverable artifact path(s) — for the **implement stage**, where there is
+  no single artifact file, this means the plan path plus the source/test files
+  changed during the stage (e.g. `git diff --name-only` against the
+  stage-start commit),
 - the upstream artifact path — **except for the research stage** (see below),
 - the instruction to invoke `sdd-review`.
 
