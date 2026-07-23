@@ -463,6 +463,23 @@ shipped state).
 task passes.
 
 ### Chunk 8: Holistic v4 verification
+**Status**: CLOSED (2026-07-23) — tasks 1–4 done. All spec acceptance criteria
+exercised on throwaway `$TMPDIR` git fixtures (deleted; nothing leaked into this repo)
+plus a cross-skill consistency sweep of the shipped skills. Two-workstream isolation
+(ISSUE-42 plan rewrite+archive left ISSUE-57 byte-unchanged), concurrency (RS-ISSUE42-001
+/ RS-ISSUE57-001 no collision; distinct-prefix index/category/per-ws-traceability additions
+3-way-merge CLEAN; same-domain additions surface a human conflict, NOT auto-unioned;
+aggregate re-derives deterministically byte-identical), workstream-scoped staleness
+isolation (updating a spec traced only by ISSUE-42 flags ISSUE-42 not ISSUE-57; checker
+reads no traceability file; requirements-corpus staleness stays ws-independent), v3→v4
+migration (copy-verify-flip-cleanup: byte-identity, marker-`4` written LAST, interrupted-
+before-flip = working v3 + idempotent re-run, verdicts/status verbatim), fan-out re-anchor
+(worktrees branch from & merge back into the ws branch, `main` untouched; regression base
+= merge-base(<ws>, main) = branch point, excludes unrelated `main` merges), and
+v3-solo-safety (marker-`3` fixture = flat layout, global ids, no `docs/ws/`) all PASS. No
+acceptance criterion failed; no replan trigger fired. THIS repo stays at marker `3`;
+`docs/verification.md` NOT written (that is the sdd-verify stage). See Q-IMPL-020 in
+`ws-layout.md`. Verifies REQ-WS-001..029 (holistic).
 **Depends on**: Chunks 2, 3, 4, 7.
 **Goal**: End-to-end confirmation that v4 behaves per every spec's acceptance
 criteria across the whole skill set, from a user/operator perspective.
@@ -677,3 +694,36 @@ criteria across the whole skill set, from a user/operator perspective.
   THIS repo stays at marker `3`; no `sdd-*` SKILL.md behavior changed. No replan
   trigger fired (Q-IMPL-019). Covers REQ-WS-009 (§ID-namespace doc half), REQ-WS-023
   (§Version-Marker doc half). (2026-07-23, 3 tasks)
+- Chunk 8 (Holistic v4 verification): end-to-end confirmation that v4 behaves per every
+  spec's acceptance criteria, exercised on throwaway `$TMPDIR` git fixtures (all deleted;
+  nothing leaked into this repo/branch) + a cross-skill consistency sweep of the shipped
+  skills. **Fixture A** (two-workstream isolation + concurrency): an `sdd-plan`
+  rewrite+archive in ISSUE-42 left ISSUE-57's plan/traceability byte-identical (hash-equal)
+  and touched only ISSUE-42 paths (REQ-WS-001, 006); `RS-ISSUE42-001` / `RS-ISSUE57-001`
+  allocated with no collision (REQ-WS-009, 011); distinct-domain-prefix additions to
+  `requirements/index.md` (ID-sorted, one-row-per-line), new category files, and per-ws
+  `traceability.md` files 3-way-merged CLEAN (REQ-WS-008, 010, 013, 014, 015); same-domain
+  concurrent additions surfaced a git conflict, NOT auto-unioned (REQ-WS-014); the shared
+  aggregate regenerated deterministically byte-identical and ID-sorted (REQ-WS-008).
+  **Fixture B** (workstream-scoped staleness, REQ-WS-026, 027, 028, 007): a live
+  `stale_inputs(<id>)` plan-walk flagged ISSUE-42 stale when a spec ONLY it traces changed
+  and left ISSUE-57 untouched (and vice-versa for a traced category file); the checker read
+  no `traceability.md`; research→requirements staleness stayed shared/ws-independent.
+  **Fixture C** (v3→v4 migration, REQ-WS-021, 022, 023): copy-verify-flip-cleanup produced
+  byte-identical copies under `docs/ws/default/`, wrote marker `4` LAST, preserved `[x]`/
+  `[ ]` + pass verdicts verbatim, left the shared corpus in place; interrupted-before-flip
+  = working v3 repo (flat files intact, marker `3`) with an idempotent safe re-run; re-run
+  after flip = idempotent cleanup no-op. **Fixture D** (fan-out re-anchor, REQ-WS-016, 017,
+  018): a fan-out worktree branched from & merged back into ISSUE-42 with `main` untouched;
+  `regression_base = merge-base(ISSUE-42, main)` equalled the branch point and excluded an
+  unrelated ISSUE-57 change merged to `main` meanwhile (diff-vs-main-HEAD would have wrongly
+  folded it in). **Fixture E + sweep** (v3-solo-safety + cross-skill consistency, REQ-WS-003,
+  004, 005, 012, 019, 020, 023, 024, 025, 029): a marker-`3` fixture behaved exactly as
+  today (flat layout, global un-prefixed ids, no `docs/ws/`); all nine shipped skills carry
+  a marker-`4` step-0 branch, the four generators emit ws-prefixed ids, `overview.md`/
+  `CLAUDE.md` document v4, the `docs/ws/<ws>/requirements|spec` guards are all negative
+  "never creates" prohibitions, and `overview.md` explicitly documents "a skill under marker
+  `4` never reads flat `docs/plan.md`". No acceptance criterion failed; no replan trigger
+  fired. THIS repo stays at marker `3`; `docs/verification.md` was NOT written (Chunk 8 is
+  the plan's own holistic verify chunk, distinct from and preceding the sdd-verify stage).
+  See Q-IMPL-020 in `ws-layout.md`. Verifies REQ-WS-001..029. (2026-07-23, 4 tasks)

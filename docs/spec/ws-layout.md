@@ -254,3 +254,30 @@ skills read flat paths and a v4-aware skill suggests migration" — the suggesti
 routing is added by `sdd-migrate` in a later chunk (`ws-migration.md`). Default
 carried: gate strictly on `marker == "4"`; leave all marker-`3` detection paths
 byte-unchanged.
+
+### Q-IMPL-020: Chunk 8 holistic verification runs on throwaway fixtures; this repo stays marker `3`
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: § Verification (all `ws-*.md` specs) — the acceptance criteria are
+behavioral (concurrent merges, staleness dates, migration interruption, regression base)
+but there is no compiled code to unit-test; the plan's Risks note "verification is prose
+review + git merge/interruption walkthroughs on fixtures".
+**Decision**: Chunk 8 verified every spec's acceptance criteria WITHOUT flipping this
+repo to marker `4`. Load-bearing runtime behaviors were exercised on throwaway `$TMPDIR`
+git fixtures (two-workstream isolation + concurrent 3-way merges, `stale_inputs(<id>)`
+plan-walk, v3→v4 copy-verify-flip-cleanup with interruption, fan-out re-anchor +
+`merge-base` regression base, marker-`3` v3-solo-safety), each reproducing the algorithm
+the relevant SKILL.md prose describes; the prose-encoded criteria not reducible to a
+runnable merge/date check (all-nine-skills step-0 gate, four generators, integration/
+migration/doc consistency) were confirmed by a cross-skill grep sweep of the shipped
+`skills/`. Fixtures were deleted; nothing leaked into this repo or its branch. The
+Verified column of the marker-`3` shared 5-column `docs/requirements/traceability.md`
+was filled `pass` for REQ-WS-001..029 (chunk-close Check 2). `docs/verification.md` was
+NOT written — that is the separate sdd-verify STAGE, which Chunk 8 (the plan's own
+holistic verify chunk) precedes.
+**Rationale**: Constraint #1 (v3-solo-safety) forbids flipping this repo's marker, so v4
+behavior must be verified on isolated fixtures rather than in-place. For a meta-feature
+whose "code" is markdown skill prose, fixture walkthroughs that re-run the described
+algorithm are the strongest available evidence and match the plan's own verify-task
+depth default; the cross-skill sweep is the plan's designated backstop for the breadth-
+of-edits risk. Recording Verified in the marker-`3` shared matrix (not per-ws files)
+follows the marker-`3` traceability rule since this repo is still at marker `3`.
