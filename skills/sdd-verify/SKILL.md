@@ -49,6 +49,7 @@ identity or quorum. Full contract: `docs/spec/ws-layout.md`.
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/plan.md` → use `sdd-plan`
 2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` and specs against `docs/plan.md` modification date. If upstream artifacts are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) run the whole-plan compare above — flat `docs/plan.md` vs all specs/requirements — **unchanged**. Under marker `4` `sdd-verify` gains a **new** workstream-scoped branch (it had no scoped branch before): compare the active workstream's `docs/ws/<ws>/plan.md` / `docs/ws/<ws>/verification.md` **only** against the shared specs/requirements that workstream traces, using the **same live plan-walk** as `sdd-plan`/`sdd-implement` (walk `<ws>`'s tasks' `traces to` specs → each spec's `requires:` requirement IDs → those specs' and requirement category files' `last_updated`; task → spec `requires:` → requirement IDs → category-file dates). It must **not** report staleness from shared-input changes outside `<ws>`'s traced set. This reads **no traceability file** and adds no traceability schema column — the scope is derived live (REQ-WS-027). See `docs/spec/ws-staleness.md`
 3. If `docs/plan.md` has incomplete tasks → use `sdd-implement`
 4. If all plan tasks are done (or user explicitly requests verification) → you're in the right place
 5. If `docs/verification.md` already exists → you're re-verifying (after fixes or replan)
@@ -154,6 +155,7 @@ For CLI tools: run them. For servers: start them and make requests. For librarie
 - Run the full test suite (not just new tests)
 - If there's a pre-existing test suite, confirm nothing regressed
 - Check git diff against the base branch — are there unintended changes?
+- **Regression base (marker `4`)**: under `docs/.sdd-version` == `4` the regression base is the **workstream branch point**, `merge-base(<ws>, main)` — diff `<ws>` HEAD against that base, not `main` HEAD, so verification reflects only this workstream's delta. The full re-anchored regression-base contract is specified in Chunk 4 / `docs/spec/ws-integration.md` (REQ-WS-018); under marker `3` diff against the base branch exactly as above, unchanged.
 
 ### Step 6: Write Verification Report
 

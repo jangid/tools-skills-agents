@@ -197,6 +197,19 @@ model established).
 compute-live boundary stated; verify task passes.
 
 ### Chunk 3: Workstream-scoped staleness
+**Status**: CLOSED (2026-07-23) — tasks 1–5 done. Under a marker-`4` branch, the
+milestone-scoped staleness traversal is **generalized verbatim** (plan path
+`docs/plan.md` → `docs/ws/<ws>/plan.md`, milestone key → workstream key, chain
+`task → spec requires: → requirement IDs → category-file dates` unchanged, computed
+live, no traceability read, no schema column) in `sdd-plan`/`sdd-implement`/
+`sdd-replan` (sdd-implement also drops the v3 plan-index caveat; sdd-replan re-points
+its by-name reference); `sdd-verify` gains a **new** ws-scoped branch (same live
+plan-walk) + a Chunk-4 regression-base pointer (`merge-base(<ws>, main)`); `sdd-specs`
+gains a **new** branch that stops treating the flat plan as a monolith and defers plan
+staleness to `sdd-plan`; `sdd-requirements` research→requirements staleness confirmed
+workstream-independent (only research ID pattern → `RS-<WS>-NNN`). Marker-`3`
+milestone-scoped behavior retained unchanged. No replan trigger fired. See Q-IMPL-013
+in `ws-staleness.md`. Covers REQ-WS-026, REQ-WS-027, REQ-WS-028.
 **Depends on**: Chunk 0.
 **Goal**: Staleness is scoped by workstream, computed live from the workstream's
 plan with no traceability read; the two skills that lacked a scoped branch gain one
@@ -506,3 +519,19 @@ criteria across the whole skill set, from a user/operator perspective.
   boundary is stated (no traceability read on any staleness path, no staleness schema
   column). Marker-`3` single-shared-file behavior retained unchanged (Q-IMPL-011,
   Q-IMPL-012). Covers REQ-WS-007, REQ-WS-008. (2026-07-23, 4 tasks)
+- Chunk 3 (Workstream-scoped staleness): under a marker-`4` branch, staleness is
+  scoped by workstream and computed **live** from the workstream's plan with **no
+  traceability read** and no new schema column. The milestone-scoped traversal
+  generalizes **verbatim** in `sdd-plan`/`sdd-implement`/`sdd-replan` (plan path
+  `docs/plan.md` → `docs/ws/<ws>/plan.md`, milestone key → workstream key, chain
+  `task → spec requires: → requirement IDs → category-file dates` unchanged;
+  sdd-implement drops the now-inapplicable v3 plan-index caveat; sdd-replan re-points
+  its by-name reference). `sdd-verify` and `sdd-specs`, which had no scoped branch,
+  gain **new** ones: sdd-verify compares a workstream's plan/verification only against
+  its traced shared inputs (same live plan-walk) + a Chunk-4 regression-base pointer
+  (`merge-base(<ws>, main)`); sdd-specs stops treating the flat plan as a monolith and
+  defers plan staleness to sdd-plan (checks only requirements→spec). `sdd-requirements`
+  research→requirements staleness confirmed **workstream-independent** (shared corpus,
+  no ws key; only research ID pattern → `RS-<WS>-NNN`). Marker-`3` milestone-scoped
+  behavior retained unchanged; no replan trigger fired (Q-IMPL-013). Covers
+  REQ-WS-026, REQ-WS-027, REQ-WS-028. (2026-07-23, 5 tasks)

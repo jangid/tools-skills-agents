@@ -144,7 +144,7 @@ last_updated: 2026-07-23
 | REQ-WS-023 | ws-migration.md | | | |
 | REQ-WS-024 | ws-orchestration.md | | | |
 | REQ-WS-025 | ws-orchestration.md | | | |
-| REQ-WS-026 | ws-staleness.md | | | |
-| REQ-WS-027 | ws-staleness.md | | | |
-| REQ-WS-028 | ws-staleness.md | | | |
+| REQ-WS-026 | ws-staleness.md | | skills/sdd-plan/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-replan/SKILL.md (milestone→workstream staleness generalized verbatim, compute-live, no traceability read, marker-4 gate) | |
+| REQ-WS-027 | ws-staleness.md | | skills/sdd-verify/SKILL.md (new ws-scoped branch), skills/sdd-specs/SKILL.md (defer plan staleness, no global plan compare, marker-4 gate) | |
+| REQ-WS-028 | ws-staleness.md | | skills/sdd-requirements/SKILL.md (research→requirements staleness stays shared/workstream-independent; RS-<WS>-NNN pattern only, marker-4 gate) | |
 | REQ-WS-029 | ws-orchestration.md | | | |

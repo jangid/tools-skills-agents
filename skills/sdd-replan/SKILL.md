@@ -52,6 +52,7 @@ identity or quorum. Full contract: `docs/spec/ws-layout.md`.
 5. **Staleness check**: if upstream artifacts are newer than the plan, the plan is stale → replan to align:
    - **Single-milestone plan**: compare `docs/requirements/index.md` and specs against `docs/plan.md`
    - **Multi-milestone plan**: apply milestone-scoped staleness — compare only against requirements and specs traced by the affected milestone's tasks
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. `sdd-replan` references milestone-scoped staleness **by name only**, so under marker `4` re-pointing that reference at the workstream-scoped definition suffices — **no new traversal**: the same chain runs with the plan path `docs/plan.md` → `docs/ws/<ws>/plan.md` and the **milestone key → workstream key**. Compare the affected workstream `<ws>`'s plan `last_updated` only against the specs its tasks trace and the requirement category files those specs `requires:` (task → spec `requires:` → requirement IDs → category-file dates), computed **live** from `<ws>`'s plan — **no traceability-file read**, no new traceability schema column (REQ-WS-026). See `docs/spec/ws-staleness.md`
 
 Tell the user what triggered the replan and confirm before proceeding.
 

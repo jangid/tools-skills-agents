@@ -136,3 +136,11 @@ research regardless of which workstream is active.
 - [ ] research→requirements staleness stays shared/workstream-independent; only the
       research ID pattern changes (REQ-WS-028)
 - [ ] Markdown well-formed; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-013: Workstream-scoped staleness placed as a marker-`4` bullet inside each skill's existing staleness check; verify regression-base is a forward pointer to Chunk 4
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Generalize Milestone-Scoped Staleness to Workstream Scope (REQ-WS-026), §New Per-Workstream Staleness Branches (REQ-WS-027), and plan Chunk 3 tasks 1–3.
+**Decision**: The workstream-scoped traversal is added as an additional **marker-`4`-gated bullet** appended to each skill's existing step-0 staleness check item (`sdd-plan` item 3, `sdd-implement` item 4, `sdd-replan` item 5, `sdd-verify` item 2, `sdd-specs` item 2), leaving the marker-`3` single-/multi-milestone bullets byte-unchanged above it, rather than rewriting the check into a version-forked block. Consistent with the Chunk 0 step-0 gate style and the marker-`3`-behavior-retained requirement. For `sdd-verify`'s regression base, Chunk 3 only re-points the note toward Chunk 4: the added note states the `merge-base(<ws>, main)` formula for orientation but attributes the full re-anchored regression-base contract (REQ-WS-018) to Chunk 4 / `ws-integration.md`, which owns that change — Chunk 3 does not modify the actual diff mechanics.
+**Rationale**: Additive marker-`4` bullets keep the v3 solo path provably unchanged (the sole `.sdd-version` gate selects the branch) and mirror how Chunks 0–2 threaded marker-`4` behavior, avoiding a divergent step-0 structure. The verify regression-base pointer stays a pointer because Chunk 3's scope is staleness, not the git integration/regression-base re-anchor (Chunk 4, REQ-WS-018); stating the formula inline aids the reader without pre-empting Chunk 4's edit. The milestone→workstream generalization held verbatim for all three of sdd-plan/sdd-implement/sdd-replan (chain identical; sdd-implement only drops an inapplicable caveat; sdd-replan is a by-name reference), so replan trigger #3 did not fire.
