@@ -193,6 +193,8 @@ For each spec referenced by the chunk's tasks, extract from code blocks:
 - (b) Field names — `field_name: Type` lines within class bodies
 - (c) Enum value lists — `VALUE = "literal"` lines in enum classes
 
+(a)–(c) show the Python forms; for TypeScript, Rust, or Move use the equivalent declarations (`interface`/`struct`/`trait`/`enum`, their field declarations, and enum variants). If a spec's code blocks match no pattern for their language, report "no extractable types" as a finding-free but explicit result — never silently pass.
+
 Grep the implementation tree for matching definitions. Report as findings:
 - Class in spec but not impl
 - Field name mismatch (present in spec, absent or renamed in impl)

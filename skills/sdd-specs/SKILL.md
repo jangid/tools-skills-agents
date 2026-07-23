@@ -204,10 +204,12 @@ This validates that when one spec references a type defined in another spec, the
 
 **Process:**
 
-1. **Extract type definitions** from each spec's code blocks:
-   - Class declarations: `class Foo` or `class Foo(Base)`
-   - Enum declarations: `class Foo(Enum)` or `class Foo(StrEnum)`
-   - Type alias patterns: `Foo: TypeAlias = Bar` or `Foo = NewType("Foo", Bar)` only — bare `Foo = ...` is excluded to avoid noise on TypeVar/generic declarations
+1. **Extract type definitions** from each spec's code blocks, using the pattern set matching each block's language:
+   - Python: `class Foo` / `class Foo(Base)`; enums `class Foo(Enum)` / `class Foo(StrEnum)`; aliases `Foo: TypeAlias = Bar` / `Foo = NewType("Foo", Bar)` only — bare `Foo = ...` is excluded to avoid noise on TypeVar/generic declarations
+   - TypeScript: `interface Foo`, `class Foo`, `enum Foo`, `type Foo = ...`
+   - Rust: `struct Foo`, `enum Foo`, `trait Foo`, `type Foo = ...;`
+   - Move: `struct Foo` (incl. `public struct Foo`)
+   - If a spec's code blocks match **no** pattern for their language, report "no extractable type definitions in {spec}" as an explicit result — a silent no-op reads as a clean pass and hides the gap
 
 2. **Build a type-to-spec map**: `{TypeName: spec-file.md}` across all specs. Flag duplicates (same type defined in multiple specs) as findings.
 
