@@ -277,6 +277,20 @@ After every write to a category file, perform these maintenance steps:
    - For removed requirements: delete from category file, mark `[Deprecated]` in the traceability Requirement column. Never reuse the ID
    - Bump `last_updated` to today
 
+   **Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole
+   gate. Under marker `3` or earlier, add rows to the single shared
+   `docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
+   traceability rows are per-workstream-owned (REQ-WS-008): the requirement text stays in
+   the **shared** category file (added merge-safe per the "Merge-safe shared writes" note
+   in this Step 5, below), but the new **row** — recording that this workstream delivers the REQ — is written into the
+   active workstream's OWN file `docs/ws/<ws>/traceability.md` (frontmatter
+   `workstream: <ws>` / `last_updated:`; 6-column matrix with the appended `Workstream`
+   column), never another ws's file and never the shared aggregate in place. Then
+   **regenerate** the shared `docs/requirements/traceability.md` wholesale (shipped legacy
+   rows under blank/`default` + concat of every `docs/ws/<id>/traceability.md`,
+   stable-sorted by requirement id; never appended/hand-merged). See
+   `docs/spec/ws-traceability.md`.
+
 **Merge-safe shared writes (marker `4` only).** `docs/.sdd-version` is the sole
 gate; under marker `3` or earlier this is unchanged. Under marker `4`,
 `requirements/`, `spec/`, `research/`, and the aggregated traceability are a single

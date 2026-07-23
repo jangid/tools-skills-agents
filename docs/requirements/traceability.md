@@ -125,8 +125,8 @@ last_updated: 2026-07-23
 | REQ-WS-004 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
 | REQ-WS-005 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate) | |
 | REQ-WS-006 | ws-layout.md | | skills/sdd-plan/SKILL.md, skills/sdd-verify/SKILL.md (ws-scoped rewrite/fail-route) | |
-| REQ-WS-007 | ws-traceability.md | | | |
-| REQ-WS-008 | ws-traceability.md | | | |
+| REQ-WS-007 | ws-traceability.md | | skills/sdd-implement/SKILL.md (recorded-join vs compute-live boundary, marker-4 gate) | |
+| REQ-WS-008 | ws-traceability.md | | skills/sdd-implement/SKILL.md, skills/sdd-verify/SKILL.md, skills/sdd-specs/SKILL.md, skills/sdd-requirements/SKILL.md (per-ws traceability file + regenerated aggregate, marker-4 gate) | |
 | REQ-WS-009 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-migrate/SKILL.md (ws-prefixed ID format, marker-4 gate) | |
 | REQ-WS-010 | ws-ids.md | | skills/sdd-requirements/SKILL.md (claimed-prefix append), skills/sdd-specs/SKILL.md (new-specs-are-new-files) | |
 | REQ-WS-011 | ws-ids.md | | skills/sdd-research/SKILL.md, skills/sdd-requirements/SKILL.md, skills/sdd-implement/SKILL.md (per-workstream counters) | |

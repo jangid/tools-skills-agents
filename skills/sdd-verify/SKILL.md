@@ -124,7 +124,19 @@ Read `docs/requirements/traceability.md` and verify:
 2. **Every implemented requirement has tests** — Test column is non-empty for requirements with Implementation filled
 3. **Flag gaps** — list any requirements missing spec, test, or implementation coverage
 
-After verification, update the **Verified** column in `traceability.md` with pass/fail for each requirement.
+After verification, update the **Verified** column with pass/fail for each requirement.
+
+**Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole gate.
+Under marker `3` or earlier, read and write the single shared
+`docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
+the aggregate `docs/requirements/traceability.md` remains a convenient read-only
+**coverage view** for the checks above, but write the **Verified** column into the
+active workstream's OWN file `docs/ws/<ws>/traceability.md` (per-workstream-owned rows,
+6-column matrix with the appended `Workstream` column) — never another ws's file and
+never the shared aggregate in place — then **regenerate** the shared aggregate wholesale
+(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+requirement id; never hand-merged). See `docs/spec/ws-traceability.md` (REQ-WS-007,
+REQ-WS-008).
 
 ### Step 4: User-Perspective Validation
 

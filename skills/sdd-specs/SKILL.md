@@ -154,10 +154,20 @@ Do NOT include:
 
 ### Step 3b: Update Traceability
 
-After writing or updating each spec, update `docs/requirements/traceability.md`:
+After writing or updating each spec, update traceability:
 
 1. For each requirement ID listed in the spec's `requires` frontmatter, fill in the **Spec** column with the spec filename
 2. This keeps a single source of truth for requirement-to-artifact mapping
+
+**Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole gate.
+Under marker `3` or earlier, write the **Spec** column into the single shared
+`docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
+traceability rows are per-workstream-owned (REQ-WS-008): fill the **Spec** column in the
+active workstream's OWN file `docs/ws/<ws>/traceability.md` (6-column matrix with the
+appended `Workstream` column) — never another ws's file and never the shared aggregate
+in place — then **regenerate** the shared `docs/requirements/traceability.md` wholesale
+(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+requirement id; never appended/hand-merged). See `docs/spec/ws-traceability.md`.
 
 ### Spec Rules
 

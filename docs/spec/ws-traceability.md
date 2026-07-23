@@ -154,3 +154,38 @@ column above exists only to attribute aggregated rows, not to feed staleness.
 - [ ] Two concurrent workstreams' traceability additions 3-way-merge with no conflict
       (REQ-WS-008)
 - [ ] Markdown well-formed; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-011: Which skills regenerate the shared aggregate, and when
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Aggregation Contract ("regenerated … wholesale replacement")
+**Decision**: Every skill that writes a per-ws traceability row under marker `4`
+(`sdd-requirements` adding a new row, `sdd-specs` filling **Spec**, `sdd-implement`
+filling **Test**/**Implementation** and at chunk-close Check 2, `sdd-verify` filling
+**Verified**) regenerates `docs/requirements/traceability.md` **immediately after** its
+per-ws write, using the `regenerate_shared_traceability()` contract (shipped legacy rows
++ concat of every `docs/ws/<id>/traceability.md`, stable-sorted by requirement id,
+wholesale replacement). The spec pins the aggregate as derived/deterministic but does not
+name a single regenerator; making each writer regenerate keeps the aggregate live after
+every owned-row change while remaining conflict-free (each branch only edits its own per-ws
+file; the aggregate re-derives on merge).
+**Rationale**: A per-ws write leaves the aggregate stale until regenerated; co-locating
+regeneration with each write is the least-surprising place and needs no separate trigger
+skill. Marker `3` behavior is untouched — the single shared file is still written directly.
+
+### Q-IMPL-012: sdd-requirements (a shared-corpus skill) writes into a per-ws file
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Per-Workstream File Shape ("both new ws-prefixed requirements and
+pre-existing shared requirements the workstream re-uses may appear as rows owned by this
+workstream")
+**Decision**: Under marker `4`, when `sdd-requirements` adds a new
+`REQ-<DOMAIN>-<WS>-NNN`, the requirement **text** is added to the shared category file
+(merge-safe, per `ws-ids.md`), but the traceability **row** is written into the active
+workstream's OWN `docs/ws/<ws>/traceability.md` — not the shared aggregate — then the
+aggregate is regenerated. This keeps the "a workstream only ever edits its own rows"
+invariant even though requirements themselves are shared.
+**Rationale**: The row records *which workstream delivers* the REQ, which is
+workstream-owned state; only the requirement definition is shared. Splitting text (shared,
+merge-safe append) from row (per-ws owned) satisfies both REQ-WS-004 (shared corpus) and
+REQ-WS-008 (per-ws-owned rows) without a shared write point.

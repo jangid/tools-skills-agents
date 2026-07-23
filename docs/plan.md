@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-07-21
+last_updated: 2026-07-23
 status: Approved
 ---
 
@@ -156,6 +156,13 @@ unaffected by RS-007 Q4 stay untouched. Traces to `ws-ids.md`.
 encoded; unaffected parsers documented as untouched; verify task passes.
 
 ### Chunk 2: Traceability restructuring — per-workstream files + derived aggregate
+**Status**: CLOSED (2026-07-23) — tasks 1–4 done; `sdd-implement` carries the canonical
+marker-`4` per-ws traceability block (file shape with appended `Workstream` column,
+own-rows rule, wholesale-regenerated aggregate, recorded-join/compute-live boundary), and
+`sdd-verify`/`sdd-specs`/`sdd-requirements` redirect their traceability writes to
+`docs/ws/<ws>/traceability.md` + regenerate the aggregate under marker `4`; marker-`3`
+single-shared-file behavior retained byte-unchanged. See Q-IMPL-011/012 in
+`ws-traceability.md`. Covers REQ-WS-007, REQ-WS-008.
 **Depends on**: Chunk 1.
 **Goal**: Each workstream owns `docs/ws/<id>/traceability.md`; the shared
 `docs/requirements/traceability.md` becomes a deterministically regenerated
@@ -485,3 +492,17 @@ criteria across the whole skill set, from a user/operator perspective.
   touch" guards added to the four RS-007-Q4-unaffected parsers; marker-`3` v3
   generation and write behavior retained unchanged (Q-IMPL-009, Q-IMPL-010). Covers
   REQ-WS-009..015. (2026-07-23, 6 tasks)
+- Chunk 2 (Traceability restructuring — per-workstream files + derived aggregate):
+  under a marker-`4` branch, traceability rows are per-workstream-owned in
+  `docs/ws/<ws>/traceability.md` (frontmatter + 6-column matrix with appended
+  `Workstream` column; a workstream only edits its own rows), and the shared
+  `docs/requirements/traceability.md` becomes a deterministically **regenerated**
+  aggregate (shipped legacy rows under blank/`default` + concat of all per-ws files,
+  stable-sorted by requirement id, wholesale replacement, never hand-merged). The four
+  traceability writers (`sdd-requirements` row-add, `sdd-specs` Spec, `sdd-implement`
+  Test/Impl + chunk-close Check 2, `sdd-verify` Verified) redirect writes to the per-ws
+  file then regenerate the aggregate; the appended `Workstream` column preserves the
+  REQ-WS-012 unchanged-parser guarantee; the recorded-join vs compute-live-staleness
+  boundary is stated (no traceability read on any staleness path, no staleness schema
+  column). Marker-`3` single-shared-file behavior retained unchanged (Q-IMPL-011,
+  Q-IMPL-012). Covers REQ-WS-007, REQ-WS-008. (2026-07-23, 4 tasks)
