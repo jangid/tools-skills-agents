@@ -165,3 +165,11 @@ emit a dedicated `overview.md`-update implement task.
       per-workstream authoritative; v3 skills never read `ws/`, v4 skills never read
       flat paths (REQ-WS-023)
 - [ ] Markdown well-formed; frontmatter valid
+
+## Implementation Questions
+
+### Q-IMPL-015: v1/v2→v4 composition writes the `3` checkpoint rather than suppressing the intermediate marker
+**Tier**: 2 (spec ambiguity)
+**Spec reference**: §Version-Routing Extension — "For missing/`2` markers, the existing v1→v2→v3 chain runs first, then v3→v4 composes on the end (the marker is written `4` last, once)."
+**Decision**: The spec says the marker is written "`4` last, once" but does not say whether, in a composition from v1/v2, the intermediate `3` marker is suppressed (the way the existing v1→v2 step suppresses its `2` marker in a v1→v3 composition). I chose to let the **existing v2→v3 Finalization write `3` unchanged** as a checkpoint, then have v3→v4 flip `3`→`4`. I read "written `4` last, once" as a constraint on the `4` value (it is the terminal write and happens exactly once), not a prohibition on the pre-existing `3` write. So the marker file is written `3` (by v2→v3) then `4` (by v3→v4); the `4` value is written once and last.
+**Rationale**: (1) It keeps the v2→v3 finalization byte-unchanged (scope discipline — v3→v4 is purely additive). (2) It gives the v3→v4 step's own interrupted-migration invariant (REQ-WS-022) a real marker-`3` state to observe even inside a composition: if v3→v4 is interrupted after the `3` checkpoint but before the flip, the repo is a genuine working v3 repo and the re-run runs *only* the idempotent v3→v4 copy-verify-flip-cleanup instead of re-running the expensive v1→v2→v3 corpus restructuring. Suppressing the `3` marker would still be safe (the whole chain would re-run idempotently) but strictly more work and would leave the v3→v4 precondition (`marker == 3`) unsatisfied on disk mid-composition. The alternative (suppress `3`, mirroring v1→v2) was rejected for those reasons.

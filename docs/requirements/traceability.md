@@ -139,9 +139,9 @@ last_updated: 2026-07-23
 | REQ-WS-018 | ws-integration.md | | skills/sdd-verify/SKILL.md (regression base = merge-base(<ws>, main), marker-4 gate) | |
 | REQ-WS-019 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: bare per-scope status) | |
 | REQ-WS-020 | ws-layout.md | | skills/sdd-*/SKILL.md (step-0 v4 gate: implicit default ws) | |
-| REQ-WS-021 | ws-migration.md | | | |
-| REQ-WS-022 | ws-migration.md | | | |
-| REQ-WS-023 | ws-migration.md | | | |
+| REQ-WS-021 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: 3→4 routing arm + kickoff absorbed to docs/ws/default/kickoff.md, no flat docs/handoff/ in v4) | pass |
+| REQ-WS-022 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: copy-verify-flip-cleanup, marker written 4 last, interrupted-migration invariant, verdicts/status preserved verbatim) | pass |
+| REQ-WS-023 | ws-migration.md | | skills/sdd-migrate/SKILL.md (§ v3 to v4 Migration: .sdd-version sole layout gate table + version-routing extension incl. version==4 no-op) | pass |
 | REQ-WS-024 | ws-orchestration.md | | | |
 | REQ-WS-025 | ws-orchestration.md | | | |
 | REQ-WS-026 | ws-staleness.md | | skills/sdd-plan/SKILL.md, skills/sdd-implement/SKILL.md, skills/sdd-replan/SKILL.md (milestone→workstream staleness generalized verbatim, compute-live, no traceability read, marker-4 gate) | |

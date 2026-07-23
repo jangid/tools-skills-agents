@@ -307,6 +307,20 @@ workstream branch point. Traces to `ws-integration.md`.
 workstream branch; boundary-error inference removed; verify task passes.
 
 ### Chunk 5: v3 → v4 migration & the `.sdd-version` gate
+**Status**: CLOSED (2026-07-23) — tasks 1–6 done. `skills/sdd-migrate/SKILL.md` gains
+§ v3 to v4 Migration: the `3`→`4` routing arm + `version==4` clean no-op composed after
+the v1→v2→v3 chain (marker written `4` last, once, at v3→v4 Finalization); the
+copy-verify-flip-cleanup step order (copy-not-move so the flat layout stays valid across
+the whole marker-`3` window, byte-identity verify, marker flipped `4` LAST, idempotent
+cleanup of flat originals + empty `docs/handoff/`); the interrupted-migration invariant
+(before flip → working v3 + idempotent copy-verify re-run; after flip → working v4 +
+idempotent cleanup re-run); the kickoff decision (`docs/ws/<id>/kickoff.md`, no flat
+`docs/handoff/` in v4); and the `.sdd-version` sole-layout-gate table (3=flat, 4=per-ws).
+Verified on a throwaway `$TMPDIR` git v3 fixture (byte-identical copies, marker-last, flat
+layout authoritative at every pre-flip interruption point, clean idempotent cleanup, shared
+corpus untouched, verdicts/status preserved verbatim). THIS repo was NOT migrated — marker
+stays `3`, no `docs/ws/` created here. No replan trigger fired. See Q-IMPL-015 in
+`ws-migration.md`. Covers REQ-WS-021, REQ-WS-022, REQ-WS-023.
 **Depends on**: Chunk 1.
 **Goal**: `sdd-migrate` gains a copy-verify-flip-cleanup v3→v4 step; `.sdd-version`
 is the sole layout gate; kickoff is absorbed per-workstream. Traces to
@@ -565,3 +579,25 @@ criteria across the whole skill set, from a user/operator perspective.
   changes are marker-`4`-gated additions); the `**Depends on**: Chunk N` parser untouched.
   No replan trigger fired (Q-IMPL-014). Covers REQ-WS-016, REQ-WS-017, REQ-WS-018.
   (2026-07-23, 4 tasks)
+- Chunk 5 (v3→v4 migration & the `.sdd-version` gate): `skills/sdd-migrate/SKILL.md`
+  gains § v3 to v4 Migration — the `3`→`4` routing arm plus a `version==4` clean
+  no-op, composed after the existing v1→v2→v3 chain so the marker is written `4`
+  LAST, once (v2→v3's `3` write becomes the checkpoint satisfying v3→v4's marker-`3`
+  precondition; Q-IMPL-015). The `migrate_v3_to_v4()` step order is copy-verify-flip-
+  cleanup: **copy** (not move) `plan.md`/`verification.md`/`plan-history/*`/flat
+  `handoff/kickoff.md` into `docs/ws/default/` (so the flat layout stays authoritative
+  across the whole marker-`3` window), **verify** byte-identical (STOP-on-mismatch),
+  leave the shared corpus (`requirements/`, `spec/`, `research/`, aggregated
+  `traceability.md`) in place, write `.sdd-version` = `4` **LAST**, then idempotently
+  delete the flat originals + empty `docs/handoff/`. The interrupted-migration
+  invariant (before flip → working v3, idempotent copy-verify re-run; after flip →
+  working v4, idempotent cleanup re-run), the kickoff absorption decision
+  (`docs/ws/<id>/kickoff.md`; no flat `docs/handoff/` in v4; no skill reads
+  `docs/handoff/` under marker `4`), and the `.sdd-version` sole-layout-gate table
+  (3=flat authoritative, 4=per-ws authoritative; v3 skill never reads `ws/`, v4 skill
+  never reads flat paths, v4-aware skill under marker `3` suggests `sdd-migrate`) are
+  all encoded. Frontmatter description + two forward-reference notes updated to point
+  at the now-present section; v1→v3 Composition renamed/extended to v1→v4. Verified on
+  a throwaway `$TMPDIR` git v3 fixture; THIS repo was NOT migrated (marker stays `3`,
+  no `docs/ws/` here). No replan trigger fired (Q-IMPL-015). Covers REQ-WS-021,
+  REQ-WS-022, REQ-WS-023. (2026-07-23, 6 tasks)
