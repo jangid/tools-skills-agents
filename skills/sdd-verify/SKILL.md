@@ -79,7 +79,7 @@ Tell the user which phase you detected and confirm before proceeding.
 
 Run all automated quality checks. Report each as pass/fail:
 
-**Language-specific gates:**
+**Language-specific gates** (paths below are examples — substitute the project's actual source layout, e.g. `ruff check .` or the package directory):
 
 Python:
 - `ruff check src/` — zero violations
@@ -171,9 +171,9 @@ Save to `docs/verification.md` (or `docs/ws/<ws>/verification.md` under marker `
 
 ```markdown
 ---
-date: YYYY-MM-DD
+last_updated: YYYY-MM-DD
 status: pass | fail
-plan_ref: docs/plan.md
+plan_ref: docs/plan.md   # marker 4: docs/ws/<ws>/plan.md
 ---
 
 # Verification Report
@@ -227,6 +227,8 @@ plan_ref: docs/plan.md
 - [ ] Fix critical issues then ship (invoke sdd-replan)
 - [ ] Significant rework needed (invoke sdd-replan)
 ```
+
+(`last_updated:` matches every other SDD artifact's staleness field; older reports may carry `date:` instead — treat the two as equivalent when reading.)
 
 ### Step 7: Decide Next Step
 
