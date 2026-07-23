@@ -53,7 +53,7 @@ tools-skills-agents repository. Covers three scopes:
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
 | functional | [review.md](functional/review.md) | REV | REQ-REV-001..008 | Approved | 2026-05-25 |
 | functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..033 | Approved | 2026-06-06 |
-| functional | [multi-workstream.md](functional/multi-workstream.md) | WS | REQ-WS-001..029 | Approved | 2026-07-21 |
+| functional | [multi-workstream.md](functional/multi-workstream.md) | WS | REQ-WS-001..030 | Approved | 2026-07-23 |
 | non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
 | integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..018 | Approved | 2026-05-25 |
 | configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
@@ -66,14 +66,14 @@ tools-skills-agents repository. Covers three scopes:
 > phases. The specs phase should treat REQ-ORCH-016 and REQ-ORCH-022..028 as the
 > new work to design.
 
-> **WS delta note:** The `WS` domain (REQ-WS-001..029, RS-007) is the
-> multi-workstream v4 feature, added at `status: Draft` (authored by a
-> non-interactive pipeline subagent; operator approval is pending at the
-> orchestration gate). It is not yet specced or implemented — its traceability
-> Spec/Impl/Verified columns are intentionally blank pending the specs and
-> implement phases. This supersedes the earlier "Forward planning to v4" /
-> "Formal 4 → migration" out-of-scope note below, which applied to the RS-002/003
-> cycle: v4 is now the in-scope work for this cycle.
+> **WS delta note:** The `WS` domain (REQ-WS-001..030, RS-007) is the
+> multi-workstream v4 feature. REQ-WS-001..029 were specced, implemented across
+> the 9-chunk plan, and verified (`docs/verification.md`, status: pass);
+> REQ-WS-030 (offer migration when the project is behind the latest version) was
+> added afterward during dogfooding as a small in-branch enhancement. This
+> supersedes the earlier "Forward planning to v4" / "Formal 4 → migration"
+> out-of-scope note below, which applied to the RS-002/003 cycle: v4 is the
+> shipped work of this cycle.
 
 ## Domain Prefixes
 

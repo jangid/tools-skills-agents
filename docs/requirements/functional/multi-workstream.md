@@ -479,6 +479,31 @@ Acceptance: at entry the operator sees each workstream with its phase and can pi
 or create; selecting a DONE workstream vs. bringing a new idea is disambiguated
 within that workstream's context, not globally.
 
+### REQ-WS-030: Offer migration when the project is behind the latest version
+On entry, `sdd-orchestrate` must compare `docs/.sdd-version` to the latest version
+the installed skills support and, whenever the project's marker is **behind** that
+latest (missing/pre-versioning, `2`, or `3`), present an **informational, non-forcing
+offer** to run `sdd-migrate` first before proceeding with the cycle. The offer must
+generalize to any behind-version case, not only v3→v4. If the operator declines (or
+the session is non-interactive), the driver proceeds on the current marker with
+downstream behavior unchanged; if the marker already equals the latest, no offer is
+shown.
+[Priority: should]
+
+Rationale: found during dogfooding — entering a v3 project ran a v3 cycle without
+mentioning that a v4 upgrade was available, so a behind-version project could stay on
+the old layout purely because nothing surfaced the option. A one-time entry offer
+makes the upgrade discoverable without forcing it, preserving the v3-solo-safety
+guarantee for anyone who declines. This intentionally softens the strict
+"marker-`3` entry emits no v4 output" reading of the driver's "behavior UNCHANGED"
+entry clauses with a single, benign, decline-able notice; declining changes no cycle
+mechanics.
+
+Acceptance: entering a repo whose `.sdd-version` is behind the latest supported
+version surfaces a migrate offer that routes to `sdd-migrate` on accept and proceeds
+unchanged on decline; entering a repo already at the latest version surfaces no
+offer.
+
 ## Open Questions / Assumptions
 
 - **Requirements status is `Draft` (operator approval pending).** This stage was

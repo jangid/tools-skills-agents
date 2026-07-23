@@ -44,6 +44,26 @@ The driver introduces **no loop-position marker**. On entry — including re-ent
 in a fresh session mid-loop — derive the current loop position from the existing
 SDD artifacts, reusing the stage skills' own phase detection:
 
+**Upgrade offer (entry, all markers).** Before deriving loop position, read
+`docs/.sdd-version` and compare it to the **latest version the installed skills
+support** (currently `4` — the highest version `sdd-migrate` can migrate to). If the
+project's marker is **behind** the latest (missing/pre-versioning, `2`, or `3`), tell
+the operator an upgrade is available and **offer to run `/sdd-migrate` first** — e.g.
+a marker-`3` project can adopt the v4 multi-workstream layout. This offer is
+**informational and non-forcing** and is the single place a behind-version project is
+nudged toward migration:
+
+- If the operator **accepts**, hand off to `sdd-migrate` (which migrates up through
+  the latest version), then re-derive phase from the migrated layout and continue.
+- If the operator **declines** — or the session is non-interactive — proceed on the
+  current marker with downstream behavior **unchanged**; the offer alters no cycle
+  mechanics, so the "behavior UNCHANGED" guarantees below still hold for anyone who
+  does not migrate.
+- If the marker **already equals** the latest, say nothing and continue.
+
+This generalizes beyond v3→v4: the driver offers migration **whenever the detected
+marker is behind the latest supported version**. (REQ-WS-030.)
+
 **Workstream & version gate (v4).** The driver accepts an optional `workstream`
 argument that defaults to `default`, threaded through to every dispatched stage
 skill. `docs/.sdd-version` is the **sole** layout gate:

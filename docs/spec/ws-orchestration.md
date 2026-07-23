@@ -91,6 +91,30 @@ keeps the common "already covered" case near-zero-cost, not a hard gate.
 judgment recorded at the research early-exit; ongoing staleness of the shared inputs a
 workstream traces is handled separately and live (`ws-staleness.md`).
 
+### Migration Offer When the Project Is Behind the Latest Version (REQ-WS-030)
+
+On entry, before deriving loop position, the driver compares `docs/.sdd-version` to the
+latest version the installed skills support (currently `4` — the highest `sdd-migrate`
+can reach) and, whenever the marker is **behind** that latest, offers migration.
+
+Contract:
+- **Trigger**: `docs/.sdd-version` is missing/pre-versioning, `2`, or `3` — i.e. any
+  value behind the latest supported version. The check is `detected < latest`, so it
+  generalizes to future versions (not hard-coded to v3→v4).
+- **Form**: an **informational, non-forcing** offer to run `sdd-migrate` first. It is the
+  single place a behind-version project is nudged toward the upgrade.
+- **Accept** → hand off to `sdd-migrate` (migrates up through the latest), then re-derive
+  phase from the migrated layout and continue.
+- **Decline / non-interactive** → proceed on the current marker with downstream behavior
+  **unchanged**. The offer alters no cycle mechanics, so the marker-`3` "behavior
+  UNCHANGED" guarantees elsewhere still hold for anyone who does not migrate.
+- **Already latest** → no offer; continue silently.
+
+**Relationship to v3-solo-safety**: this is a deliberate, minimal departure from the
+strict "marker-`3` entry emits no v4 output" reading — a single decline-able notice makes
+the upgrade discoverable without forcing it. Declining preserves the unchanged v3 cycle
+exactly.
+
 ## Verification
 
 ### Automated

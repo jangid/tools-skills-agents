@@ -148,3 +148,4 @@ last_updated: 2026-07-23
 | REQ-WS-027 | ws-staleness.md | | skills/sdd-verify/SKILL.md (new ws-scoped branch), skills/sdd-specs/SKILL.md (defer plan staleness, no global plan compare, marker-4 gate) | pass |
 | REQ-WS-028 | ws-staleness.md | | skills/sdd-requirements/SKILL.md (research→requirements staleness stays shared/workstream-independent; RS-<WS>-NNN pattern only, marker-4 gate) | pass |
 | REQ-WS-029 | ws-orchestration.md | | skills/sdd-orchestrate/SKILL.md (§ Workstream Picker: enumerate docs/ws/<id>/, list id/description/detected-phase, select-or-create, default degenerates to one; per-workstream done-vs-new-cycle via marker-4 gate on § New cycle vs. resume) | pass |
+| REQ-WS-030 | ws-orchestration.md | | skills/sdd-orchestrate/SKILL.md (§ Phase Detection → Upgrade offer: on entry compare docs/.sdd-version to latest supported; if behind, non-forcing offer to run sdd-migrate; accept→migrate, decline→unchanged, already-latest→silent) | pass |
