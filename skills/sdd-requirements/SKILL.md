@@ -285,8 +285,8 @@ After every write to a category file, perform these maintenance steps:
    the **shared** category file (added merge-safe per the "Merge-safe shared writes" note
    in this Step 5, below), but the new **row** — recording that this workstream delivers the REQ — is written into the
    active workstream's OWN file `docs/ws/<ws>/traceability.md` (frontmatter
-   `workstream: <ws>` / `last_updated:`; 6-column matrix with the appended `Workstream`
-   column), never another ws's file and never the shared aggregate in place. Then
+   `workstream: <ws>` / `last_updated:`; 6-column matrix with the `Workstream`
+   column as the 3rd column), never another ws's file and never the shared aggregate in place. Then
    **regenerate** the shared `docs/requirements/traceability.md` wholesale (shipped legacy
    rows under blank/`default` + concat of every `docs/ws/<id>/traceability.md`,
    stable-sorted by requirement id; never appended/hand-merged). See

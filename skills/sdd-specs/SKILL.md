@@ -165,7 +165,7 @@ Under marker `3` or earlier, write the **Spec** column into the single shared
 `docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
 traceability rows are per-workstream-owned (REQ-WS-008): fill the **Spec** column in the
 active workstream's OWN file `docs/ws/<ws>/traceability.md` (6-column matrix with the
-appended `Workstream` column) — never another ws's file and never the shared aggregate
+`Workstream` column as the 3rd column) — never another ws's file and never the shared aggregate
 in place — then **regenerate** the shared `docs/requirements/traceability.md` wholesale
 (shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
 requirement id; never appended/hand-merged). See `docs/spec/ws-traceability.md`.
