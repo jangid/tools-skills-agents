@@ -1,87 +1,134 @@
 ---
-date: 2026-06-06
+date: 2026-07-23
 status: pass
 plan_ref: docs/plan.md
-scope: >
-  Holistic end-to-end verification of the COMPLETE sdd-orchestrate driver —
-  all 33 requirements (REQ-ORCH-001..033) across the driver core (RS-005),
-  implement-stage fan-out (RS-006), the dogfooding driver fixes (029/030), and
-  non-research entry (031..033). Consolidates the per-cycle reports listed below.
-prior_reports:
-  - docs/verification-rs006-fanout.md (fan-out detail + driver-fixes + non-research-entry addenda, 2026-06-06)
-  - docs/verification-rs005.md (RS-005 driver core holistic report, 2026-06-04)
-  - docs/verification-rs004.md (full v3 + sdd-review, 2026-05-25)
+scope: Multi-Workstream SDD (v4) — REQ-WS-001..029, specs ws-layout/ws-ids/ws-traceability/ws-staleness/ws-integration/ws-migration/ws-orchestration, the ten sdd-* skills + fan-out.md, overview.md, CLAUDE.md
 ---
 
-# Verification Report — sdd-orchestrate (holistic, complete feature)
+# Verification Report
 
 ## Summary
 
-Holistic verification of the entire `sdd-orchestrate` driver, now feature-complete
-on `main`. **Status: pass — ready to ship.** All 33 requirements
-(REQ-ORCH-001..033) are traced end-to-end and verified; all 7 structural quality
-gates pass; all 39 spec acceptance criteria cite defined, verified requirements;
-zero critical and zero minor issues. The driver was **dogfooded through itself**
-to build its own deferred features, and the two load-bearing mechanisms (subagent
-skill-invocation, paths-only review isolation) carry independent live-dispatch
-evidence (RS-005), as does fan-out's nesting/worktree/merge feasibility (RS-006)
-and dispatch concurrency (the 2026-06-05 spike, medium confidence).
+**PASS.** The Multi-Workstream SDD (v4) feature is verified holistically: all nine
+plan chunks (0–8) are CLOSED with every task complete, all 29 REQ-WS acceptance
+criteria are met (high-value merge/isolation/migration/integration behaviors backed
+by throwaway git-fixture evidence, the rest by contract inspection), the ten
+`sdd-*` skills + `fan-out.md` + `overview.md` + `CLAUDE.md` present one consistent v4
+contract, and the `main..HEAD` diff contains only the intended feature. The
+**critical v3-solo-safety gate PASSES**: this repo remains at `.sdd-version = 3`, has
+no `docs/ws/`, and every skill gates the entire v4 behavior behind a "marker not `4`
+⇒ behavior UNCHANGED" branch — so nothing about the live marker-3 solo cycle changes.
+No critical or minor issues found. Recommend ship-as-is.
 
-This is a Markdown-skill deliverable, so quality gates are **structural** (no
-language compilers apply). Detailed per-criterion walkthroughs live in the
-per-cycle reports under `prior_reports`; this report consolidates coverage.
+## Quality Gates
 
-## Quality Gates (structural)
+This is a docs/skills meta-feature (no compiled code — the "code" is the skills'
+described algorithms), so the gates are markdown well-formedness, frontmatter
+validity, and behavioral fixtures rather than compilers/unit tests.
 
 | Gate | Status | Notes |
 |------|--------|-------|
-| Frontmatter valid | pass | SKILL.md, spec, requirements all parse; USAGE.md is an operator guide (no frontmatter required) |
-| Skill name kebab-case + matches dir | pass | `name: sdd-orchestrate` == `skills/sdd-orchestrate/` |
-| SKILL.md size | pass | 399 lines (< ~1000 guideline); bulk in `references/` |
-| Internal references resolve | pass | `references/dispatch-templates.md` + `references/fan-out.md` exist and are linked from SKILL.md |
-| Code fences balanced | pass | SKILL.md, USAGE.md, dispatch-templates.md, fan-out.md all even |
-| Spec ACs cite defined requirements | pass | 39 acceptance criteria cite 33 distinct REQ-ORCH IDs, all defined in the requirements |
-| No other `sdd-*` skill modified (REQ-ORCH-001) | pass* | Across all orchestrate cycles (since RS-005), the only non-orchestrate skill change is `skills/sdd-specs/SKILL.md` — the deliberate, operator-requested ~1000-line convention edit (a project convention, not the driver reimplementing skill logic). The driver dispatches the nine skills; it modifies none. |
+| Frontmatter (7 new specs) | pass | each `docs/spec/ws-*.md` opens with `---` |
+| Frontmatter (10 skills) | pass | all `skills/sdd-*/SKILL.md` retain valid `---` name/description block |
+| Markdown well-formed | pass | plan/specs/requirements/overview/CLAUDE parse; tables one-row-per-line |
+| Plan completeness | pass | chunks 0–8 all `Status: CLOSED`; only `[ ]` occurrences are literal prose ("preserving `[x]`/`[ ]`"), no open tasks |
+| Behavioral fixtures | pass | 4 throwaway git fixtures (merge-safety, owned-files, migration, regression base) all behaved as specified; see below |
+| Repo cleanliness | pass | live tree clean; no fixtures leaked (`$TMPDIR` swept, 0 remaining) |
 
-## Acceptance Criteria — coverage by feature area
+## Acceptance Criteria
 
-All 39 spec acceptance criteria pass (per-criterion evidence in the prior
-reports). Grouped:
+### ws-layout.md (REQ-WS-001..006, 019, 020)
 
-| Feature area | Requirements | Criteria | Status | Detail report |
-|--------------|--------------|----------|--------|---------------|
-| Driver core (phases, dispatch contracts, gates, isolation, resume, packaging, docs) | REQ-ORCH-001..014, 019, 020, 021 | core set | pass | verification-rs005.md |
-| Implement-stage fan-out (Design B) | REQ-ORCH-015, 016, 022..028 | 14 (+1 supporting) | pass | verification-rs006-fanout.md |
-| Driver fixes (new-cycle/resume, orchestrator-only work) | REQ-ORCH-029, 030 | 2 | pass | verification-rs006-fanout.md §Addendum |
-| Non-research mid-pipeline entry | REQ-ORCH-005, 031, 032, 033 | 4 | pass | verification-rs006-fanout.md §Addendum |
-| Edge cases (replan-as-gate, reject-no-findings) | REQ-ORCH-017, 018 | 2 | pass | verification-rs005.md |
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| v4 per-ws execution layout; shared corpus stays top-level (001) | pass | Shared-vs-owned table in ws-layout.md; every skill step-0 roots execution artifacts at `docs/ws/<ws>/`, corpus at `docs/{research,requirements,spec}/` |
+| Branch-per-issue isolation (002) | pass | ws-integration.md + fan-out.md §0: workstream = its own branch, isolation via git + `docs/ws/<id>/` |
+| Phase detection is fn(repo, workstream) (003) | pass | All 10 skills carry a marker-`4` step-0 branch taking a `workstream` arg defaulting to `default` |
+| Requirements/specs single shared corpus; no per-ws fork (004) | pass | ws-layout.md forbids `docs/ws/<id>/requirements|spec/`; skills ADD new IDs/files only |
+| Workstream references a shared subset via traceability (005) | pass | ws-layout.md + ws-traceability.md: reference model, no ownership marker on requirement text |
+| Workstream owns only its execution artifacts (006) | pass | Owned set = kickoff/plan/plan-history/verification/per-ws traceability; plan archive & verify are per-ws |
+| Approval is a per-ws bare status flag (019) | pass | Owned plan/verification carry own `status`; shared requirements/specs one product-wide status; no approver/quorum |
+| Solo = implicit ceremony-free `default` ws (020) | pass | `workstream` defaults to `default` throughout; omitting it needs no naming |
 
-## Traceability Verification
+### ws-ids.md (REQ-WS-009..015)
 
-| Check | Result |
-|-------|--------|
-| Every REQ-ORCH has a Spec | pass — 33/33 → orchestration.md |
-| Every REQ-ORCH has an Implementation | pass — 33/33 (SKILL.md, plus references/USAGE.md/README.org where applicable) |
-| Test column | empty by design (33/33) — a prose skill has no unit-test surface; the acceptance-criteria walkthroughs are the verification, per the REQ-REV precedent |
-| Verified column | pass — 33/33 |
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| IDs carry ws segment, NNN parsed after WS (009) | pass | `RS-<WS>-NNN`, `Q-IMPL-<WS>-NNN`, `REQ-<DOMAIN>-<WS>-NNN` consistent across sdd-research/implement/requirements/migrate + ws-ids.md + overview.md |
+| New reqs append under claimed prefix; new specs new files; no shared-body rewrite (010) | pass | sdd-requirements/specs prose; ws-ids.md write model |
+| Per-ws (per domain+ws) counters replace global scan (011) | pass | ws-ids.md generator table; four generators scope max-scan per workstream |
+| Exactly 4 generators + sdd-review string change; parsers untouched (012) | pass | sdd-review accepts `<WS>` as opaque/prefix-glob (lines 100-103, 145-146); Chunk-N and Q-*/row parsers unchanged |
+| Shared-table writes sorted-insertion/owned, no EOF append (013) | pass | **Fixture A**: distinct-prefix sorted insertion 3-way merges CLEAN; adjacent EOF append CONFLICTS |
+| Clean index merge conditional on distinct prefixes; same-domain = human PR conflict (014) | pass | **Fixture A/A2** demonstrates the distinct-vs-adjacent divide; tooling does not auto-union |
+| index.md ID-sorted one-row-per-line insertion (015) | pass | Fixture A rows inserted at sorted position, one per line |
+
+### ws-traceability.md (REQ-WS-007, 008)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Traceability is recorded join; staleness computes live (no file read) (007) | pass | ws-traceability.md + ws-staleness.md: live plan-walk `task → spec requires: → requirement`, no traceability read; sets coincide |
+| Per-ws-owned rows, merge-safe; aggregate regenerated not hand-merged (008) | pass | **Fixture B**: two ws own separate `docs/ws/<id>/traceability.md` files → merge CLEAN; aggregation contract is wholesale regenerate + stable sort by req id; `Workstream` = 3rd column of 6-col matrix, consistent in sdd-implement/sdd-verify |
+
+### ws-staleness.md (REQ-WS-026..028)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Milestone→workstream scope by swapping plan path + key; chain unchanged (026) | pass | sdd-implement/sdd-plan/sdd-replan marker-`4` branch: `docs/plan.md`→`docs/ws/<ws>/plan.md`, milestone key→ws key, chain identical, no traceability read/column |
+| sdd-verify gains ws-scoped branch on traced inputs only (027) | pass | sdd-verify.md L52 marker-`4` branch compares ws plan/verification only vs traced shared inputs |
+| sdd-specs stops treating flat plan as monolith (defers to sdd-plan) (027) | pass | ws-staleness.md adopts deferral; sdd-specs checks only requirements→spec staleness |
+| research→requirements staleness stays shared/ws-independent (028) | pass | sdd-requirements.md L58: same under marker 3 and 4, no ws key; only research ID pattern may change |
+
+### ws-integration.md (REQ-WS-016..018)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Branch-per-ws → PR to main; concurrent open PRs (016) | pass | ws-integration.md; fan-out.md §0 |
+| Fan-out worktrees branch from ws branch, merge back; no exclusive main (017) | pass | fan-out.md §0/§3a-c: base = ws branch HEAD, merge back into ws branch |
+| main-ownership "conflict = boundary error" inference removed (017) | pass | fan-out.md §3c: inference explicitly REMOVED |
+| sdd-verify regression base = ws branch point, not main (018) | pass | **Fixture D**: `merge-base(ISSUE-42,main)` == branch point; diff vs merge-base shows only ISSUE-42's delta while diff vs main HEAD falsely folds in unrelated ISSUE-57 |
+| Verification independent of other ws merged to main meanwhile (018) | pass | Fixture D: merging unrelated ISSUE-57 to main does not affect ISSUE-42's branch-point diff |
+
+### ws-migration.md (REQ-WS-021..023)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| sdd-migrate gains v3→v4 step; flat exec artifacts → docs/ws/default/, corpus in place, marker→4 (021) | pass | sdd-migrate.md v3→v4 arm; version-routing extension |
+| Copy-verify-flip-cleanup, marker written last, idempotent, interrupt-safe (022) | pass | **Fixture C**: copy byte-identical (`[x]`/`[ ]` + pass verdict verbatim); interrupt-before-flip leaves working v3 (marker 3, flat intact); after flip+cleanup marker 4, flat gone, ws/default present; cleanup re-run idempotent |
+| .sdd-version is sole layout gate; v3 never reads ws/, v4 never reads flat (023) | pass | ws-migration.md gate table; "sole gate" phrasing in all 9 step-0 skills + overview.md |
+
+### ws-orchestration.md (REQ-WS-024, 025, 029)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Workstream picker (id, description from kickoff.md, phase) select-or-create (029) | pass | sdd-orchestrate.md marker-`4` branch enumerates `docs/ws/<id>/`, reads kickoff description + detected phase |
+| done-vs-new-cycle resolved per workstream, not global intent (029) | pass | ws-orchestration.md: DONE read from per-ws `verification.md`; new cycle overwrites that ws's kickoff |
+| Every new ws begins at research; no mid-pipeline entry variant (024) | pass | sdd-orchestrate positions new ws at research |
+| Research early-exits fast when corpus already covers (025) | pass | sdd-research recorded early-exit path distinct from full spike |
 
 ## User-Perspective Validation
 
-| Scenario | Status | Evidence |
-|----------|--------|----------|
-| Subagent can run an sdd-* stage and write artifacts | pass | RS-005 Q1 live dispatch; reinforced by every pipeline dispatch in the RS-006 dogfood run |
-| Paths-only review yields a real verdict with no leakage | pass | RS-005 Q2 live dispatch + audit; reinforced by ~10 review dispatches across the dogfood cycles |
-| The driver runs DISCUSS→DONE end-to-end with gates | pass | RS-006 fan-out cycle was built *by running the driver itself* — every stage dispatched, reviewed, and gated, with real loop-backs |
-| Fan-out mechanics (nesting ruled out, worktree+merge) | pass | RS-006 spike, live git worktree/merge/abort prototypes |
-| Operator can install + invoke the skill | pass | `~/.claude/skills/sdd-orchestrate` symlinked; appears in the skills list; USAGE.md documents install + invocation |
-| Docs match behavior | pass | USAGE.md/README reconciled — no stale "no fan-out" or "research-entry only"; deferred-features list cleared |
+| Scenario | Status | Notes |
+|----------|--------|-------|
+| Two concurrent workstreams (ISSUE-42 impl, ISSUE-57 plan) | pass | Separate `docs/ws/<id>/` execution trees, independent per-ws ID counters, per-ws staleness scope, per-ws-owned traceability files that 3-way-merge clean (Fixture B), branch-point regression base independent of the other's merges (Fixture D). Concurrency is structural, not conventional. |
+| Solo operator, unchanged experience | pass | Live repo at marker 3 behaves byte-for-byte as before (v3 path untouched). Under a future marker 4, the implicit `default` workstream needs no naming; all artifacts land under `docs/ws/default/`. |
+| Concurrent requirement additions merge | pass | Distinct claimed domain prefixes → clean 3-way merge (Fixture A); same-domain surfaces an honest human PR conflict, no silent union (accepted degradation per REQ-WS-014). |
+| Migration adoption path | pass | Copy-verify-flip-cleanup is interrupt-safe at every step (Fixture C): before flip = working v3, after flip = working v4, cleanup idempotent. |
+| Error/edge honesty | pass | Same-domain concurrency and in-place shared-edit conflicts are deliberately left as human PR conflicts rather than mis-auto-merged — the design surfaces them instead of hiding them. |
 
 ## Regressions
 
-- None. The driver modified no other `sdd-*` skill (the lone `sdd-specs` edit is
-  the operator-requested convention change). `main` is clean; every cycle merged
-  via `--no-ff` with archived plans. Earlier projects' verification reports
-  (rs004/rs005) remain valid and are referenced, not overwritten.
+- **None.** `git diff --name-status main..HEAD` (base = `03268f2`, the current `main`
+  HEAD and the branch's merge-base) contains only in-scope changes: the ten
+  `skills/sdd-*` skill bodies + `fan-out.md` (v4 gating), the 7 new `docs/spec/ws-*.md`,
+  `docs/requirements/functional/multi-workstream.md`, `docs/spec/overview.md` (v4),
+  `CLAUDE.md` (v4 section), and bookkeeping (`requirements/index.md`,
+  `requirements/traceability.md`, `research/index.md` + RS-007 research, `plan.md`,
+  `plan-history/` archive, the superpowers design doc, `docs/handoff/kickoff.md`).
+  No out-of-scope or unrelated file touched. No source code exists to regress.
+- **v3-solo-safety (critical gate): no regression.** `.sdd-version` is still `3`,
+  `docs/ws/` is absent, and all ten skills gate the v4 layout behind "marker not `4`
+  ⇒ UNCHANGED". CLAUDE.md explicitly states "Both markers are supported; this repo
+  currently runs at marker `3`." The feature is inert on the live marker-3 cycle.
 
 ## Issues Found
 
@@ -89,15 +136,25 @@ reports). Grouped:
 - None.
 
 ### Minor (can ship, fix later)
-- None. (Optional hygiene, non-blocking: `docs/spec/orchestration.md` is 649 lines
-  — within the new ~1000 soft guideline, but a future cohesion split of the
-  fan-out cluster into its own spec remains available if desired.)
+- None. (Observation, not a defect: `sdd-review` shows the lowest ws/marker-4 mention
+  count of the ten skills — expected, since its only required change per REQ-WS-012 is
+  the convention string accepting the `<WS>` segment; verified present and correct.)
+
+## Assumptions
+
+- Treated this as a prose/algorithm meta-feature: "run the code" is inapplicable, so
+  behavioral verification used throwaway git fixtures to reconfirm the empirical
+  merge/migration/integration claims (which RS-007 originally established) plus
+  contract inspection across skills/specs/overview/CLAUDE for the layout, ID,
+  staleness, approval, and orchestration prose. Default: fixtures for empirical
+  behaviors, inspection for contract-shape behaviors.
+- Verification ran under marker `3` by design and did **not** flip `.sdd-version`; the
+  marker-`4` behaviors were validated via fixtures and prose rather than by mutating
+  the live repo's layout.
 
 ## Recommendation
 - [x] Ship as-is
 - [ ] Fix critical issues then ship (invoke sdd-replan)
 - [ ] Significant rework needed (invoke sdd-replan)
 
-`sdd-orchestrate` is feature-complete and fully verified: driver core + parallel
-fan-out + driver fixes + non-research entry. The active plan may be archived to
-`docs/plan-history/` if desired.
+The active `docs/plan.md` may now be archived to `docs/plan-history/` if desired.

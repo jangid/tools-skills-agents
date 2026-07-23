@@ -19,9 +19,37 @@ You are performing holistic verification of a completed implementation. Your job
 
 Before starting, check project state. **Compare dates** to detect stale artifacts:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/plan.md` → use `sdd-plan`
 2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` and specs against `docs/plan.md` modification date. If upstream artifacts are newer than the plan, the plan is stale → use `sdd-plan` to update before verifying
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) run the whole-plan compare above — flat `docs/plan.md` vs all specs/requirements — **unchanged**. Under marker `4` `sdd-verify` gains a **new** workstream-scoped branch (it had no scoped branch before): compare the active workstream's `docs/ws/<ws>/plan.md` / `docs/ws/<ws>/verification.md` **only** against the shared specs/requirements that workstream traces, using the **same live plan-walk** as `sdd-plan`/`sdd-implement` (walk `<ws>`'s tasks' `traces to` specs → each spec's `requires:` requirement IDs → those specs' and requirement category files' `last_updated`; task → spec `requires:` → requirement IDs → category-file dates). It must **not** report staleness from shared-input changes outside `<ws>`'s traced set. This reads **no traceability file** and adds no traceability schema column — the scope is derived live (REQ-WS-027). See `docs/spec/ws-staleness.md`
 3. If `docs/plan.md` has incomplete tasks → use `sdd-implement`
 4. If all plan tasks are done (or user explicitly requests verification) → you're in the right place
 5. If `docs/verification.md` already exists → you're re-verifying (after fixes or replan)
@@ -97,7 +125,19 @@ Read `docs/requirements/traceability.md` and verify:
 2. **Every implemented requirement has tests** — Test column is non-empty for requirements with Implementation filled
 3. **Flag gaps** — list any requirements missing spec, test, or implementation coverage
 
-After verification, update the **Verified** column in `traceability.md` with pass/fail for each requirement.
+After verification, update the **Verified** column with pass/fail for each requirement.
+
+**Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole gate.
+Under marker `3` or earlier, read and write the single shared
+`docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
+the aggregate `docs/requirements/traceability.md` remains a convenient read-only
+**coverage view** for the checks above, but write the **Verified** column into the
+active workstream's OWN file `docs/ws/<ws>/traceability.md` (per-workstream-owned rows,
+6-column matrix with the `Workstream` column as the 3rd column) — never another ws's file and
+never the shared aggregate in place — then **regenerate** the shared aggregate wholesale
+(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+requirement id; never hand-merged). See `docs/spec/ws-traceability.md` (REQ-WS-007,
+REQ-WS-008).
 
 ### Step 4: User-Perspective Validation
 
@@ -115,10 +155,19 @@ For CLI tools: run them. For servers: start them and make requests. For librarie
 - Run the full test suite (not just new tests)
 - If there's a pre-existing test suite, confirm nothing regressed
 - Check git diff against the base branch — are there unintended changes?
+- **Regression base (version gate — REQ-WS-018)**: `docs/.sdd-version` is the sole gate.
+  - **Marker is not `4` (v3 or earlier): UNCHANGED.** Diff against the base branch (`main` HEAD) exactly as the bullets above, and check `git diff` against it for unintended changes. The v3 path is untouched.
+  - **Marker is `4`:** the regression base is the **workstream branch point** — `regression_base(<ws>) = merge-base(<ws>, main)`, the commit where the workstream branched. Compute the regression diff as **`<ws>` HEAD vs `regression_base(<ws>)`**, **not** `main` HEAD. Diffing against current `main` would fold in unrelated concurrent workstreams' changes that merged to `main` after `<ws>` branched, producing **false regressions**; the branch point isolates this workstream's own delta regardless of what else landed on `main` meanwhile. So a workstream's verification is **independent of other workstreams merged to `main`** in the interim (e.g. merging an unrelated `ISSUE-57` to `main` does not affect `sdd-verify` for `ISSUE-42`). This is the integration model's branch-per-workstream → PR-to-`main` boundary (REQ-WS-016/017): `main` is a shared trunk that moves under the workstream, so the branch point — not `main` HEAD — is the stable regression anchor. Full contract: `docs/spec/ws-integration.md` §Verification Regression Base Is the Workstream Branch Point.
 
 ### Step 6: Write Verification Report
 
-Save to `docs/verification.md`:
+**Workstream scoping (marker `4`)**: under `docs/.sdd-version` == `4`, write the
+report to the active workstream's `docs/ws/<ws>/verification.md` (default
+`default`) — **never** the flat `docs/verification.md` and never another
+workstream's file. Under marker `3` (or earlier) save to `docs/verification.md`
+exactly as below, unchanged.
+
+Save to `docs/verification.md` (or `docs/ws/<ws>/verification.md` under marker `4`):
 
 ```markdown
 ---
@@ -185,7 +234,9 @@ Based on the report:
 
 - **All pass, no issues** → tell the user "verification complete, ready to ship". Note that the active plan can now be archived to `docs/plan-history/` if desired
 - **Minor issues only** → ask user: "fix now or ship and track as follow-up?"
-- **Critical issues** → recommend `sdd-replan` with the failure context
+- **Critical issues** → recommend `sdd-replan` with the failure context. Under
+  marker `4`, route **only** the active workstream `<ws>` into replan — never
+  another workstream's plan/verification
 
 ## Rules
 

@@ -15,6 +15,34 @@ You are conducting a time-boxed research spike to reduce uncertainty. Your outpu
 
 Research is always a valid entry point — new exploration doesn't require a clean slate. Before starting, check what exists so you can inform the user:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and note any
+  **execution artifacts** (`plan.md`, `verification.md`, `kickoff.md`,
+  `plan-history/`) under `base` — never at flat `docs/`. The **shared corpus**
+  stays at its top-level paths and is used as-is: `docs/research/`,
+  `docs/requirements/` (index, category files, aggregated `traceability.md`),
+  `docs/spec/`. Research findings are shared-corpus artifacts written under
+  `docs/research/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 1. **Version check**: Read `docs/.sdd-version`. If missing, assume v1 — suggest running `sdd-migrate` to upgrade to v2 artifact structure before proceeding. If present and contains `2`, use v2 paths below.
 2. If `docs/verification.md` exists with failures → mention it; user may want `sdd-replan` instead, but research is valid if they're exploring a new direction
 3. If downstream artifacts exist (`docs/requirements/index.md`, `docs/spec/`, `docs/plan.md`) → note them. These may become stale after new research — that's expected. Downstream phases will detect staleness and update them
@@ -53,7 +81,59 @@ Before starting exploration, assign an ID for this spike:
 
 The new spike directory will be: `docs/research/RS-NNN-{topic}/`
 
-**Edge case**: If a directory exists but its `findings.md` is missing or has `status: Abandoned`, the number is still consumed — IDs are never reused.
+**Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole
+gate. When the marker is **not** `4` (v3 or earlier), allocate exactly as in
+steps 1–4 above — bare `RS-NNN`, global scan, behavior UNCHANGED. When the marker
+is `4`, resolve `ws` (the workstream argument, default `default`) and allocate a
+workstream-prefixed id `RS-<WS>-NNN` with a **per-workstream counter**:
+
+1. Scan `docs/research/` for directories matching `RS-<ws>-NNN-*` (this workstream's
+   ids only — a different `<ws>` is a different, independent sequence)
+2. Extract the highest `NNN`, parsing the number **after** the `<ws>` token
+3. Increment by 1 and zero-pad to 3 digits (e.g., `RS-ISSUE42-002` if
+   `RS-ISSUE42-001` exists); if no `RS-<ws>-*` directories exist, start at
+   `RS-<ws>-001`
+4. The directory is `docs/research/RS-<WS>-NNN-{topic}/`; the frontmatter `id:` is
+   `RS-<WS>-NNN`
+
+Scoping the scan per workstream is what makes two workstreams concurrently allocate
+`RS-ISSUE42-001` and `RS-ISSUE57-001` with no coordination and no collision
+(REQ-WS-009, REQ-WS-011). Legacy bare `RS-NNN` ids from a v3 corpus are treated as
+the `default` workstream and are NOT remapped. See `docs/spec/ws-ids.md`.
+
+**Do NOT touch (RS-007 Q4 — provably unaffected):** cross-references that match
+`RS-*` by prefix-glob or as opaque strings (index rows, `research_refs:`, inline
+`(see RS-...)`) tolerate the inserted `<WS>` segment unchanged — do not "fix" them.
+
+**Edge case**: If a directory exists but its `findings.md` is missing or has `status: Abandoned`, the number is still consumed — IDs are never reused (per workstream under marker `4`).
+
+### Research Early-Exit When the Shared Corpus Already Covers the Work (marker `4`)
+
+`docs/.sdd-version` is the sole gate. Under marker `3` or earlier this subsection does
+**not** apply — run the full spike (Steps 3–7) as always. Under marker `4`, because
+every new workstream begins at research for uniformity (REQ-WS-024,
+`sdd-orchestrate` §Workstream Picker), the research stage **should** early-exit fast
+(REQ-WS-025) when the shared corpus already covers this workstream's needs, so uniform
+research-entry imposes minimal overhead:
+
+1. **Judge coverage.** On entry at research for a workstream `ws`, check whether the
+   existing **shared** corpus — `docs/requirements/`, `docs/spec/`, prior
+   `docs/research/RS-*/findings.md` — already answers what this workstream needs. This
+   is a recorded judgment, not a staleness check (ongoing staleness of traced shared
+   inputs is handled separately and live — see `docs/spec/ws-staleness.md`).
+2. **If already covered → record a fast, explicit early-exit** instead of a full
+   spike. Assign the RS id per Step 2, then write
+   `docs/research/RS-<WS>-NNN-{topic}/findings.md` with frontmatter
+   `status: Complete` **and** `early_exit: true`, and a single finding
+   **"Covered by shared corpus — no new spike"** naming the shared REQ/SPEC/RS ids
+   that cover the work. **Skip Steps 3–4** (no Explore, no Prototype, no budget burn).
+   Update the research index (Step 6) with the early-exit summary, then advance the
+   loop (Step 7 → proceed to requirements/next stage). The early-exit is **recorded**
+   so the workstream's research state is auditable, and it is **distinct** from a full
+   spike (`early_exit: true` marks it).
+3. **If NOT covered → run the full spike** (Steps 3–7). The early-exit is a `should`,
+   not a `must`: a workstream is always free to run a real spike; the early-exit is
+   only the optimization that keeps the common "already covered" case near-zero-cost.
 
 ### Step 3: Explore
 

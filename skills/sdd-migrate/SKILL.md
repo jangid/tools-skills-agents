@@ -1,11 +1,12 @@
 ---
 name: sdd-migrate
 description: >
-  Migrates SDD artifact structures between versions (v1→v2→v3). Handles
+  Migrates SDD artifact structures between versions (v1→v2→v3→v4). Handles
   research directory restructuring, requirements splitting with ID remapping,
-  plan archival, plan vocabulary rename, and v3 convention adoption. Use when
+  plan archival, plan vocabulary rename, v3 convention adoption, and the v3→v4
+  copy-verify-flip-cleanup to the per-workstream `docs/ws/<id>/` layout. Use when
   other SDD skills detect old-format artifacts or when upgrading a project to
-  the latest SDD conventions. Skip if docs/.sdd-version already shows `3`.
+  the latest SDD conventions. Skip if docs/.sdd-version already shows `4`.
 ---
 
 # SDD: Migrate
@@ -16,21 +17,46 @@ You are migrating a project's SDD artifacts from one structure version to anothe
 
 Before anything else, determine the current artifact version:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. `docs/.sdd-version` is the **sole** layout
+gate for every skill's step-0:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Run exactly the
+  version-routing table below; execution artifacts are the flat `docs/plan.md` /
+  `docs/verification.md` / `docs/plan-history/` (and flat `docs/handoff/`). Never
+  read or write `docs/ws/`.
+- **Marker is `4` (workstream-aware layout).** Per-workstream execution artifacts
+  are authoritative: resolve `ws` = the workstream argument (default `default`),
+  set `base = docs/ws/<ws>/`, and treat `plan.md`, `verification.md`, `kickoff.md`,
+  and `plan-history/` as living under `base` — never at flat `docs/`. The shared
+  corpus (`docs/research/`, `docs/requirements/` incl. aggregated
+  `traceability.md`, `docs/spec/`) stays at its top-level paths. A workstream never
+  gets a `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` dir. A v3-marked repo
+  never reads `docs/ws/`; a v4-marked repo never reads flat execution paths.
+
+The concrete v3→v4 migration routing (the `3`→`4` arm, copy-verify-flip-cleanup,
+and the `4` = "already at v4" exit) is specified in `docs/spec/ws-migration.md` and
+wired into the version-routing table via § v3 to v4 Migration below — this step-0
+gate only establishes the workstream argument and the marker-`4` layout semantics.
+Full layout contract: `docs/spec/ws-layout.md`.
+
 1. If no `docs/` directory exists at all, inform the user there is nothing to migrate and exit.
 2. Read `docs/.sdd-version`:
 
 | Disk state | Version | Action |
 |------------|---------|--------|
-| File missing | v1 | Run v1→v2 then v2→v3 in one invocation |
-| Contains `2` | v2 | Offer v2→v3 migration |
-| Contains `3` | v3 | Already current — inform user and exit |
+| File missing | v1 | Run v1→v2 → v2→v3 → v3→v4 in one invocation (marker written `4` last) |
+| Contains `2` | v2 | Run v2→v3 → v3→v4 (marker written `4` last) |
+| Contains `3` | v3 | Offer v3→v4 migration (see § v3 to v4 Migration below) |
+| Contains `4` | v4 | Already current — inform user and exit |
 | Other value | Unknown | Warn and exit without changes |
 
 **Routing logic:**
 
-1. If v3 → "Already at v3, nothing to migrate." Exit.
-2. If v2 → run v2→v3 migration (see § v2 to v3 Migration below).
-3. If v1 → run v1→v2 first (Steps 1-3 + Finalization below), then continue directly to v2→v3 without writing the intermediate version marker. The composition is sequential within a single invocation (see § v1 to v3 Composition).
+1. If v4 → "Already at v4, nothing to migrate." Exit (clean no-op — see § v3 to v4 Migration → Version-Routing Extension).
+2. If v3 → run v3→v4 migration (see § v3 to v4 Migration below).
+3. If v2 → run v2→v3 migration (see § v2 to v3 Migration below), then continue into v3→v4. The chain terminates by writing `4` last.
+4. If v1 → run v1→v2 first (Steps 1-3 + Finalization below), then continue directly to v2→v3 without writing the intermediate version marker, then continue into v3→v4. The composition is sequential within a single invocation (see § v1 to v4 Composition). The marker is written `4` last, once, at the v3→v4 finalization.
 
 Tell the user which version you detected and what will happen. Get confirmation before proceeding.
 
@@ -74,6 +100,19 @@ Each step checks its own preconditions. If research is already migrated but requ
 ### Idempotency
 
 If `RS-NNN-*` directories already exist alongside flat files, only migrate the flat files. Start numbering after the highest existing RS number. Existing directories are not touched.
+
+**Workstream-prefixed ID allocation (marker `4` only).** `docs/.sdd-version` is the
+sole gate. The v1→v2→v3 legacy migrations in this skill (research restructuring
+above and requirements remapping below) run while the marker is still below `4` and
+therefore mint and remap **bare** ids (`RS-NNN`, `REQ-{DOMAIN}-{NNN}`) exactly as
+described — behavior UNCHANGED. The general RS/REQ allocation/remap template carries
+a `<WS>` slot for **NEW allocations under marker `4` only**: a fresh id minted under
+marker `4` takes the workstream-prefixed form `RS-<WS>-NNN` /
+`REQ-{DOMAIN}-<WS>-NNN` with `NNN` parsed after the `<WS>` token and scanned per
+workstream (per `domain+workstream` for requirements), matching the four generators
+(`docs/spec/ws-ids.md`). The v3→v4 migration itself (§ v3 to v4 Migration below) does
+**NOT** remap the legacy corpus — pre-existing bare ids remain bare and are treated
+as the `default` workstream (see `ws-migration.md`, `ws-traceability.md`).
 
 ## Step 2: Requirements Migration
 
@@ -181,7 +220,7 @@ If `RS-NNN-*` directories already exist alongside flat files, only migrate the f
 After all three steps complete (or are skipped because already done):
 
 1. **If running standalone (v1→v2 only):** Write `docs/.sdd-version` containing `2`.
-2. **If running as part of v1→v3 composition:** Do NOT write the version marker here — continue directly to § v2 to v3 Migration. The marker is written by v2→v3 Finalization as `3`.
+2. **If running as part of a v1→v4 composition:** Do NOT write the version marker here — continue directly to § v2 to v3 Migration. The `3` checkpoint is written by v2→v3 Finalization; the terminal `4` is written by v3→v4 Finalization.
 3. Present a v1→v2 migration summary:
    ```
    v1 -> v2 migration complete.
@@ -229,6 +268,12 @@ v2 projects that have not run v2→v3 migration continue to work:
 
 1. Read `docs/plan.md`.
 2. Scan for lines matching the regex `### M\d+:` (M followed by one or more digits, then a colon). This matches `### M1:`, `### M12:`, etc. It does NOT match `### Migration`, `### Models`, or other section headers starting with M.
+
+   **Do NOT touch (RS-007 Q4 — provably unaffected):** this `### M\d+:` milestone
+   regex matches milestone **header** ordinals, a separate namespace from RS / REQ /
+   Q-IMPL artifact ids. The workstream `<WS>` segment added in v4 never appears in a
+   milestone header, so this regex is unaffected and must stay exactly as written —
+   do not extend it for ws-prefixed ids.
 3. Present proposed renames to the operator, preserving original numbering:
    ```
    ### M1: Foundation    →  ### Chunk 1: Foundation
@@ -269,15 +314,143 @@ The report is informational — no operator action required. These mechanisms ac
    - Multi-milestone split: applied / declined / not applicable
    - New capabilities: listed in the capability report above
 
-**Version marker is written last.** If any prior step fails or is interrupted, `.sdd-version` still contains `2`. Re-running `sdd-migrate` detects v2 and resumes the v2→v3 migration.
+**Version marker is written last.** If any prior step fails or is interrupted, `.sdd-version` still contains `2`. Re-running `sdd-migrate` detects v2 and resumes the v2→v3 migration. In a v1→v4 / v2→v4 composition this `3` write is the checkpoint that satisfies v3→v4's marker-`3` precondition; the terminal `4` is written by v3→v4 Finalization (see § v3 to v4 Migration).
 
-## v1 to v3 Composition
+## v3 to v4 Migration
 
-For v1 projects (`.sdd-version` missing), `sdd-migrate` runs v1→v2 (Steps 1-3 above) then v2→v3 (Steps 1-4 above) in a single invocation.
+v4 relocates the flat execution artifacts under `docs/ws/default/` while leaving the
+requirements/spec/research/traceability corpus shared at top level. A v3 repo adopts
+v4 through this one-time step. Full contract: `docs/spec/ws-migration.md` (covers
+REQ-WS-021, REQ-WS-022, REQ-WS-023); layout contract `docs/spec/ws-layout.md`.
 
-- **Intermediate state**: v1→v2 completes but does NOT write `.sdd-version` in the composition path — only the v2→v3 Finalization writes `3`.
-- **Resumability**: If interrupted at any point, `.sdd-version` is still missing. Re-running `sdd-migrate` detects v1, re-runs v1→v2 (idempotent — each step checks preconditions and skips if already done), then continues to v2→v3.
-- **v1→v2 logic unchanged**: The Step 1-3 sections above are not modified. v2→v3 is a new section. Composition is routing logic only.
+### `.sdd-version` Is the Sole Layout Gate (REQ-WS-023)
+
+`docs/.sdd-version` is the single switch selecting which execution layout every
+skill's step-0 reads:
+
+| Marker | Authoritative execution layout |
+|--------|-------------------------------|
+| `3` | flat: `docs/plan.md`, `docs/verification.md`, `docs/plan-history/`, flat `docs/handoff/kickoff.md` |
+| `4` | per-workstream: `docs/ws/<id>/{kickoff,plan,verification}.md`, `docs/ws/<id>/plan-history/` (default ws `default`); `requirements/`, `spec/`, `research/`, aggregated `traceability.md` stay shared at top level |
+
+- A v3 skill (marker `3`) must **never** read `docs/ws/`.
+- A v4 skill (marker `4`) must **never** read flat execution paths (`docs/plan.md`,
+  `docs/verification.md`, `docs/plan-history/`, `docs/handoff/`).
+- A v4-aware skill invoked while the marker still reads `3` sees "not yet migrated"
+  and suggests `sdd-migrate`. This cross-checks the Chunk 0 step-0 branches — every
+  `sdd-*` skill gates on this same marker, so the on-disk layout and the marker are
+  only ever read together and no skill misdetects phase during or after migration.
+
+### Version-Routing Extension
+
+The version routing (§ Version Detection) gains a `3`→`4` arm and a `4` no-op:
+
+```
+elif version == 3:
+    migrate_v3_to_v4()      # this section
+elif version == 4:
+    inform("already at v4, nothing to do")   # clean exit, no changes
+```
+
+For missing/`2` markers, the existing v1→v2→v3 chain runs first (terminating by
+writing the `3` checkpoint), then v3→v4 composes on the end. The marker is written
+`4` **last, once** — at v3→v4 Finalization.
+
+### Decision: kickoff.md Absorbed Per-Workstream; No Flat `docs/handoff/` in v4 (REQ-WS-021)
+
+`kickoff.md` lives at `docs/ws/<id>/kickoff.md` (per-workstream). The flat
+`docs/handoff/` directory is **NOT retained** in v4: the migration moves a flat
+`docs/handoff/kickoff.md` (if present) to `docs/ws/default/kickoff.md`. Retaining a
+flat `docs/handoff/` would reintroduce a repo-global singleton — exactly the
+collision the v4 layout removes — and split kickoff state across two locations. Under
+marker `4` **no skill reads `docs/handoff/`**; `sdd-orchestrate`'s picker and every
+step-0 read `docs/ws/<id>/kickoff.md` (see `docs/spec/ws-orchestration.md`).
+
+### `migrate_v3_to_v4()` — Copy-Verify-Flip-Cleanup (REQ-WS-021, REQ-WS-022)
+
+The migration **copies** execution artifacts into `docs/ws/default/`, **verifies**
+them byte-identical, writes the marker **last**, then deletes the flat originals as
+idempotent cleanup. Copy-then-delete (not move) is the one deviation from prior
+move-based migrations: while the marker still reads `3`, v3 skills must still find
+the flat files, so the flat layout must stay valid across the entire `3` window.
+Duplicates under `docs/ws/default/` are invisible to v3 skills; moving would break
+the flat layout the instant it ran — before the marker flips — violating the
+"version marker written last" invariant that makes interrupted migrations safe.
+
+**Safe step order:**
+
+1. **Precondition**: `docs/.sdd-version` == `3` (in a v1/v2 composition, control
+   reaches here immediately after the chain wrote the `3` checkpoint). Create
+   `docs/ws/default/` and `docs/ws/default/plan-history/`.
+2. **Copy** (not move), preserving content verbatim — task `[x]`/`[ ]` status and
+   pass/fail verdicts byte-for-byte:
+   - `docs/plan.md` → `docs/ws/default/plan.md`
+   - `docs/verification.md` (if present) → `docs/ws/default/verification.md`
+   - `docs/plan-history/*` → `docs/ws/default/plan-history/`
+   - `docs/handoff/kickoff.md` (if present) → `docs/ws/default/kickoff.md`
+3. **Verify** each copy is **byte-identical** to its source (e.g. `cmp` / `diff` /
+   hash comparison). If any copy fails verification, **STOP and report** — do NOT
+   write the marker and do NOT delete anything.
+4. Leave the **shared corpus** in place — `docs/requirements/`, `docs/spec/`,
+   `docs/research/`, and `docs/requirements/traceability.md` are NOT moved. The legacy
+   corpus keeps its bare ids (treated as the `default` workstream); **no id is
+   remapped** (see § Step 1 Idempotency and `ws-migration.md` / `ws-traceability.md`).
+5. **Write `docs/.sdd-version` = `4`** — the single atomic layout flip, written
+   **LAST**, once.
+6. **Cleanup** (idempotent): delete the now-orphaned flat `docs/plan.md`,
+   `docs/verification.md`, `docs/plan-history/`, and flat `docs/handoff/kickoff.md`
+   (and the now-empty `docs/handoff/`).
+
+### Interrupted-Migration Invariant (REQ-WS-022)
+
+- Interrupted **before** the flip (step 5): the marker still reads `3` and the flat
+  files are intact → a **working v3 repo**. Re-running restarts copy-verify (copy is
+  idempotent — it overwrites the `docs/ws/default/` duplicates with identical
+  content, then re-verifies).
+- Interrupted **after** the flip: the marker reads `4` and v4 skills already ignore
+  the flat paths → a **working v4 repo**. Re-running detects marker `4`, and because
+  the only work left after the flip is cleanup, it re-does cleanup idempotently
+  (deleting any flat originals that survived).
+
+At **every** interruption point before the marker flip, the flat layout is still
+authoritative and every skill behaves exactly as v3 — the marker-written-last
+ordering is what guarantees this: the flip happens only after all copies are verified
+byte-identical, and cleanup is the only step after the flip.
+
+### Finalization
+
+1. The atomic flip (step 5 above) — write `4` to `docs/.sdd-version`, after
+   byte-identity verification and before cleanup.
+2. Present a v3→v4 migration summary:
+   - Execution artifacts copied into `docs/ws/default/`: plan, verification (if
+     present), plan-history, kickoff (if a flat `docs/handoff/kickoff.md` existed)
+   - Byte-identity verification: pass
+   - Shared corpus left in place: requirements, spec, research, traceability
+   - Flat originals cleaned up: plan.md, verification.md, plan-history/, handoff/
+
+**Version marker written last.** If any step before the flip fails or is interrupted,
+`.sdd-version` still contains `3` and the flat layout stays authoritative — re-running
+detects v3 and safely restarts copy-verify.
+
+## v1 to v4 Composition
+
+For v1 projects (`.sdd-version` missing), `sdd-migrate` runs v1→v2 (Steps 1-3 above),
+then v2→v3 (Steps 1-4 above), then v3→v4 (§ v3 to v4 Migration) in a single
+invocation. A v2 project runs v2→v3 then v3→v4.
+
+- **Intermediate state**: v1→v2 completes but does NOT write `.sdd-version` in the
+  composition path. v2→v3 Finalization writes the `3` checkpoint (which satisfies
+  v3→v4's marker-`3` precondition); v3→v4 Finalization then writes `4` last. The
+  marker file is thus written `3` then `4` — the `4` value is written **once and
+  last**.
+- **Resumability**: interrupted before v2→v3 completes → `.sdd-version` is still
+  missing/`2`, re-running restarts the chain (each step idempotent). Interrupted
+  during v3→v4 after the `3` checkpoint but before the flip → `.sdd-version` reads
+  `3`, the repo is a working v3 repo, and re-running detects v3 and runs only
+  v3→v4's idempotent copy-verify-flip-cleanup. Interrupted after the flip →
+  `.sdd-version` reads `4`, re-running re-does cleanup idempotently.
+- **v1→v2 / v2→v3 logic unchanged**: the Step 1-3 and v2→v3 sections above are not
+  modified. v3→v4 is a new section. Composition is routing logic only.
 
 ## Rules
 

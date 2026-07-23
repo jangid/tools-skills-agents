@@ -16,9 +16,37 @@ You are writing design specs for a Spec-Driven Development workflow. Your input 
 
 Before starting, check project state:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements` first
 2. **Staleness check**: compare `last_updated` in `docs/requirements/index.md` against `last_updated` in each `docs/spec/*.md` and `docs/plan.md` (if they exist). If requirements are newer than existing specs or plan, those downstream artifacts are **stale** — they were written against older requirements and need updating. Proceed to write/update specs regardless of their current status
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) run the compare above — requirements vs each spec **and** the flat `docs/plan.md` — **unchanged**. Under marker `4` specs are **shared** and plans are **per-workstream** (there are N `docs/ws/<id>/plan.md`, no flat monolith), so `sdd-specs` **stops treating the flat plan as a monolith**: check **only** requirements→spec staleness (the shared corpus — compare `docs/requirements/index.md` against each `docs/spec/*.md`) and **defer plan staleness** to `sdd-plan`'s per-workstream branch. Do **not** compare against a global `docs/plan.md` under marker `4` (REQ-WS-027). See `docs/spec/ws-staleness.md`
 3. If `docs/spec/*.md` all have `status: Approved` **and are not stale** (per check 2) → use `sdd-plan`
 4. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 2) → use `sdd-implement`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
@@ -59,6 +87,15 @@ docs/spec/
 ```
 
 Get approval on the structure before writing. The user may merge or split areas.
+
+**Merge-safe shared writes (marker `4` only).** `docs/.sdd-version` is the sole gate;
+under marker `3` or earlier this is unchanged. Under marker `4`, `docs/spec/` is a
+single **shared** corpus that concurrent workstreams extend, so writes must
+3-way-merge cleanly (REQ-WS-010, REQ-WS-013): each new design lands as a **new file**
+in `docs/spec/` — never an in-place edit to an existing shared spec body. Modifying
+an existing shared spec remains a **human PR conflict** to resolve and is not
+automated. New files by distinct workstreams never share a git location, so they
+merge without conflict. See `docs/spec/ws-ids.md`.
 
 ### Step 3: Write Specs
 
@@ -118,10 +155,20 @@ Do NOT include:
 
 ### Step 3b: Update Traceability
 
-After writing or updating each spec, update `docs/requirements/traceability.md`:
+After writing or updating each spec, update traceability:
 
 1. For each requirement ID listed in the spec's `requires` frontmatter, fill in the **Spec** column with the spec filename
 2. This keeps a single source of truth for requirement-to-artifact mapping
+
+**Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole gate.
+Under marker `3` or earlier, write the **Spec** column into the single shared
+`docs/requirements/traceability.md` directly, as above (unchanged). Under marker `4`,
+traceability rows are per-workstream-owned (REQ-WS-008): fill the **Spec** column in the
+active workstream's OWN file `docs/ws/<ws>/traceability.md` (6-column matrix with the
+`Workstream` column as the 3rd column) — never another ws's file and never the shared aggregate
+in place — then **regenerate** the shared `docs/requirements/traceability.md` wholesale
+(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+requirement id; never appended/hand-merged). See `docs/spec/ws-traceability.md`.
 
 ### Spec Rules
 

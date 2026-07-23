@@ -1,6 +1,6 @@
 ---
-version: "10.0"
-last_updated: 2026-06-06
+version: "11.0"
+last_updated: 2026-07-21
 traceability: traceability.md
 ---
 
@@ -27,6 +27,11 @@ tools-skills-agents repository. Covers three scopes:
    the nine SDD skills as a single-operator loop with per-stage subagent
    review — DISCUSS/KICKOFF/LOOP/DONE phases, dispatch-time isolation,
    non-interactivity contract, human gates, resume via phase detection.
+6. **Multi-workstream SDD** (RS-007): concurrent SDD cycles in one repo via a
+   v4 layout — execution artifacts under `docs/ws/<id>/`, requirements/specs a
+   shared corpus, workstream-prefixed IDs, merge-safe shared writes,
+   workstream-scoped staleness, branch-per-workstream → PR integration, v3→v4
+   migration, and a ceremony-free implicit `default` workstream for solo use.
 
 ## Stakeholders
 
@@ -48,6 +53,7 @@ tools-skills-agents repository. Covers three scopes:
 | functional | [cross-spec-consistency.md](functional/cross-spec-consistency.md) | XSPEC | REQ-XSPEC-001..002 | Approved | 2026-05-25 |
 | functional | [review.md](functional/review.md) | REV | REQ-REV-001..008 | Approved | 2026-05-25 |
 | functional | [orchestration.md](functional/orchestration.md) | ORCH | REQ-ORCH-001..033 | Approved | 2026-06-06 |
+| functional | [multi-workstream.md](functional/multi-workstream.md) | WS | REQ-WS-001..030 | Approved | 2026-07-23 |
 | non-functional | [context-and-compatibility.md](non-functional/context-and-compatibility.md) | CTX, COMPAT | REQ-CTX-001..002, REQ-COMPAT-001..002 | Approved | 2026-05-25 |
 | integration | [skill-updates.md](integration/skill-updates.md) | SKILL | REQ-SKILL-001..018 | Approved | 2026-05-25 |
 | configuration | [version-marker.md](configuration/version-marker.md) | CFG | REQ-CFG-001 | Approved | 2026-05-25 |
@@ -59,6 +65,15 @@ tools-skills-agents repository. Covers three scopes:
 > Spec/Impl/Verified columns are intentionally blank pending the specs and implement
 > phases. The specs phase should treat REQ-ORCH-016 and REQ-ORCH-022..028 as the
 > new work to design.
+
+> **WS delta note:** The `WS` domain (REQ-WS-001..030, RS-007) is the
+> multi-workstream v4 feature. REQ-WS-001..029 were specced, implemented across
+> the 9-chunk plan, and verified (`docs/verification.md`, status: pass);
+> REQ-WS-030 (offer migration when the project is behind the latest version) was
+> added afterward during dogfooding as a small in-branch enhancement. This
+> supersedes the earlier "Forward planning to v4" / "Formal 4 → migration"
+> out-of-scope note below, which applied to the RS-002/003 cycle: v4 is the
+> shipped work of this cycle.
 
 ## Domain Prefixes
 
@@ -75,6 +90,7 @@ tools-skills-agents repository. Covers three scopes:
 | XSPEC | Cross-Spec Consistency | functional/cross-spec-consistency.md |
 | REV | External Review | functional/review.md |
 | ORCH | SDD Orchestration Driver | functional/orchestration.md |
+| WS | Multi-Workstream SDD | functional/multi-workstream.md |
 | CTX | AI Context Budget | non-functional/context-and-compatibility.md |
 | COMPAT | Git Compatibility | non-functional/context-and-compatibility.md |
 | SKILL | Skill Updates | integration/skill-updates.md |
@@ -214,6 +230,7 @@ All other Q-REQ items resolved.
 - [RS-004: sdd-review Skill Design](../research/RS-004-sdd-review/findings.md)
 - [RS-005: sdd-orchestrate Feasibility](../research/RS-005-sdd-orchestrate-feasibility/findings.md)
 - [RS-006: Subagent Nesting & Worktrees (implement-stage fan-out)](../research/RS-006-subagent-nesting-worktrees/findings.md)
+- [RS-007: Multi-Workstream SDD (concurrent cycles in one repo)](../research/RS-007-multi-workstream/findings.md)
 
 ## See Also
 

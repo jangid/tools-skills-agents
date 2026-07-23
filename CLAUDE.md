@@ -108,22 +108,30 @@ each pipeline stage and each `sdd-review` run as **separate, context-isolated
 subagents** and the operator gates after every stage (proceed │ loop-back-to-fix
 │ stop). It introduces one new artifact, `docs/handoff/kickoff.md`; reviews stay
 ephemeral. v1 is research-entry and sequential (no mid-pipeline entry, no
-parallel fan-out). Use it to run a whole SDD cycle end-to-end with built-in
-external review; invoke an individual `sdd-*` skill directly for a single phase.
+parallel fan-out). Under marker `4` it opens with a **workstream picker**
+(select-or-create a workstream, every new one entering at research) and its
+implement-stage fan-out branches from the workstream branch — see
+[Multi-Workstream Layout (v4)](#multi-workstream-layout-v4). Use it to run a whole
+SDD cycle end-to-end with built-in external review; invoke an individual `sdd-*`
+skill directly for a single phase.
 
 ### Phase Detection
 
-Every skill checks `docs/.sdd-version` on entry. If missing, it suggests running `sdd-migrate`. Skills then detect the current phase by checking which artifacts exist **and whether they are stale**:
+Every skill checks `docs/.sdd-version` on entry. If missing, it suggests running `sdd-migrate`. `docs/.sdd-version` is the **sole layout gate**: marker `3` (or earlier) selects the flat single-operator layout; marker `4` selects the multi-workstream layout where phase detection is a **function of `(repo, workstream)`** — every skill takes a `workstream` argument (default `default`) and roots execution artifacts at `docs/ws/<id>/` (see [Multi-Workstream Layout (v4)](#multi-workstream-layout-v4)). Both markers are supported; this repo currently runs at marker `3`.
 
-| Artifact | Phase complete |
+Skills then detect the current phase by checking which artifacts exist **and whether they are stale**. Execution-artifact paths depend on the marker — under marker `3` they are the flat paths below; under marker `4` the same artifacts live at `docs/ws/<id>/` (the shared corpus — `research/`, `requirements/`, `spec/` — stays at top level under both markers):
+
+| Artifact (marker `3` flat / marker `4` per-ws) | Phase complete |
 |----------|---------------|
-| `docs/research/RS-*/findings.md` (status: Complete) | Research done |
-| `docs/requirements/index.md` (status: Approved) | Requirements done |
-| `docs/spec/*.md` (all status: Approved) | Specs done |
-| `docs/plan.md` (exists, tasks incomplete) | Planning done, implementing |
-| `docs/plan.md` (all tasks done) | Implementation done |
-| `docs/verification.md` (status: pass) | Verified, ready to ship |
-| `docs/verification.md` (status: fail) | Needs replan |
+| `docs/research/RS-*/findings.md` (status: Complete) — shared | Research done |
+| `docs/requirements/index.md` (status: Approved) — shared | Requirements done |
+| `docs/spec/*.md` (all status: Approved) — shared | Specs done |
+| `docs/plan.md` → `docs/ws/<id>/plan.md` (exists, tasks incomplete) | Planning done, implementing |
+| `docs/plan.md` → `docs/ws/<id>/plan.md` (all tasks done) | Implementation done |
+| `docs/verification.md` → `docs/ws/<id>/verification.md` (status: pass) | Verified, ready to ship |
+| `docs/verification.md` → `docs/ws/<id>/verification.md` (status: fail) | Needs replan |
+
+Under marker `4`, phase is resolved **per workstream** — two workstreams in the same repo can sit at different phases simultaneously. A skill under marker `3` never reads `docs/ws/`; a skill under marker `4` never reads flat `docs/plan.md` / `docs/verification.md`.
 
 #### Staleness Detection
 
@@ -135,9 +143,44 @@ research/index.md → requirements/index.md → specs → plan → implementatio
 
 If a downstream artifact's `last_updated` is older than its upstream input, it is **stale** and needs updating — not skipping to. For example, if `requirements/index.md` was updated today but `docs/spec/*.md` and `docs/plan.md` are from last week, `sdd-specs` will update the specs rather than redirecting to `sdd-implement`. Early-phase skills (research, requirements) are always valid entry points — they note existing downstream artifacts but don't block on them.
 
+Under marker `4`, staleness is **workstream-scoped**: the plan path is `docs/ws/<id>/plan.md` and the scope is computed **live** from that workstream's plan (walk each task's `traces to` spec → the spec's `requires:` requirement IDs → those requirements' category-file dates). A shared spec or requirement that **no task in `<id>`'s plan traces** does not make that workstream stale — a change in one workstream's traced inputs never falsely flags another. Requirements-corpus staleness (research → requirements) stays shared and workstream-independent. No staleness path reads any traceability file. See `ws-staleness.md`.
+
 #### Plan Archival
 
-When `sdd-plan` rewrites a plan or `sdd-replan` makes significant changes, the previous plan is archived to `docs/plan-history/{date}-{reason}.md`. The active plan stays lean — completed milestones are summarized to one line each. Changelogs and removed tasks live only in archive files.
+When `sdd-plan` rewrites a plan or `sdd-replan` makes significant changes, the previous plan is archived to `docs/plan-history/{date}-{reason}.md` (under marker `4`: `docs/ws/<id>/plan-history/{date}-{reason}.md` — archival is scoped to the active workstream and never touches another workstream's history). The active plan stays lean — completed milestones are summarized to one line each. Changelogs and removed tasks live only in archive files.
+
+### Multi-Workstream Layout (v4)
+
+v4 lets a team run several SDD cycles concurrently in one repo — **one branch/issue per workstream** — without artifact collisions, false staleness, ID races, or cross-workstream phase confusion, while keeping requirements/specs/research/traceability a single shared corpus and keeping solo use ceremony-free. `docs/.sdd-version` = `4` is the sole gate that flips every skill to this layout; marker `3` (flat) remains fully supported and is what this repo uses today.
+
+**Layout — execution artifacts move, the shared corpus stays.** Under marker `4`:
+
+```
+docs/
+  .sdd-version          # "4"
+  research/             # SHARED corpus (top level, used as-is)
+  requirements/         # SHARED corpus — index.md, category files, aggregated traceability.md
+  spec/                 # SHARED corpus
+  ws/
+    <id>/               # one directory per workstream (issue/branch key; solo → "default")
+      kickoff.md        # OWNED
+      plan.md           # OWNED
+      plan-history/     # OWNED
+      verification.md   # OWNED
+      traceability.md   # OWNED — this workstream's rows only
+```
+
+A workstream **owns only** its `kickoff.md`, `plan.md`, `plan-history/`, `verification.md`, and per-ws `traceability.md`. Requirements, specs, research, and the aggregated `docs/requirements/traceability.md` are **shared** — new work only ADDs IDs/files to them; no skill ever creates `docs/ws/<id>/requirements/` or `docs/ws/<id>/spec/`. The shared aggregate traceability is **regenerated** (never hand-merged) from the per-ws files. Solo use runs in an implicit `default` workstream — never name a workstream, and all execution artifacts land under `docs/ws/default/`.
+
+**Workstream lifecycle.** `sdd-orchestrate` opens with a **workstream picker**: it enumerates `docs/ws/<id>/`, shows each workstream's id + description (from its `kickoff.md`) + detected phase, and lets the operator select an existing workstream or create a new one (a `default`-only repo degenerates to a picker of one — no ceremony). Every **new** workstream begins at **research** and seeds `docs/ws/<id>/kickoff.md`, then runs the normal per-workstream research → requirements → specs → plan → implement → verify pipeline. Done-vs-new-cycle is resolved **per workstream** (a workstream whose `verification.md` is `status: pass` offers "start a new cycle in this workstream"; a genuinely new idea mints a new workstream id). Research may **early-exit** when the shared corpus already covers the workstream's needs (recorded as an explicit "covered by shared corpus" finding).
+
+**Approval** is a bare per-scope `status` flag — owned `plan.md`/`verification.md` carry their own status; shared `requirements/*` / `spec/*` carry one product-wide status. No approver identity or quorum.
+
+**Workstream-prefixed IDs.** Under marker `4`, downstream IDs carry a `<WS>` segment before the counter, with a **per-workstream counter** (per `domain+workstream` for requirements): `RS-<WS>-NNN`, `REQ-<DOMAIN>-<WS>-NNN`, `Q-IMPL-<WS>-NNN` (e.g. `RS-ISSUE42-001`, `REQ-AUTH-ISSUE42-001`, `Q-IMPL-ISSUE42-003`). `NNN` is parsed after the `<WS>` token, so two workstreams allocate `RS-ISSUE42-001` / `RS-ISSUE57-001` with no coordination and no collision. Legacy bare v2/v3 ids remain valid and are treated as the `default` workstream (not remapped). Specs stay filename-based (shared). Shared-table writes are merge-safe (ID-sorted insertion / per-ws-owned rows) — never raw EOF append; same-domain concurrent requirement additions are an accepted human PR conflict, not auto-unioned. See `ws-ids.md`.
+
+**Git integration — branch per workstream → PR to `main`.** Each workstream corresponds to its own git branch; isolation comes from git + path scoping, not naming discipline. The workstream branch is the integration unit — a completed workstream merges via **PR to `main`**; concurrent open PRs are supported; `main` is a shared trunk, not a working surface. Orchestrate's implement-stage fan-out branches worktrees from the **workstream branch** (HEAD) and merges back into it, leaving `main` untouched until the PR. `sdd-verify`'s regression base is the workstream branch point — `merge-base(<id>, main)` — so a workstream's verification is unaffected by unrelated workstreams merged to `main` meanwhile. See `ws-integration.md`.
+
+**Migration.** `sdd-migrate` handles the one-time **v3 → v4** flip via copy-verify-flip-cleanup: copy (not move) the flat execution artifacts into `docs/ws/default/`, verify byte-identity, write `.sdd-version` = `4` **last**, then delete the flat originals. The shared corpus is left in place; interrupting before the flip leaves a working v3 repo, after the flip a working v4 repo (both re-runnable idempotently). See `ws-migration.md`. Full v4 contracts: `docs/spec/ws-layout.md`, `ws-ids.md`, `ws-traceability.md`, `ws-staleness.md`, `ws-integration.md`, `ws-migration.md`, `ws-orchestration.md`.
 
 ### Key Differences from Linear Waterfall
 

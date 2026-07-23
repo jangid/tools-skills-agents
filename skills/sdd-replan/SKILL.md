@@ -16,6 +16,34 @@ You are adjusting an existing implementation plan because something changed. The
 
 Before starting, check what triggered the replan:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`. A replan re-plans and routes only the active
+  workstream `<ws>` — never another workstream's plan/verification.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If `docs/verification.md` exists with `status: fail` → replan from verification failures
 2. If a spike task produced findings that contradict the plan → replan from new knowledge
@@ -24,6 +52,7 @@ Before starting, check what triggered the replan:
 5. **Staleness check**: if upstream artifacts are newer than the plan, the plan is stale → replan to align:
    - **Single-milestone plan**: compare `docs/requirements/index.md` and specs against `docs/plan.md`
    - **Multi-milestone plan**: apply milestone-scoped staleness — compare only against requirements and specs traced by the affected milestone's tasks
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. `sdd-replan` references milestone-scoped staleness **by name only**, so under marker `4` re-pointing that reference at the workstream-scoped definition suffices — **no new traversal**: the same chain runs with the plan path `docs/plan.md` → `docs/ws/<ws>/plan.md` and the **milestone key → workstream key**. Compare the affected workstream `<ws>`'s plan `last_updated` only against the specs its tasks trace and the requirement category files those specs `requires:` (task → spec `requires:` → requirement IDs → category-file dates), computed **live** from `<ws>`'s plan — **no traceability-file read**, no new traceability schema column (REQ-WS-026). See `docs/spec/ws-staleness.md`
 
 Tell the user what triggered the replan and confirm before proceeding.
 

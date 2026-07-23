@@ -15,6 +15,33 @@ You are implementing from an approved plan and design specs. Follow the plan, us
 
 Before starting, check project state. **Compare `last_updated` dates** to detect stale upstream artifacts:
 
+**Workstream & version gate (v4).** This skill accepts an optional `workstream`
+argument that defaults to `default`. Read `docs/.sdd-version` first — it is the
+**sole** layout gate:
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Ignore the workstream
+  argument and run exactly the numbered detection below against flat
+  `docs/plan.md` / `docs/verification.md`; never read or write `docs/ws/`. The v3
+  path is unaffected.
+- **Marker is `4` (workstream-aware layout).** Resolve `ws` = the workstream
+  argument (default `default`), set `base = docs/ws/<ws>/`, and run the same
+  detection below but root every **execution artifact** (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`) at `base` — never at flat
+  `docs/`. The **shared corpus** stays at its top-level paths and is used as-is:
+  `docs/research/`, `docs/requirements/` (index, category files, aggregated
+  `traceability.md`), `docs/spec/`.
+
+Under marker `4` a workstream **owns only** `kickoff.md`, `plan.md`,
+`plan-history/`, `verification.md`, and its own `docs/ws/<ws>/traceability.md`. It
+never creates `docs/ws/<ws>/requirements/` or `docs/ws/<ws>/spec/` (requirements,
+specs, research and the aggregated traceability are shared — ADD to them, never
+fork per workstream) and never touches flat `docs/plan.md` / `docs/verification.md`.
+Omitting the argument resolves the implicit `default` workstream, so solo use needs
+no naming and lands all execution artifacts under `docs/ws/default/`. Approval is a
+bare `status` flag — owned `plan.md`/`verification.md` carry their own `status`;
+shared `requirements/*` / `spec/*` carry one product-wide `status`; no approver
+identity or quorum. Full contract: `docs/spec/ws-layout.md`.
+
 0. **Version check**: If `docs/.sdd-version` is missing, suggest running `sdd-migrate` before proceeding
 1. If no `docs/requirements/index.md` or status is `Draft` → use `sdd-requirements`
 2. If `docs/spec/*.md` are missing or have `status: Draft` → use `sdd-specs`
@@ -22,6 +49,7 @@ Before starting, check project state. **Compare `last_updated` dates** to detect
 4. **Staleness check**: compare `last_updated` dates to detect upstream changes:
    - **Single-milestone plan**: compare `docs/requirements/index.md`'s `last_updated` against specs, and specs against `docs/plan.md`'s `last_updated`. If anything upstream is newer → use `sdd-plan`
    - **Multi-milestone plan** (index + per-milestone files): apply milestone-scoped staleness — compare the active milestone plan's `last_updated` only against specs and requirement category files traced by that milestone's tasks (task → spec → `requires:` → requirement IDs → category file dates). Unrelated requirement changes don't trigger staleness. The index-level `docs/plan.md` is not subject to this check
+   - **Workstream-scoped (marker `4` only)**: `docs/.sdd-version` is the sole gate. Under marker `3` (or earlier) compute staleness exactly as the single-/multi-milestone bullets above — flat `docs/plan.md`, milestone key — **unchanged**. Under marker `4` the milestone-scoped traversal **generalizes verbatim** by swapping two inputs and keeping the chain identical: plan path `docs/plan.md` → `docs/ws/<ws>/plan.md`, and the **milestone key → workstream key**. Compute the scoped set **live** from the workstream's plan — walk its tasks' `traces to` specs, collect each spec's `requires:` requirement IDs, and compare the plan's `last_updated` against those specs' `last_updated` and the requirement category files those IDs belong to (task → spec `requires:` → requirement IDs → category-file dates). The v3 caveat "the index-level `docs/plan.md` is not subject to this check" is **dropped** — there is no plan index in v4; workstreams are selected via the `sdd-orchestrate` picker (`docs/spec/ws-orchestration.md`), not a `plan.md` table. This reads **no traceability file** and adds **no** traceability schema column — the scope is derived live (REQ-WS-026). A shared spec/requirement no task in `<ws>`'s plan traces does not trigger staleness. See `docs/spec/ws-staleness.md`
 5. If `docs/verification.md` exists with failures → use `sdd-replan`
 6. If `docs/plan.md` exists with incomplete tasks **and is not stale** (per check 4) → you're in the right place, resume
 
@@ -95,6 +123,39 @@ Before marking any task done:
 - [ ] The task's spec acceptance criteria are met
 - [ ] Update `docs/requirements/traceability.md`: fill **Test** column after writing tests, fill **Implementation** column after writing code
 
+**Per-workstream traceability (marker `4` only).** `docs/.sdd-version` is the sole
+gate. Under marker `3` or earlier the single shared `docs/requirements/traceability.md`
+is written **directly** as above — this note does NOT apply, and the shared file keeps
+its historical 5-column `| Requirement | Spec | Test | Implementation | Verified |`
+shape with no per-ws files and no aggregate regeneration. Under marker `4`, traceability
+rows are **per-workstream-owned** (REQ-WS-008): fill the **Test** / **Implementation**
+columns in the active workstream's OWN file `docs/ws/<ws>/traceability.md` — never in
+another workstream's file and never in the shared aggregate in place — then
+**regenerate** the shared aggregate (below). Full contract: `docs/spec/ws-traceability.md`.
+
+- **Per-workstream file shape (REQ-WS-008).** `docs/ws/<ws>/traceability.md` carries
+  frontmatter `workstream: <ws>` / `last_updated:` and the matrix with a
+  **Workstream** column as the **3rd column** — `| Requirement | Spec | Workstream | Test | Implementation | Verified |`.
+  It holds **only** this workstream's rows: both new `REQ-<DOMAIN>-<WS>-NNN` requirements
+  and pre-existing shared REQs this workstream re-uses. A workstream only ever edits its
+  own rows — never another ws's file.
+- **Aggregate is regenerated, never hand-merged (REQ-WS-008).**
+  `docs/requirements/traceability.md` is a **derived** aggregate. After updating the
+  per-ws file, rebuild the aggregate **wholesale**: shipped legacy rows (blank/`default`
+  workstream) `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
+  requirement id**. Same inputs → byte-identical output. Never append or hand-edit it, so
+  two concurrent workstreams never conflict on it — each writes only its own per-ws file
+  and the aggregate re-derives on merge. The **Workstream** column (the 3rd column) does
+  **not** disturb the REQ-WS-012 unchanged-parser guarantee: traceability/requirements row
+  parsing keys off the first `Requirement` column, so column position is irrelevant — the
+  parser is unaffected regardless of where the `Workstream` column sits.
+- **Recorded join vs. compute-live staleness (REQ-WS-007).** The per-ws traceability
+  files and the aggregate are the load-bearing **recorded** coverage/derivation join
+  ONLY. Staleness is computed **live** from the workstream's plan
+  `task → spec requires: → requirement` chain and MUST NOT read any traceability file; no
+  traceability schema column is added for staleness (the `Workstream` column exists only
+  to attribute aggregated rows, not to feed staleness).
+
 ### Step 3: Stuck Detection
 
 You are **stuck** if any of these are true:
@@ -141,9 +202,14 @@ Findings BLOCK chunk close. Fix by editing implementation, updating the spec, or
 
 #### Check 2: Traceability Matrix Update (BLOCKING)
 
-For each requirement covered by this chunk (identified via task → spec `requires:` → requirement IDs), verify `docs/requirements/traceability.md` has:
+For each requirement covered by this chunk (identified via task → spec `requires:` → requirement IDs), verify traceability has:
 - Test column populated (tests written during TDD)
 - Implementation column populated (code module path)
+
+Under marker `3` this checks the single shared `docs/requirements/traceability.md`.
+Under marker `4` it checks the active workstream's OWN `docs/ws/<ws>/traceability.md`
+(the file the workstream is allowed to edit); after filling, regenerate the shared
+aggregate per the marker-`4` note in § Task Completion Checklist.
 
 Empty columns BLOCK chunk close. Fill them before proceeding.
 
@@ -261,6 +327,25 @@ Required fields: question ID, tier, decision, and rationale (or impact for tier 
 - Global sequential across all specs in the project: `Q-IMPL-001`, `Q-IMPL-002`, ...
 - To find the next number, scan all spec files' `## Implementation Questions` sections and increment from the highest existing.
 - Append-only: retired entries stay in their spec with a `[superseded by Q-IMPL-NNN]` status note, not deleted or renumbered.
+
+**Workstream-prefixed IDs (marker `4` only).** `docs/.sdd-version` is the sole gate.
+When the marker is **not** `4` (v3 or earlier), number exactly as above — bare
+`Q-IMPL-NNN`, global sequential scan, behavior UNCHANGED. When the marker is `4`,
+resolve `ws` (the workstream argument, default `default`) and allocate
+`Q-IMPL-<WS>-NNN` with a **per-workstream counter**:
+- `{NNN}` is parsed **after** the `<WS>` token and scanned for its max per workstream
+  — not globally — so each workstream advances an independent Q-IMPL sequence
+  (`Q-IMPL-ISSUE42-003`, `Q-IMPL-ISSUE57-001`) with no cross-workstream collision
+  (REQ-WS-009, REQ-WS-011)
+- The entry heading becomes `### Q-IMPL-<WS>-NNN: <short topic>`
+- Legacy bare `Q-IMPL-NNN` entries from a v3 corpus are treated as the `default`
+  workstream and are NOT remapped. See `docs/spec/ws-ids.md`.
+
+**Do NOT touch (RS-007 Q4 — provably unaffected):** the chunk-close Q-IMPL audit and
+`sdd-review`'s Q-REQ/Q-SPEC/Q-IMPL content checks make no numeric-suffix assumption
+(Q-REQ/Q-SPEC already use letter suffixes) and match these ids as opaque strings —
+they tolerate the inserted `<WS>` segment unchanged. Do not add a numeric-suffix
+parser to them.
 
 ## Transition
 

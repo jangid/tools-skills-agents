@@ -1,6 +1,6 @@
 ---
 status: Approved
-last_updated: 2026-05-25
+last_updated: 2026-07-23
 requires:
   - REQ-CTX-001
   - REQ-CTX-002
@@ -32,7 +32,7 @@ conventions that all other specs build on.
 
 ```
 docs/
-  .sdd-version                    # Plain text: "2" or "3"
+  .sdd-version                    # Plain text: "2", "3", or "4" (sole layout gate)
   research/
     index.md                      # Auto-maintained research index
     RS-001-{topic}/
@@ -70,9 +70,22 @@ indicating the SDD process version. Current valid values:
 - `3` — v2 layout plus v3 process conventions (chunk-close review, Q-IMPL
   deviation protocol, per-milestone plan support, cross-spec consistency
   pass, plan vocabulary using `### Chunk N:` headers for work units)
+- `4` — v4 multi-workstream layout: execution artifacts (`plan.md`,
+  `verification.md`, `kickoff.md`, `plan-history/`, per-ws `traceability.md`)
+  move under `docs/ws/<id>/`, while the shared corpus (`research/`,
+  `requirements/`, `spec/`, aggregated `traceability.md`) stays at top level;
+  workstream-prefixed IDs; phase detection becomes a function of
+  `(repo, workstream)`; branch-per-workstream → PR-to-`main` integration. The
+  marker is the **sole** layout gate — see `ws-layout.md`, `ws-migration.md`,
+  `ws-ids.md`.
 
 If the file is missing, assume v1 (backward compatible). All SDD skills read
-this file on phase detection to determine which conventions apply.
+this file on phase detection to determine which conventions apply. `docs/.sdd-version`
+is the **sole** layout gate: marker `3` (or earlier) selects the flat layout
+described here, marker `4` selects the per-workstream `docs/ws/<id>/` layout
+(`sdd-migrate` performs the one-time v3→v4 flip). A skill under marker `3` never
+reads `docs/ws/`; a skill under marker `4` never reads flat `docs/plan.md` /
+`docs/verification.md`.
 
 The marker tracks SDD process version — not just artifact layout — because v3
 introduces behavioral conventions (not layout changes) that operators need to
@@ -177,23 +190,45 @@ to "what does v3 add" without restating their designs.
 
 ### ID Namespaces
 
-v2 uses three ID namespaces:
+v2/v3 use three ID namespaces; the numeric counter is global across the project
+(or per domain for requirements):
 
-| Namespace | Format | Example | Scope |
+| Namespace | Format (v2/v3) | Example | Scope |
 |-----------|--------|---------|-------|
 | Research | `RS-NNN` | `RS-001` | Global across project |
 | Requirements | `REQ-{DOMAIN}-{NNN}` | `REQ-AUTH-001` | Unique per domain, globally unique |
+| Implement deviation | `Q-IMPL-NNN` | `Q-IMPL-001` | Global sequential across specs |
 | Specs | filename-based | `auth-flow.md` | `docs/spec/` directory |
 
 **Why domain-based requirement IDs instead of type-based**: `REQ-AUTH-001` tells
 you both what it's about and where to find it (`functional/auth.md` or similar).
 `REQ-F-001` tells you only the type, requiring a search to locate it.
 
+#### v4: Workstream-Prefixed IDs
+
+Under marker `4`, downstream artifact IDs carry a `<WS>` **workstream segment**
+inserted **before** the numeric counter, and the counter becomes a **per-workstream**
+sequence (per `domain+workstream` for requirements). This eliminates the ID-allocation
+race between concurrent workstreams — each scans only its own workstream's ids:
+
+| Namespace | Format (marker `4`) | Example |
+|-----------|---------------------|---------|
+| Research | `RS-<WS>-NNN` | `RS-ISSUE42-001` |
+| Requirements | `REQ-<DOMAIN>-<WS>-NNN` | `REQ-AUTH-ISSUE42-001` |
+| Implement deviation | `Q-IMPL-<WS>-NNN` | `Q-IMPL-ISSUE42-003` |
+
+`NNN` is always parsed **after** the `<WS>` token (and, for requirements, after the
+`<DOMAIN>` token) and stays zero-padded to 3 digits. Specs remain filename-based (no
+`<WS>` segment — specs are a shared corpus). The `<WS>` segment applies **only under
+marker `4`**; legacy bare ids from a v2/v3 corpus remain valid and are treated as the
+reserved `default` workstream — they are **not** remapped by the v3→v4 migration. Full
+contract: `ws-ids.md` (REQ-WS-009, REQ-WS-011, REQ-WS-012).
+
 ## Verification
 
 ### Manual
 - Inspect the directory layout after migration or fresh project setup
-- Confirm `docs/.sdd-version` contains the current version (`2` or `3`)
+- Confirm `docs/.sdd-version` contains the current version (`2`, `3`, or `4`)
 - Confirm each artifact file has the required frontmatter fields
 - Confirm v3 projects use `### Chunk N:` plan vocabulary
 
@@ -202,7 +237,7 @@ you both what it's about and where to find it (`functional/auth.md` or similar).
 - [ ] No artifact file exceeds 300 lines except index/traceability (REQ-CTX-001)
 - [ ] Each file is self-contained with ID-based cross-references (REQ-CTX-002)
 - [ ] `docs/.sdd-version` exists and contains the version number (REQ-CFG-001)
-- [ ] Version marker valid values are `2` and `3` (REQ-CFG-001)
+- [ ] Version marker valid values are `2`, `3`, and `4` (REQ-CFG-001, REQ-WS-023)
 - [ ] Staleness detection uses `index.md` dates, not individual file scans (REQ-STALE-001)
 - [ ] v2 projects work without migration; v3 mechanisms degrade gracefully (REQ-COMPAT-002)
 - [ ] Overview documents plan vocabulary convention (REQ-MIG-015)

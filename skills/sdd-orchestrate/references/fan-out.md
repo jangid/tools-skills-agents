@@ -14,6 +14,45 @@ ruled out infeasible; Design B (this procedure) is the spec.
 
 ---
 
+## 0. Integration anchor: the version gate (marker-3 `main` vs marker-4 workstream branch)
+
+`docs/.sdd-version` is the **sole** gate for the fan-out integration anchor
+(`docs/spec/ws-integration.md`, REQ-WS-016/017):
+
+- **Marker is not `4` (v3 or earlier): behavior UNCHANGED.** Read every `main`
+  reference in §§1–4 below literally: the fan-out base is `main`, worktrees merge
+  back into `main`, redo worktrees re-branch from the updated `main`, and the §3c
+  step 3 `main`-ownership "conflict-after-re-derivation = boundary error" inference
+  applies exactly as written. The v3 path is untouched.
+- **Marker is `4` (workstream-aware layout).** Fan-out runs **inside the workstream's
+  branch isolation** (branch-per-workstream → PR to `main`, REQ-WS-016 — the
+  **workstream branch**, not `main`, is the integration unit for the whole cycle;
+  `main` is a shared trunk, not a working surface; concurrent workstreams may hold
+  open PRs at once). Everywhere §§1–4 name `main` as the fan-out integration anchor,
+  substitute the **workstream branch `<ws>` (HEAD)** (REQ-WS-017):
+  - the fan-out **base** is the workstream branch HEAD, not `main` (§3a);
+  - worktrees **merge back into the workstream branch**, not `main` (§3b);
+  - a redo worktree **re-branches from the updated workstream branch**, not `main` (§3c);
+  - **`main` is untouched** until the workstream PR (REQ-WS-016) — fan-out no longer
+    takes exclusive ownership of `main`;
+  - the §3c step 3 **`main`-ownership "conflict = boundary error" inference is
+    REMOVED** (see §3c): with per-workstream branches `main` is not the fan-out
+    integration point, so a conflict no longer implies a chunk-boundary error. The
+    guaranteed-termination **sequential fallback** in §3c step 3 is retained — only
+    the boundary-error *labeling* is dropped.
+
+  All other fan-out mechanics — worktree provisioning ownership, sequential
+  merge-back, inline git identity, conflict abort-and-redo-by-re-derivation — are
+  **unchanged**; only the base branch and the merge-back target move from `main` to
+  the workstream branch.
+
+**Do NOT touch (RS-007 Q4):** this gate re-anchors the branch/merge **lifecycle**
+only. It does **not** alter the `**Depends on**: Chunk N` boundary-derivation parser
+in §1 (which parses chunk ordinals, a separate namespace from ws-prefixed ids and
+already guarded below).
+
+---
+
 ## 1. Boundary derivation (which chunks run in parallel)
 
 Fan-out occurs along the **independent branches of the plan's chunk dependency
@@ -29,6 +68,13 @@ Derive the parallel groups by **reading `docs/plan.md`**, never by modifying
   treat as the equivalent of that field.
 - These are **chunk-level** declarations. Do **not** use the coarser
   milestone-level Entry/Exit criteria from milestone-plans to derive chunk fan-out.
+- **Do NOT touch (RS-007 Q4 — provably unaffected):** this `**Depends on**: Chunk N`
+  derivation parses chunk **ordinals** (`### Chunk N:` headers), a separate namespace
+  from RS / REQ / Q-IMPL artifact ids. The v4 workstream `<WS>` segment is inserted
+  only into artifact ids, which appear here (if at all) as inert prose — it never
+  enters a chunk ordinal. This parser is unaffected by the ws-prefixed ID format and
+  must stay exactly as written; do not add ws-awareness to it (`docs/spec/ws-ids.md`,
+  REQ-WS-012).
 - Two chunks are **independent** (concurrently runnable) when neither (transitively)
   depends on the other. A maximal set of mutually-independent chunks is a
   **chunk-group** that can run in its own worktree.
@@ -129,6 +175,12 @@ teardown — a single owner keeps lifecycle symmetric and avoids orphaned worktr
 git worktree add -b <branch> <worktree_path> <base>
 ```
 
+**Marker-4 anchor (§0):** under `docs/.sdd-version` == `4`, `<base>` is the
+**workstream branch `<ws>` HEAD**, not `main` — worktrees branch from the workstream
+branch so parallel implement work stays inside the workstream's isolation and other
+workstreams' `main` merges proceed independently (REQ-WS-017). Under marker `3` the
+base is `main` as above, unchanged.
+
 Then dispatch one leaf implement subagent per group (§2), **all in one batch** so
 they run concurrently. Await **all** returns before merging (REQ-ORCH-022/023).
 
@@ -137,6 +189,11 @@ they run concurrently. Await **all** returns before merging (REQ-ORCH-022/023).
 Merge the branches **one at a time** into `main`; complete **all** merges **before**
 the implement-stage review runs (the review sees the merged state, never an unmerged
 branch). For each branch in turn:
+
+**Marker-4 anchor (§0):** under `docs/.sdd-version` == `4`, merge each group's branch
+back into the **workstream branch `<ws>`**, not `main`; `main` stays untouched until
+the workstream PR (REQ-WS-016/017). The one-at-a-time merge mechanics are otherwise
+identical. Under marker `3` merge into `main` as below, unchanged.
 
 ```bash
 git merge --no-edit <branch>
@@ -163,6 +220,11 @@ On a non-zero `git merge` exit:
    git worktree add -b <branch>-redo <redo_path> main  # re-branch from UPDATED main
    ```
 
+   **Marker-4 anchor (§0):** under `docs/.sdd-version` == `4`, re-branch the redo
+   worktree from the **updated workstream branch `<ws>`**, not `main` (the workstream
+   branch already contains the groups merged back so far); `main` stays untouched
+   (REQ-WS-017). Under marker `3` re-branch from `main` as shown, unchanged.
+
    Re-dispatch a **leaf** implement subagent (§2 template, pinned to `<redo_path>` /
    `<branch>-redo`) to **re-run `sdd-implement`** for that chunk-group in the fresh
    worktree. Because the work is re-derived against the updated `main` (which already
@@ -183,6 +245,18 @@ On a non-zero `git merge` exit:
    conflict by construction. This guarantees termination: each round either merges
    cleanly or proves non-independence and collapses to the always-terminating
    sequential path.
+
+   **Marker-4 anchor (§0) — boundary-error inference REMOVED (REQ-WS-017).** Under
+   `docs/.sdd-version` == `4`, the fan-out integration point is the **workstream
+   branch**, not `main`, so a repeat conflict after re-derivation **no longer implies
+   a chunk-boundary error** — the `main`-ownership inference above does not apply. The
+   **guaranteed-termination sequential fallback is retained unchanged** (re-run the
+   affected groups one at a time, each re-branched from the updated **workstream
+   branch** and merged back into it, which cannot conflict by construction), but it is
+   reached **without** labeling the conflict a boundary error: `main` may have moved
+   under this workstream meanwhile, so a conflict is no longer diagnostic of
+   non-independence. Under marker `3` the `main`-ownership boundary-error inference
+   applies exactly as written above, unchanged.
 4. **No-corruption invariant.** The abort-and-redo path must **never** corrupt or
    unwind already-merged work. A `git merge --abort` unwinds only the single failing
    merge (RS-006 Q3 proved clean restoration with no loss of prior merges); the redo
