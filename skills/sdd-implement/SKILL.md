@@ -101,8 +101,8 @@ For each task, follow the process based on its type:
 
 **Spike code separation:**
 
-- Spike findings (decisions, learnings, recommendations) go to `docs/spikes/{topic}.md`.
-- Throwaway spike code (proofs of concept, exploratory scripts) goes to `scripts/spike_*` with a docstring noting it is throwaway.
+- Spike findings (decisions, learnings, recommendations) go to `docs/research/RS-NNN-{topic}/findings.md` — the same destination as step 4 above and as `sdd-research` spikes. Do not create a separate `docs/spikes/` tree.
+- Throwaway spike code (proofs of concept, exploratory scripts) goes to `docs/research/RS-NNN-{topic}/prototype/` with a docstring noting it is throwaway (per `sdd-research` §Step 5 supporting files).
 - Production code for the same functionality must be written fresh against the spec, not adapted from spike code. Spike code is optimized for speed of learning; adapting it imports shortcuts and assumptions the spec's design may have deliberately avoided.
 
 #### [verify] tasks — Beyond Unit Tests
