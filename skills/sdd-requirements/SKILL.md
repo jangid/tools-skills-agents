@@ -284,7 +284,7 @@ After every write to a category file, perform these maintenance steps:
    `workstream: <ws>` / `last_updated:`; 6-column matrix with the `Workstream`
    column as the 3rd column), never another ws's file and never the shared aggregate in place. Then
    **regenerate** the shared `docs/requirements/traceability.md` wholesale (shipped legacy
-   rows under blank/`default` + concat of every `docs/ws/<id>/traceability.md`,
+   rows — rows predating the v4 migration, attributed to the blank/default workstream — + concat of every `docs/ws/<id>/traceability.md`,
    stable-sorted by requirement id; never appended/hand-merged). See
    `docs/spec/ws-traceability.md`.
 

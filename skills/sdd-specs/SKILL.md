@@ -163,7 +163,7 @@ traceability rows are per-workstream-owned (REQ-WS-008): fill the **Spec** colum
 active workstream's OWN file `docs/ws/<ws>/traceability.md` (6-column matrix with the
 `Workstream` column as the 3rd column) — never another ws's file and never the shared aggregate
 in place — then **regenerate** the shared `docs/requirements/traceability.md` wholesale
-(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+(shipped legacy rows — rows predating the v4 migration, attributed to the blank/default workstream — + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
 requirement id; never appended/hand-merged). See `docs/spec/ws-traceability.md`.
 
 ### Spec Rules

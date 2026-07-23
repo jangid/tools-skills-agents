@@ -131,7 +131,7 @@ the aggregate `docs/requirements/traceability.md` remains a convenient read-only
 active workstream's OWN file `docs/ws/<ws>/traceability.md` (per-workstream-owned rows,
 6-column matrix with the `Workstream` column as the 3rd column) — never another ws's file and
 never the shared aggregate in place — then **regenerate** the shared aggregate wholesale
-(shipped legacy rows + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
+(shipped legacy rows — rows predating the v4 migration, attributed to the blank/default workstream — + concat of every `docs/ws/<id>/traceability.md`, stable-sorted by
 requirement id; never hand-merged). See `docs/spec/ws-traceability.md` (REQ-WS-007,
 REQ-WS-008).
 

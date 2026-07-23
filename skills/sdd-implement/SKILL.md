@@ -136,8 +136,7 @@ another workstream's file and never in the shared aggregate in place — then
   own rows — never another ws's file.
 - **Aggregate is regenerated, never hand-merged (REQ-WS-008).**
   `docs/requirements/traceability.md` is a **derived** aggregate. After updating the
-  per-ws file, rebuild the aggregate **wholesale**: shipped legacy rows (blank/`default`
-  workstream) `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
+  per-ws file, rebuild the aggregate **wholesale**: shipped legacy rows — rows predating the v4 migration, attributed to the blank/default workstream — `+ concat(` every `docs/ws/<id>/traceability.md` `)`, **stable-sorted by
   requirement id**. Same inputs → byte-identical output. Never append or hand-edit it, so
   two concurrent workstreams never conflict on it — each writes only its own per-ws file
   and the aggregate re-derives on merge. The **Workstream** column (the 3rd column) does
