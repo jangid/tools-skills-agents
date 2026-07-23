@@ -98,6 +98,13 @@ skill. `docs/.sdd-version` is the **sole** layout gate:
 | plan complete, no/failing `docs/verification.md` | at the verify stage |
 | `docs/verification.md` status pass | at DONE (pending operator approval) |
 
+**Entry kickoffs shift the table's origin.** If the kickoff on disk is an
+**entry kickoff** (§Entry Points — it records an entry stage and which upstream
+is assumed approved), the stages before its entry stage are *intentionally
+absent*: do not derive "at the research stage" from missing research artifacts.
+Read the kickoff's recorded entry stage and derive loop position from that stage
+onward only.
+
 Tell the operator the detected position and confirm before proceeding. A pending
 or prior review leaves no on-disk trace by design — it is **reproduced** by
 re-dispatching the review subagent against the current artifacts (reviews are
