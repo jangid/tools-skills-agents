@@ -2,6 +2,21 @@
 #+AUTHOR: Pankaj Jangid
 #+DESCRIPTION: A curated collection of reusable tools, skills, and agents for AI-assisted workflows.
 
+* Notice — sui-move-auditor has moved
+
+The =sui-move-auditor= agent (and its companion playbooks under
+=agents/sui-move-auditor/=) now lives at its canonical home:
+[[https://github.com/AlphaFiTech/open-agents][AlphaFiTech/open-agents]] (MIT-licensed
+Claude Code plugin marketplace). The copies in this repository are *frozen* —
+no further changes land here.
+
+Install from the canonical home:
+
+#+begin_src text
+/plugin marketplace add AlphaFiTech/open-agents
+/plugin install sui-move-auditor@open-agents
+#+end_src
+
 * Overview
 
 A repository of reusable tools, skills, and agents designed to integrate into AI-assisted development workflows.
