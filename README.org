@@ -6,15 +6,16 @@
 
 The =sui-move-auditor= agent (and its companion playbooks under
 =agents/sui-move-auditor/=) now lives at its canonical home:
-[[https://github.com/AlphaFiTech/open-agents][AlphaFiTech/open-agents]] (MIT-licensed
-Claude Code plugin marketplace). The copies in this repository are *frozen* —
-no further changes land here.
+[[https://github.com/AlphaFiTech/sui-ai-commons][AlphaFiTech/sui-ai-commons]]
+(MIT-licensed Claude Code plugin marketplace — the AI commons for the Sui
+community). The copies in this repository are *frozen* — no further changes
+land here.
 
 Install from the canonical home:
 
 #+begin_src text
-/plugin marketplace add AlphaFiTech/open-agents
-/plugin install sui-move-auditor@open-agents
+/plugin marketplace add AlphaFiTech/sui-ai-commons
+/plugin install sui-ai@sui-ai-commons
 #+end_src
 
 * Overview
